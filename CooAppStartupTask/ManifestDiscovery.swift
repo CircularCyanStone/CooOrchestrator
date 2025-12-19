@@ -25,14 +25,23 @@ public enum ManifestDiscovery {
     public static func loadDescriptors(in bundle: Bundle) -> [TaskDescriptor] {
         var descs: [TaskDescriptor] = []
         if let info = bundle.infoDictionary,
-           let arr = info[ManifestKeys.root] as? [[String: Any]] {
+           let arr = info[ManifestKeys.root] as? [[String: Sendable]] {
             descs.append(contentsOf: parse(array: arr))
         }
         if let url = bundle.url(forResource: ManifestKeys.root, withExtension: "plist"),
            let data = try? Data(contentsOf: url),
            let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-           let arr = obj as? [[String: Any]] {
+           let arr = obj as? [[String: Sendable]] {
             descs.append(contentsOf: parse(array: arr))
+        }
+        if descs.isEmpty {
+            let paths = bundle.paths(forResourcesOfType: "plist", inDirectory: nil).filter { $0.hasSuffix("/\(ManifestKeys.root).plist") }
+            if let path = paths.first,
+               let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+               let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+               let arr = obj as? [[String: Sendable]] {
+                descs.append(contentsOf: parse(array: arr))
+            }
         }
         return descs
     }
@@ -40,14 +49,14 @@ public enum ManifestDiscovery {
     /// 将清单数组转换为描述符数组
     /// - Parameter array: 解析到的数组对象
     /// - Returns: 合法条目的 `TaskDescriptor` 列表
-    private static func parse(array: [[String: Any]]) -> [TaskDescriptor] {
+    private static func parse(array: [[String: Sendable]]) -> [TaskDescriptor] {
         var list: [TaskDescriptor] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
             let phaseStr = item[ManifestKeys.phase] as? String ?? "appLaunchEarly"
             let residencyStr = item[ManifestKeys.residency] as? String ?? "autoDestroy"
             let priorityVal = item[ManifestKeys.priority] as? Int ?? 0
-            let args = item[ManifestKeys.args] as? [String: Any] ?? [:]
+            let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
             let factory = item[ManifestKeys.factory] as? String
             guard let phase = StartupTaskPhase(rawValue: phaseStr),
                   let residency = StartupTaskResidency(rawValue: residencyStr) else { continue }

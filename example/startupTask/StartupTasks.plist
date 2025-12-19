@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>class</key>
+		<string>example.PushNotificationInitTask</string>
+		<key>phase</key>
+		<string>appLaunchEarly</string>
+		<key>priority</key>
+		<integer>200</integer>
+		<key>residency</key>
+		<string>resident</string>
+	</dict>
+	<dict>
+		<key>class</key>
+		<string>example.ScreenshotTipTask</string>
+		<key>phase</key>
+		<string>appLaunchLate</string>
+		<key>priority</key>
+		<integer>100</integer>
+		<key>residency</key>
+		<string>autoDestroy</string>
+	</dict>
+	<dict>
+		<key>class</key>
+		<string>example.UpgradePromptTask</string>
+		<key>phase</key>
+		<string>appLaunchEarly</string>
+		<key>priority</key>
+		<integer>150</integer>
+		<key>residency</key>
+		<string>autoDestroy</string>
+	</dict>
+</array>
+</plist>
+

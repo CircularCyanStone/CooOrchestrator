@@ -61,7 +61,7 @@ public final class StartupTaskManager {
                 message: result.message,
                 cost: cost
             )
-            switch type(of: task).residency {
+            switch desc.residency {
             case .resident:
                 residentTasks[type(of: task).id] = task
             case .autoDestroy:

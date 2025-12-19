@@ -6,11 +6,34 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FB15F5062EF592A000E1DA93 /* CooAppStartupTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooAppStartupTask.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		FB15F2752EF58F7200E1DA93 /* example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBD17C8B2EF3D61900C9CDB2 /* CooAppStartupTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CooAppStartupTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FB15F2882EF58F7400E1DA93 /* Exceptions for "example" folder in "example" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FB15F2742EF58F7200E1DA93 /* example */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		FB15F2762EF58F7200E1DA93 /* example */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FB15F2882EF58F7400E1DA93 /* Exceptions for "example" folder in "example" target */,
+			);
+			path = example;
+			sourceTree = "<group>";
+		};
 		FBD17C8D2EF3D61900C9CDB2 /* CooAppStartupTask */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = CooAppStartupTask;
@@ -19,6 +42,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		FB15F2722EF58F7200E1DA93 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB15F5062EF592A000E1DA93 /* CooAppStartupTask.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FBD17C882EF3D61900C9CDB2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -29,10 +60,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FB15F5052EF592A000E1DA93 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		FBD17C812EF3D61900C9CDB2 = {
 			isa = PBXGroup;
 			children = (
 				FBD17C8D2EF3D61900C9CDB2 /* CooAppStartupTask */,
+				FB15F2762EF58F7200E1DA93 /* example */,
+				FB15F5052EF592A000E1DA93 /* Frameworks */,
 				FBD17C8C2EF3D61900C9CDB2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				FBD17C8B2EF3D61900C9CDB2 /* CooAppStartupTask.framework */,
+				FB15F2752EF58F7200E1DA93 /* example.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -58,6 +99,28 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		FB15F2742EF58F7200E1DA93 /* example */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB15F2892EF58F7400E1DA93 /* Build configuration list for PBXNativeTarget "example" */;
+			buildPhases = (
+				FB15F2712EF58F7200E1DA93 /* Sources */,
+				FB15F2722EF58F7200E1DA93 /* Frameworks */,
+				FB15F2732EF58F7200E1DA93 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FB15F2762EF58F7200E1DA93 /* example */,
+			);
+			name = example;
+			packageProductDependencies = (
+			);
+			productName = example;
+			productReference = FB15F2752EF58F7200E1DA93 /* example.app */;
+			productType = "com.apple.product-type.application";
+		};
 		FBD17C8A2EF3D61900C9CDB2 /* CooAppStartupTask */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FBD17C942EF3D61900C9CDB2 /* Build configuration list for PBXNativeTarget "CooAppStartupTask" */;
@@ -91,6 +154,9 @@
 				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					FB15F2742EF58F7200E1DA93 = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					FBD17C8A2EF3D61900C9CDB2 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -111,11 +177,19 @@
 			projectRoot = "";
 			targets = (
 				FBD17C8A2EF3D61900C9CDB2 /* CooAppStartupTask */,
+				FB15F2742EF58F7200E1DA93 /* example */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		FB15F2732EF58F7200E1DA93 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FBD17C892EF3D61900C9CDB2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -126,6 +200,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		FB15F2712EF58F7200E1DA93 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FBD17C872EF3D61900C9CDB2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -136,6 +217,62 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		FB15F2862EF58F7400E1DA93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UQ35W3765Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = example/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coo.example;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FB15F2872EF58F7400E1DA93 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UQ35W3765Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = example/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coo.example;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		FBD17C922EF3D61900C9CDB2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -336,6 +473,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		FB15F2892EF58F7400E1DA93 /* Build configuration list for PBXNativeTarget "example" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB15F2862EF58F7400E1DA93 /* Debug */,
+				FB15F2872EF58F7400E1DA93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FBD17C852EF3D61900C9CDB2 /* Build configuration list for PBXProject "CooAppStartupTask" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
