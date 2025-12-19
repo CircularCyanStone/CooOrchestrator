@@ -53,16 +53,17 @@ public enum ManifestDiscovery {
         var list: [TaskDescriptor] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
-            let phaseStr = item[ManifestKeys.phase] as? String ?? "appLaunchEarly"
-            let residencyStr = item[ManifestKeys.residency] as? String ?? "autoDestroy"
-            let priorityVal = item[ManifestKeys.priority] as? Int ?? 0
+            let phaseStr = item[ManifestKeys.phase] as? String
+            let residencyStr = item[ManifestKeys.residency] as? String
+            let priorityVal = item[ManifestKeys.priority] as? Int
             let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
             let factory = item[ManifestKeys.factory] as? String
-            guard let phase = StartupTaskPhase(rawValue: phaseStr),
-                  let residency = StartupTaskResidency(rawValue: residencyStr) else { continue }
+            let phase = phaseStr.flatMap(StartupTaskPhase.init(rawValue:))
+            let residency = residencyStr.flatMap(StartupTaskResidency.init(rawValue:))
+            let priority = priorityVal.map { StartupTaskPriority(rawValue: $0) }
             list.append(TaskDescriptor(className: className,
                                        phase: phase,
-                                       priority: StartupTaskPriority(rawValue: priorityVal),
+                                       priority: priority,
                                        residency: residency,
                                        args: args,
                                        factoryClassName: factory))

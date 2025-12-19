@@ -92,21 +92,21 @@ public struct AppEnvironment: Sendable {
 public struct TaskDescriptor: Sendable {
     /// 任务类名（建议包含模块前缀，如 `Module.Class`）
     public let className: String
-    /// 执行时机
-    public let phase: StartupTaskPhase
-    /// 优先级
-    public let priority: StartupTaskPriority
-    /// 驻留策略
-    public let residency: StartupTaskResidency
+    /// 执行时机（可选，未提供则使用类型静态默认值）
+    public let phase: StartupTaskPhase?
+    /// 优先级（可选，未提供则使用类型静态默认值）
+    public let priority: StartupTaskPriority?
+    /// 驻留策略（可选，未提供则使用类型静态默认值）
+    public let residency: StartupTaskResidency?
     /// 运行参数
     public let args: [String: Sendable]
     /// 工厂类名（可选），用于复杂构造
     public let factoryClassName: String?
     /// 构造器
     public init(className: String,
-                phase: StartupTaskPhase,
-                priority: StartupTaskPriority,
-                residency: StartupTaskResidency,
+                phase: StartupTaskPhase? = nil,
+                priority: StartupTaskPriority? = nil,
+                residency: StartupTaskResidency? = nil,
                 args: [String: Sendable] = [:],
                 factoryClassName: String? = nil) {
         self.className = className

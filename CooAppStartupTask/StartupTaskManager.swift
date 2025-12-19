@@ -44,9 +44,23 @@ public final class StartupTaskManager {
             hasBootstrapped = true
         }
         let contextBase = StartupTaskContext(environment: environment)
-        let phaseDescriptors = descriptors.filter { $0.phase == phase }
-            .sorted { $0.priority.rawValue > $1.priority.rawValue }
-        for desc in phaseDescriptors {
+        let resolved = descriptors.compactMap {
+            d -> (
+                desc: TaskDescriptor, type: StartupTask.Type,
+                effPhase: StartupTaskPhase, effPriority: StartupTaskPriority,
+                effResidency: StartupTaskResidency
+            )? in
+            guard let type = NSClassFromString(d.className) as? StartupTask.Type
+            else { return nil }
+            let effPhase = d.phase ?? type.phase
+            let effPriority = d.priority ?? type.priority
+            let effResidency = d.residency ?? type.residency
+            return (d, type, effPhase, effPriority, effResidency)
+        }
+        let phaseDescriptors = resolved.filter { $0.effPhase == phase }
+            .sorted { $0.effPriority.rawValue > $1.effPriority.rawValue }
+        for item in phaseDescriptors {
+            let desc = item.desc
             guard
                 let task = instantiateTask(from: desc, baseContext: contextBase)
             else { continue }
@@ -56,12 +70,12 @@ public final class StartupTaskManager {
             let cost = end - start
             Logging.logTask(
                 desc.className,
-                phase: phase,
+                phase: item.effPhase,
                 success: result.success,
                 message: result.message,
                 cost: cost
             )
-            switch desc.residency {
+            switch item.effResidency {
             case .resident:
                 residentTasks[type(of: task).id] = task
             case .autoDestroy:
@@ -105,7 +119,7 @@ public final class StartupTaskManager {
         var seen = Set<String>()
         var result: [TaskDescriptor] = []
         for d in items {
-            let key = "\(d.className)-\(d.phase.rawValue)"
+            let key = "\(d.className)"
             if !seen.contains(key) {
                 seen.insert(key)
                 result.append(d)
