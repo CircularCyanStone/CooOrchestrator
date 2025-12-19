@@ -7,7 +7,7 @@ import os
 
 /// 启动任务日志工具
 /// - 使用 `OSLog` 记录任务执行信息；若系统不支持或失败，自动降级到 `print`（由 `Logger` 处理）。
-enum Logging {
+public enum Logging {
     /// 日志子系统标识，默认取主 bundle 标识
     static let subsystem = Bundle.main.bundleIdentifier ?? "CooAppStartupTask"
     /// 日志分类，固定为启动任务
@@ -22,7 +22,7 @@ enum Logging {
     ///   - success: 是否成功
     ///   - message: 可选消息（错误或备注）
     ///   - cost: 执行耗时（秒）
-    static func logTask(_ className: String,
+    public static func logTask(_ className: String,
                         phase: StartupTaskPhase,
                         success: Bool,
                         message: String?,

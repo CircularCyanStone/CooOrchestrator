@@ -22,4 +22,3 @@ public final class PushNotificationInitTask: NSObject, StartupTask {
         return .ok
     }
 }
-

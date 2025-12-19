@@ -9,6 +9,13 @@ import Foundation
 /// - 职责：统一在 `MainActor` 上按“时机 + 优先级”顺序执行任务；
 ///   支持自动从清单加载任务描述、常驻任务的生命周期管理与统一日志记录。
 public final class StartupTaskManager {
+    private struct ResolvedTaskEntry {
+        let desc: TaskDescriptor
+        let type: StartupTask.Type
+        let effPhase: StartupTaskPhase
+        let effPriority: StartupTaskPriority
+        let effResidency: StartupTaskResidency
+    }
     /// 单例实例，用于在应用生命周期内集中调度所有启动任务
     public static let shared = StartupTaskManager()
 
@@ -20,6 +27,7 @@ public final class StartupTaskManager {
     private var residentTasks: [String: StartupTask] = [:]
     /// 是否已完成一次清单引导（避免重复解析 bundle 清单）
     private var hasBootstrapped = false
+    private var cacheByPhase: [StartupTaskPhase: [ResolvedTaskEntry]] = [:]
 
     /// 注册一批任务描述符
     /// - Parameter newDescriptors: 新增的任务描述符数组（会进行去重合并）
@@ -27,6 +35,7 @@ public final class StartupTaskManager {
         if newDescriptors.isEmpty { return }
         descriptors.append(contentsOf: newDescriptors)
         descriptors = dedup(descriptors)
+        rebuildCache()
     }
 
     /// 触发指定时机的任务执行
@@ -44,26 +53,10 @@ public final class StartupTaskManager {
             hasBootstrapped = true
         }
         let contextBase = StartupTaskContext(environment: environment)
-        let resolved = descriptors.compactMap {
-            d -> (
-                desc: TaskDescriptor, type: StartupTask.Type,
-                effPhase: StartupTaskPhase, effPriority: StartupTaskPriority,
-                effResidency: StartupTaskResidency
-            )? in
-            guard let type = NSClassFromString(d.className) as? StartupTask.Type
-            else { return nil }
-            let effPhase = d.phase ?? type.phase
-            let effPriority = d.priority ?? type.priority
-            let effResidency = d.residency ?? type.residency
-            return (d, type, effPhase, effPriority, effResidency)
-        }
-        let phaseDescriptors = resolved.filter { $0.effPhase == phase }
-            .sorted { $0.effPriority.rawValue > $1.effPriority.rawValue }
+        let phaseDescriptors = cacheByPhase[phase] ?? []
         for item in phaseDescriptors {
             let desc = item.desc
-            guard
-                let task = instantiateTask(from: desc, baseContext: contextBase)
-            else { continue }
+            guard let task = instantiateTask(from: desc, baseContext: contextBase) else { continue }
             let start = CFAbsoluteTimeGetCurrent()
             let result = task.run()
             let end = CFAbsoluteTimeGetCurrent()
@@ -126,5 +119,31 @@ public final class StartupTaskManager {
             }
         }
         return result
+    }
+
+    
+    /// 根据清单配置和静态类型配置，重新组合数据，并根据启动任务阶段提前做好映射关系
+    private func rebuildCache() {
+        
+        /// 将一整个任务数组根据启动阶段重新映射
+        var grouped: [StartupTaskPhase: [ResolvedTaskEntry]] = [:]
+        for d in descriptors {
+            guard let type = NSClassFromString(d.className) as? StartupTask.Type else { continue }
+            let effPhase = d.phase ?? type.phase
+            let entry = ResolvedTaskEntry(
+                desc: d,
+                type: type,
+                effPhase: effPhase,
+                effPriority: d.priority ?? type.priority,
+                effResidency: d.residency ?? type.residency
+            )
+            grouped[effPhase, default: []].append(entry)
+        }
+        
+        /// 对每个阶段的任务进行排序
+        for (p, arr) in grouped {
+            grouped[p] = arr.sorted { $0.effPriority.rawValue > $1.effPriority.rawValue }
+        }
+        cacheByPhase = grouped
     }
 }

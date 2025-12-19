@@ -32,6 +32,15 @@
 		<key>residency</key>
 		<string>autoDestroy</string>
 	</dict>
+	<dict>
+		<key>class</key>
+		<string>example.EnvironmentDemoTask</string>
+		<key>phase</key>
+		<string>appLaunchEarly</string>
+		<key>priority</key>
+		<integer>50</integer>
+		<key>residency</key>
+		<string>autoDestroy</string>
+	</dict>
 </array>
 </plist>
-

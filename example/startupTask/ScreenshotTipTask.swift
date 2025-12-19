@@ -22,4 +22,3 @@ public final class ScreenshotTipTask: NSObject, StartupTask {
         return .ok
     }
 }
-
