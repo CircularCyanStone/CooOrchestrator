@@ -8,9 +8,9 @@ import CooAppStartupTask
 @MainActor
 public final class PushNotificationInitTask: NSObject, StartupTask {
     public static let id: String = "push.init"
-    public static let phase: StartupTaskPhase = .appLaunchEarly
+    public static let phase: AppStartupPhase = .didFinishLaunchBegin
     public static let priority: StartupTaskPriority = .init(rawValue: 200)
-    public static let residency: StartupTaskResidency = .resident
+    public static let residency: StartupTaskRetentionPolicy = .hold
 
     private let context: StartupTaskContext
     public required init(context: StartupTaskContext) {

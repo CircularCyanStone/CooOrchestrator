@@ -23,7 +23,7 @@ public enum Logging {
     ///   - message: 可选消息（错误或备注）
     ///   - cost: 执行耗时（秒）
     public static func logTask(_ className: String,
-                        phase: StartupTaskPhase,
+                        phase: AppStartupPhase,
                         success: Bool,
                         message: String?,
                         cost: CFTimeInterval) {

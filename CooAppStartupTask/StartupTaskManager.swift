@@ -12,9 +12,9 @@ public final class StartupTaskManager {
     private struct ResolvedTaskEntry {
         let desc: TaskDescriptor
         let type: StartupTask.Type
-        let effPhase: StartupTaskPhase
+        let effPhase: AppStartupPhase
         let effPriority: StartupTaskPriority
-        let effResidency: StartupTaskResidency
+        let effResidency: StartupTaskRetentionPolicy
     }
     /// 单例实例，用于在应用生命周期内集中调度所有启动任务
     public static let shared = StartupTaskManager()
@@ -27,7 +27,7 @@ public final class StartupTaskManager {
     private var residentTasks: [String: StartupTask] = [:]
     /// 是否已完成一次清单引导（避免重复解析 bundle 清单）
     private var hasBootstrapped = false
-    private var cacheByPhase: [StartupTaskPhase: [ResolvedTaskEntry]] = [:]
+    private var cacheByPhase: [AppStartupPhase: [ResolvedTaskEntry]] = [:]
 
     /// 注册一批任务描述符
     /// - Parameter newDescriptors: 新增的任务描述符数组（会进行去重合并）
@@ -43,7 +43,7 @@ public final class StartupTaskManager {
     ///   - phase: 执行时机（如 `appLaunchEarly`/`appLaunchLate`）
     ///   - environment: 运行环境对象，默认使用 `.main` bundle
     public func fire(
-        _ phase: StartupTaskPhase,
+        _ phase: AppStartupPhase,
         environment: AppEnvironment = .init()
     ) {
         if !hasBootstrapped {
@@ -69,9 +69,9 @@ public final class StartupTaskManager {
                 cost: cost
             )
             switch item.effResidency {
-            case .resident:
+            case .hold:
                 residentTasks[type(of: task).id] = task
-            case .autoDestroy:
+            case .destroy​:
                 break
             }
         }
@@ -126,7 +126,7 @@ public final class StartupTaskManager {
     private func rebuildCache() {
         
         /// 将一整个任务数组根据启动阶段重新映射
-        var grouped: [StartupTaskPhase: [ResolvedTaskEntry]] = [:]
+        var grouped: [AppStartupPhase: [ResolvedTaskEntry]] = [:]
         for d in descriptors {
             guard let type = NSClassFromString(d.className) as? StartupTask.Type else { continue }
             let effPhase = d.phase ?? type.phase
@@ -135,7 +135,7 @@ public final class StartupTaskManager {
                 type: type,
                 effPhase: effPhase,
                 effPriority: d.priority ?? type.priority,
-                effResidency: d.residency ?? type.residency
+                effResidency: d.retentionPolicy ?? type.residency
             )
             grouped[effPhase, default: []].append(entry)
         }

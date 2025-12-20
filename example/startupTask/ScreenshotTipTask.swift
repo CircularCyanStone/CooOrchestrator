@@ -8,9 +8,9 @@ import CooAppStartupTask
 @MainActor
 public final class ScreenshotTipTask: NSObject, StartupTask {
     public static let id: String = "screenshot.tip"
-    public static let phase: StartupTaskPhase = .appLaunchLate
+    public static let phase: AppStartupPhase = .didFinishLaunchEnd
     public static let priority: StartupTaskPriority = .init(rawValue: 100)
-    public static let residency: StartupTaskResidency = .autoDestroy
+    public static let residency: StartupTaskRetentionPolicy = .destroy​
 
     private let context: StartupTaskContext
     public required init(context: StartupTaskContext) {

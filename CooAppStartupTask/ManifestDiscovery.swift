@@ -58,8 +58,8 @@ public enum ManifestDiscovery {
             let priorityVal = item[ManifestKeys.priority] as? Int
             let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
             let factory = item[ManifestKeys.factory] as? String
-            let phase = phaseStr.flatMap(StartupTaskPhase.init(rawValue:))
-            let residency = residencyStr.flatMap(StartupTaskResidency.init(rawValue:))
+            let phase = phaseStr.flatMap(AppStartupPhase.init(rawValue:))
+            let residency = residencyStr.flatMap(StartupTaskRetentionPolicy.init(rawValue:))
             let priority = priorityVal.map { StartupTaskPriority(rawValue: $0) }
             list.append(TaskDescriptor(className: className,
                                        phase: phase,

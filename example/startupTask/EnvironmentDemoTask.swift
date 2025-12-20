@@ -4,9 +4,10 @@ import CooAppStartupTask
 @MainActor
 public final class EnvironmentDemoTask: NSObject, StartupTask {
     public static let id: String = "env.demo"
-    public static let phase: StartupTaskPhase = .appLaunchEarly
+    public static let phase: AppStartupPhase = .didFinishLaunchBegin
     public static let priority: StartupTaskPriority = .init(rawValue: 50)
-    public static let residency: StartupTaskResidency = .autoDestroy
+    public static let residency: StartupTaskRetentionPolicy = .destroy​
+    
 
     private let context: StartupTaskContext
     public required init(context: StartupTaskContext) {

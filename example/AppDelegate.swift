@@ -14,13 +14,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        StartupTaskManager.shared.fire(.appLaunchEarly)
-        StartupTaskManager.shared.fire(.appLaunchLate)
-        if let url = Bundle.main.url(forResource: "Secondary", withExtension: "bundle"),
-           let secBundle = Bundle(url: url) {
-            StartupTaskManager.shared.fire(.appLaunchEarly, environment: AppEnvironment(bundle: secBundle))
-            StartupTaskManager.shared.fire(.appLaunchLate, environment: AppEnvironment(bundle: secBundle))
-        }
+        StartupTaskManager.shared.fire(.didFinishLaunchBegin)
+        StartupTaskManager.shared.fire(.didFinishLaunchEnd)
         return true
     }
 

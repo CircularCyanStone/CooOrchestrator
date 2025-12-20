@@ -5,28 +5,43 @@
 import Foundation
 
 /// 启动任务协议
-/// - 约束：在 `MainActor` 上同步执行，返回快速、可选内部异步；
 ///   通过静态元数据声明任务的“标识/时机/优先级/驻留策略”。
+///   限定继承自NSObject，可以通过反射初始化实力对象
+///   既然是启动任务为了保障启动速度，肯定要在主线程同步执行用于控制执行顺序，所以限定到MainActor。
+///   如需异步任务任务内部进行。
 @MainActor
-public protocol StartupTask: AnyObject {
+public protocol StartupTask: NSObject {
     /// 任务唯一标识，用于日志标记与常驻持有 Map 的键
     static var id: String { get }
     /// 执行时机（如 `appLaunchEarly`/`appLaunchLate`）
-    static var phase: StartupTaskPhase { get }
+    static var phase: AppStartupPhase { get }
     /// 优先级，数值越大排序越靠前
     static var priority: StartupTaskPriority { get }
     /// 执行完成后的持有策略（常驻或自动销毁）
-    static var residency: StartupTaskResidency { get }
+    static var residency: StartupTaskRetentionPolicy { get }
+    
     /// 上下文构造方法，调度器按需注入运行环境与参数
     init(context: StartupTaskContext)
+    
     /// 执行任务主体逻辑（需快速返回）；若涉及异步请在内部自管
     func run() -> StartupTaskResult
 }
 
-/// 任务执行时机枚举（字符串原始值，便于清单直接映射）
-public enum StartupTaskPhase: String, CaseIterable, Sendable {
-    case appLaunchEarly = "appLaunchEarly"
-    case appLaunchLate = "appLaunchLate"
+/// 应用启动阶段，任务执行时机（结构体封装，支持自定义扩展）
+public struct AppStartupPhase: RawRepresentable, Hashable, Sendable {
+    public let rawValue: String
+    
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+    
+    /// 预设阶段：App 启动完成开始（对应 didFinishLaunchingWithOptions 开始）
+    public static let didFinishLaunchBegin = AppStartupPhase(rawValue: "didFinishLaunchBegin")
+    /// 预设阶段：App 启动完成结束（对应 didFinishLaunchingWithOptions 结束）
+    public static let didFinishLaunchEnd = AppStartupPhase(rawValue: "didFinishLaunchEnd")
+    
+    // 用户可通过 extension 自定义其他阶段，例如：
+    // extension AppStartupPhase { static let homeDidAppear = AppStartupPhase(rawValue: "homeDidAppear") }
 }
 
 /// 任务优先级包装（可比较、可发送）
@@ -41,11 +56,11 @@ public struct StartupTaskPriority: RawRepresentable, Comparable, Sendable {
 }
 
 /// 任务执行后的持有策略（字符串原始值，便于清单直接映射）
-public enum StartupTaskResidency: String, Sendable {
+public enum StartupTaskRetentionPolicy: String, Sendable {
     /// 执行结束即释放，不被管理器持有
-    case autoDestroy = "autoDestroy"
+    case destroy​ 
     /// 执行后被管理器以 `id` 持有，直至进程结束或手动清理
-    case resident = "resident"
+    case hold
 }
 
 /// 任务执行结果
@@ -93,26 +108,26 @@ public struct TaskDescriptor: Sendable {
     /// 任务类名（建议包含模块前缀，如 `Module.Class`）
     public let className: String
     /// 执行时机（可选，未提供则使用类型静态默认值）
-    public let phase: StartupTaskPhase?
+    public let phase: AppStartupPhase?
     /// 优先级（可选，未提供则使用类型静态默认值）
     public let priority: StartupTaskPriority?
     /// 驻留策略（可选，未提供则使用类型静态默认值）
-    public let residency: StartupTaskResidency?
+    public let retentionPolicy: StartupTaskRetentionPolicy?
     /// 运行参数
     public let args: [String: Sendable]
     /// 工厂类名（可选），用于复杂构造
     public let factoryClassName: String?
     /// 构造器
     public init(className: String,
-                phase: StartupTaskPhase? = nil,
+                phase: AppStartupPhase? = nil,
                 priority: StartupTaskPriority? = nil,
-                residency: StartupTaskResidency? = nil,
+                residency: StartupTaskRetentionPolicy? = nil,
                 args: [String: Sendable] = [:],
                 factoryClassName: String? = nil) {
         self.className = className
         self.phase = phase
         self.priority = priority
-        self.residency = residency
+        self.retentionPolicy = residency
         self.args = args
         self.factoryClassName = factoryClassName
     }
