@@ -15,6 +15,8 @@ public final class AppLifecycleManager: @unchecked Sendable {
         let type: AppLifecycleTask.Type
         let effPhase: AppLifecyclePhase
         let effPriority: LifecycleTaskPriority
+        
+        // 标记任务留存测测策略
         let effResidency: LifecycleTaskRetentionPolicy
     }
     
@@ -86,7 +88,6 @@ public final class AppLifecycleManager: @unchecked Sendable {
                 args: item.desc.args,
                 userInfo: sharedUserInfo
             )
-            
             // 实例化任务
             guard let task = instantiateTask(from: item.desc, context: context) else { continue }
             
@@ -129,6 +130,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
             // 处理常驻
             if case .hold = item.effResidency {
                 isolationQueue.async {
+                    // 常驻任务，添加到常驻列表里
                     self.residentTasks[type(of: task).id] = task
                 }
             }
@@ -137,8 +139,18 @@ public final class AppLifecycleManager: @unchecked Sendable {
                 break
             }
         }
-        
         return finalReturnValue
+    }
+    
+    /// 触发任务执行并获取泛型返回值
+    /// - Note: 这是 fire(_:environment:) 的便捷泛型封装
+    @discardableResult
+    public func fire<T>(
+        _ phase: AppLifecyclePhase,
+        environment: AppEnvironment = .init()
+    ) -> T? {
+        let ret = fire(phase, environment: environment)
+        return ret.value()
     }
     
     // MARK: - Private Helper

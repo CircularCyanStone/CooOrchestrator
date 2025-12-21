@@ -23,7 +23,22 @@ public enum LifecycleResult: Sendable {
 }
 
 /// 系统代理方法的返回值封装
-public enum LifecycleReturnValue: Sendable {
+/// - Note: 标记为 @unchecked Sendable 以支持传递非 Sendable 的 UI 对象（如 UISceneConfiguration），
+///         请开发者确保在正确的线程（通常是 MainActor）使用这些值。
+public enum LifecycleReturnValue: @unchecked Sendable {
     case void          // 无返回值
     case bool(Bool)    // 布尔返回值
+    case any(Any)      // 通用返回值（需手动转换）
+    
+    /// 泛型提取辅助方法
+    public func value<T>() -> T? {
+        switch self {
+        case .void:
+            return nil
+        case .bool(let b):
+            return b as? T
+        case .any(let v):
+            return v as? T
+        }
+    }
 }
