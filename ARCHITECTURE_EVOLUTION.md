@@ -96,6 +96,36 @@ public enum LifecycleReturnValue: Sendable {
 - **Shared Context**: 每次 `fire` 时，创建一个新的 `NSMutableDictionary` 作为 `userInfo` 容器，传递给所有任务的 Context，确保数据在单次调用链中共享。
 - **Return Value**: `fire` 方法需要支持返回值，以反馈给系统代理（如 `openURL` 需返回 Bool）。
 
+#### E. 接口设计策略：单一分发方法 (Single Dispatch)
+
+**决策**：采用 **单一方法 + 事件类型** 的模式，而非为每个事件定义单独的协议方法。
+
+```swift
+protocol AppLifecycleTask {
+    // 统一入口，通过 switch context.phase 处理不同事件
+    func run(context: LifecycleContext) -> LifecycleResult
+}
+```
+
+**理由**：
+1.  **无限扩展性**：支持自定义事件（如 `userDidLogin`），无需修改协议定义或 Manager 源码。
+2.  **动态调度**：完美契合 `Manifest` 驱动的架构，Manager 无需感知具体事件类型，只负责透传。
+
+**类型安全补偿**：
+虽然单一方法导致参数弱类型化（都在 `parameters` 字典里），但可以通过 **Context 扩展** 来弥补。
+
+```swift
+// 框架提供的强类型辅助扩展
+extension LifecycleContext {
+    /// 获取 OpenURL 事件的专用参数
+    public var openURLParameters: (url: URL, options: [UIApplication.OpenURLOptionsKey: Any])? {
+        guard let url = parameters["url"] as? URL else { return nil }
+        let options = parameters["options"] as? [UIApplication.OpenURLOptionsKey: Any] ?? [:]
+        return (url, options)
+    }
+}
+```
+
 ---
 
 ## 3. 实施路线图 (Roadmap)
@@ -114,9 +144,33 @@ public enum LifecycleReturnValue: Sendable {
 - [ ] **SceneDelegate 支持**：接入 `sceneDidBecomeActive` 和 `sceneWillResignActive`。
 - [ ] **URL 路由分发**：实现 `openURL` 的去中心化分发，验证返回值聚合逻辑。
 
+#### G. 稳定性与健壮性设计
+
+**1. 并发模型 (Concurrency Model)**
+*   **目标**：支持多线程同步分发（如后台下载回调、推送），避免强制切主线程导致无法获取返回值。
+*   **策略**：**非隔离设计 (Non-isolated Design) + GCD 串行队列保护**。
+    *   `Manager`：不标记为 `@MainActor`。
+    *   **内部状态保护**：持有一个私有的串行队列 (`DispatchQueue`)。所有对内部状态（任务列表、常驻实例）的读写操作，均通过该队列进行调度（读用 `sync`，写用 `async`）。
+    *   **执行逻辑**：`fire` 方法在读取任务列表时使用队列同步，但在**执行任务 (`task.run`) 时脱离队列**，在调用者线程直接执行，以避免死锁和环境切换。
+    *   `AppLifecycleTask`：协议移除 `@MainActor` 约束，继承 `Sendable`。
+*   **Context 安全性**：
+    *   `LifecycleContext` 必须是 `Sendable`。
+    *   内部 `userInfo` 容器需封装为线程安全的字典（使用 `NSLock` 或读写锁保护），允许存储 `Any`。
+
+**2. 异常隔离 (Exception Isolation)**
+*   **协议升级**：`run` 方法签名增加 `throws`。
+    ```swift
+    func run(context: LifecycleContext) throws -> LifecycleResult
+    ```
+*   **容错机制**：Manager 在调用任务时必须包裹在 `do-catch` 块中。
+    *   若任务抛出错误，Manager 捕获该错误，记录 Error 级别的日志，并**自动继续执行下一个任务**（视为返回了 `.continue`），确保单一模块的崩溃不会阻断整个 App 的启动流程。
+
+**3. 循环调用保护**
+*   Manager 内部维护一个简单的递归深度计数器。若检测到嵌套分发深度超过阈值（如 10 层），自动中断并报错，防止 Stack Overflow。
+
 ---
 
-## 4. 建议与规范
+## 5. 实施路线图 (Revised)
 
 1.  **异步处理原则**：维持框架本身的**同步调度**特性。
     - **原因**：系统生命周期代理方法绝大多数是同步的（尤其是启动和 UI 相关）。
