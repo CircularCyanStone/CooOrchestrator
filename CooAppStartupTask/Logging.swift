@@ -11,10 +11,10 @@ public enum Logging {
     /// 日志子系统标识，默认取主 bundle 标识
     static let subsystem = Bundle.main.bundleIdentifier ?? "CooAppStartupTask"
     /// 日志分类，固定为启动任务
-    static let category = "StartupTask"
+    static let category = "AppLifecycle"
     /// 系统日志记录器
     static let logger = Logger(subsystem: subsystem, category: category)
-
+    
     /// 记录单个任务的执行信息
     /// - Parameters:
     ///   - className: 任务类名
@@ -23,11 +23,16 @@ public enum Logging {
     ///   - message: 可选消息（错误或备注）
     ///   - cost: 执行耗时（秒）
     public static func logTask(_ className: String,
-                        phase: AppStartupPhase,
+                        phase: AppLifecyclePhase,
                         success: Bool,
                         message: String?,
                         cost: CFTimeInterval) {
         let status = success ? "OK" : "FAIL"
         logger.log("task=\(className) phase=\(String(describing: phase)) status=\(status) cost=\(cost)s msg=\(message ?? "")")
+    }
+    
+    /// 记录拦截事件（Warning 级别）
+    public static func logIntercept(_ className: String, phase: AppLifecyclePhase) {
+        logger.warning("🚫 Event '\(phase.rawValue)' was INTERCEPTED by task '\(className)'. Subsequent tasks will NOT be executed.")
     }
 }

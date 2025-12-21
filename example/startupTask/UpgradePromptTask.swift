@@ -5,20 +5,18 @@
 import Foundation
 import CooAppStartupTask
 
-@MainActor
-public final class UpgradePromptTask: NSObject, StartupTask {
+public final class UpgradePromptTask: NSObject, AppLifecycleTask {
     public static let id: String = "upgrade.prompt"
-    public static let phase: AppStartupPhase = .didFinishLaunchBegin
-    public static let priority: StartupTaskPriority = .init(rawValue: 150)
-    public static let residency: StartupTaskRetentionPolicy = .destroy​
+    public static let phase: AppLifecyclePhase = .didFinishLaunchBegin
+    public static let priority: LifecycleTaskPriority = .init(rawValue: 150)
+    public static let residency: LifecycleTaskRetentionPolicy = .destroy
 
-    private let context: StartupTaskContext
-    public required init(context: StartupTaskContext) {
-        self.context = context
+    // 协议变更
+    public required override init() {
         super.init()
     }
 
-    public func run() -> StartupTaskResult {
+    public func run(context: LifecycleContext) throws -> LifecycleResult {
         return .ok
     }
 }

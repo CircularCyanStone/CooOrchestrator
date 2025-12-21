@@ -5,8 +5,7 @@
 import Foundation
 
 /// Manifest 解析器
-/// - 职责：从各模块私有清单（模块 `Info.plist` 的 `StartupTasks` 键，或资源包 `StartupTasks.plist`）
-///   读取任务配置并转换为统一的 `TaskDescriptor` 集合。
+/// - 职责：从各模块私有清单读取任务配置并转换为统一的 `TaskDescriptor` 集合。
 public enum ManifestDiscovery {
     /// 加载主应用与所有已加载框架的清单并合并
     /// - Returns: 解析得到的任务描述符数组
@@ -18,34 +17,54 @@ public enum ManifestDiscovery {
         }
         return result
     }
-
+    
     /// 加载指定 `bundle` 内的清单
     /// - Parameter bundle: 目标模块的 bundle
     /// - Returns: 解析结果数组；若未配置清单则返回空数组
     public static func loadDescriptors(in bundle: Bundle) -> [TaskDescriptor] {
         var descs: [TaskDescriptor] = []
-        if let info = bundle.infoDictionary,
-           let arr = info[ManifestKeys.root] as? [[String: Sendable]] {
-            descs.append(contentsOf: parse(array: arr))
+        
+        // 尝试加载新 Key (LifecycleTasks) 和旧 Key (StartupTasks)
+        let keysToTry = [ManifestKeys.rootNew, ManifestKeys.rootOld]
+        
+        // 1. Info.plist
+        if let info = bundle.infoDictionary {
+            for key in keysToTry {
+                if let arr = info[key] as? [[String: Sendable]] {
+                    descs.append(contentsOf: parse(array: arr))
+                }
+            }
         }
-        if let url = bundle.url(forResource: ManifestKeys.root, withExtension: "plist"),
-           let data = try? Data(contentsOf: url),
-           let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-           let arr = obj as? [[String: Sendable]] {
-            descs.append(contentsOf: parse(array: arr))
-        }
-        if descs.isEmpty {
-            let paths = bundle.paths(forResourcesOfType: "plist", inDirectory: nil).filter { $0.hasSuffix("/\(ManifestKeys.root).plist") }
-            if let path = paths.first,
-               let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+        
+        // 2. Resource plist (StartupTasks.plist or LifecycleTasks.plist)
+        // 优先查找新文件名
+        let filesToTry = ["LifecycleTasks", "StartupTasks"]
+        
+        for fileName in filesToTry {
+            if let url = bundle.url(forResource: fileName, withExtension: "plist"),
+               let data = try? Data(contentsOf: url),
                let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
                let arr = obj as? [[String: Sendable]] {
                 descs.append(contentsOf: parse(array: arr))
             }
         }
+        
+        // 3. 深度查找 (fallback)
+        if descs.isEmpty {
+            for fileName in filesToTry {
+                let paths = bundle.paths(forResourcesOfType: "plist", inDirectory: nil).filter { $0.hasSuffix("/\(fileName).plist") }
+                if let path = paths.first,
+                   let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+                   let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                   let arr = obj as? [[String: Sendable]] {
+                    descs.append(contentsOf: parse(array: arr))
+                }
+            }
+        }
+        
         return descs
     }
-
+    
     /// 将清单数组转换为描述符数组
     /// - Parameter array: 解析到的数组对象
     /// - Returns: 合法条目的 `TaskDescriptor` 列表
@@ -58,9 +77,11 @@ public enum ManifestDiscovery {
             let priorityVal = item[ManifestKeys.priority] as? Int
             let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
             let factory = item[ManifestKeys.factory] as? String
-            let phase = phaseStr.flatMap(AppStartupPhase.init(rawValue:))
-            let residency = residencyStr.flatMap(StartupTaskRetentionPolicy.init(rawValue:))
-            let priority = priorityVal.map { StartupTaskPriority(rawValue: $0) }
+            
+            let phase = phaseStr.flatMap(AppLifecyclePhase.init(rawValue:))
+            let residency = residencyStr.flatMap(LifecycleTaskRetentionPolicy.init(rawValue:))
+            let priority = priorityVal.map { LifecycleTaskPriority(rawValue: $0) }
+            
             list.append(TaskDescriptor(className: className,
                                        phase: phase,
                                        priority: priority,
@@ -74,7 +95,8 @@ public enum ManifestDiscovery {
 
 /// 清单键名常量
 enum ManifestKeys {
-    static let root = "StartupTasks"
+    static let rootOld = "StartupTasks"
+    static let rootNew = "LifecycleTasks"
     static let className = "class"
     static let phase = "phase"
     static let priority = "priority"

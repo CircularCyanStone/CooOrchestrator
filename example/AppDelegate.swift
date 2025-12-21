@@ -14,8 +14,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        StartupTaskManager.shared.fire(.didFinishLaunchBegin)
-        StartupTaskManager.shared.fire(.didFinishLaunchEnd)
+        AppLifecycleManager.shared.fire(.didFinishLaunchBegin)
+        AppLifecycleManager.shared.fire(.didFinishLaunchEnd)
         return true
     }
 

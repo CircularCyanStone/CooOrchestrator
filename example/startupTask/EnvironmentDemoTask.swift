@@ -1,21 +1,19 @@
 import Foundation
 import CooAppStartupTask
 
-@MainActor
-public final class EnvironmentDemoTask: NSObject, StartupTask {
+public final class EnvironmentDemoTask: NSObject, AppLifecycleTask {
     public static let id: String = "env.demo"
-    public static let phase: AppStartupPhase = .didFinishLaunchBegin
-    public static let priority: StartupTaskPriority = .init(rawValue: 50)
-    public static let residency: StartupTaskRetentionPolicy = .destroy​
+    public static let phase: AppLifecyclePhase = .didFinishLaunchBegin
+    public static let priority: LifecycleTaskPriority = .init(rawValue: 50)
+    public static let residency: LifecycleTaskRetentionPolicy = .destroy
     
-
-    private let context: StartupTaskContext
-    public required init(context: StartupTaskContext) {
-        self.context = context
+    // 协议变更：init 必须无参
+    public required override init() {
         super.init()
     }
 
-    public func run() -> StartupTaskResult {
+    // 协议变更：run 接收 context 参数，支持 throws
+    public func run(context: LifecycleContext) throws -> LifecycleResult {
         let bundle = context.environment.bundle
         let identifier = bundle.bundleIdentifier ?? "unknown.bundle"
         let version = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "0.0"
@@ -38,6 +36,7 @@ public final class EnvironmentDemoTask: NSObject, StartupTask {
             msg = "EnvDemo.plist not found"
         }
 
+        // 依然可以调用 Logging，但实际上 Manager 也会记录一次
         Logging.logTask(
             "EnvironmentDemoTask",
             phase: Self.phase,

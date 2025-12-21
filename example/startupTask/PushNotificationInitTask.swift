@@ -5,20 +5,20 @@
 import Foundation
 import CooAppStartupTask
 
-@MainActor
-public final class PushNotificationInitTask: NSObject, StartupTask {
+public final class PushNotificationInitTask: NSObject, AppLifecycleTask {
     public static let id: String = "push.init"
-    public static let phase: AppStartupPhase = .didFinishLaunchBegin
-    public static let priority: StartupTaskPriority = .init(rawValue: 200)
-    public static let residency: StartupTaskRetentionPolicy = .hold
+    public static let phase: AppLifecyclePhase = .didFinishLaunchBegin
+    public static let priority: LifecycleTaskPriority = .init(rawValue: 200)
+    public static let residency: LifecycleTaskRetentionPolicy = .hold
 
-    private let context: StartupTaskContext
-    public required init(context: StartupTaskContext) {
-        self.context = context
+    // 协议变更：init 必须无参
+    public required override init() {
         super.init()
     }
 
-    public func run() -> StartupTaskResult {
+    // 协议变更：run 接收 context 参数，支持 throws
+    public func run(context: LifecycleContext) throws -> LifecycleResult {
+        // 使用 context...
         return .ok
     }
 }
