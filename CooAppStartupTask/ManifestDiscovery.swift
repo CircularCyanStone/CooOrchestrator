@@ -11,8 +11,22 @@ public enum ManifestDiscovery {
     /// - Returns: 解析得到的任务描述符数组
     public static func loadAllDescriptors() -> [TaskDescriptor] {
         var result: [TaskDescriptor] = []
-        let bundles = Set(Bundle.allFrameworks + [Bundle.main])
-        for bundle in bundles {
+        // 优化：只扫描 Main Bundle 和内嵌的 Frameworks
+        // 排除系统库（如 UIKit, SwiftUI, Foundation 等），大幅减少扫描范围
+        let mainBundlePath = Bundle.main.bundlePath
+        let allBundles = Bundle.allFrameworks + [Bundle.main]
+        
+        let targetBundles = allBundles.filter { bundle in
+            if bundle == Bundle.main { return true }
+            // 简单判断：如果 bundle 路径在 app 包内，或者是用户自定义的 bundle (通常路径包含 app 名称或不以 /System 开头)
+            // 更安全的做法是：只处理 bundlePath 以 Bundle.main.bundlePath 开头的（针对嵌入式 Framework）
+            // 或者 bundleID 匹配特定的前缀。
+            // 这里我们采用保守策略：排除系统库路径。
+            guard let path = bundle.bundlePath as String? else { return false }
+            return !path.hasPrefix("/System/") && !path.hasPrefix("/usr/lib/")
+        }
+        
+        for bundle in targetBundles {
             result.append(contentsOf: loadDescriptors(in: bundle))
         }
         return result
@@ -27,7 +41,7 @@ public enum ManifestDiscovery {
         // 尝试加载新 Key (LifecycleTasks) 和旧 Key (StartupTasks)
         let keysToTry = [ManifestKeys.rootNew, ManifestKeys.rootOld]
         
-        // 1. Info.plist
+        // 1. Info.plist (极速，推荐)
         if let info = bundle.infoDictionary {
             for key in keysToTry {
                 if let arr = info[key] as? [[String: Sendable]] {
@@ -36,7 +50,8 @@ public enum ManifestDiscovery {
             }
         }
         
-        // 2. Resource plist (StartupTasks.plist or LifecycleTasks.plist)
+        // 2. Resource plist (独立文件，仅作兼容，不推荐)
+        // 移除了深度扫描逻辑，仅支持根目录下的标准命名文件
         // 优先查找新文件名
         let filesToTry = ["LifecycleTasks", "StartupTasks"]
         
@@ -46,19 +61,6 @@ public enum ManifestDiscovery {
                let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
                let arr = obj as? [[String: Sendable]] {
                 descs.append(contentsOf: parse(array: arr))
-            }
-        }
-        
-        // 3. 深度查找 (fallback)
-        if descs.isEmpty {
-            for fileName in filesToTry {
-                let paths = bundle.paths(forResourcesOfType: "plist", inDirectory: nil).filter { $0.hasSuffix("/\(fileName).plist") }
-                if let path = paths.first,
-                   let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
-                   let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-                   let arr = obj as? [[String: Sendable]] {
-                    descs.append(contentsOf: parse(array: arr))
-                }
             }
         }
         
