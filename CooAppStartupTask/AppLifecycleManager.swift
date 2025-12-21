@@ -10,13 +10,14 @@ import Foundation
 public final class AppLifecycleManager: @unchecked Sendable {
     
     // 已经解析的任务条目
-    private struct ResolvedTaskEntry: Sendable {
+    private struct ResolvedTaskEntry: @unchecked Sendable {
         let desc: TaskDescriptor
-        let type: AppService.Type
+        let type: any AppService.Type
         let effEvent: AppLifecycleEvent
         let effPriority: LifecycleTaskPriority
         let effResidency: LifecycleTaskRetentionPolicy
         // 绑定的处理器（从 Registry 获取）
+        // 移除 @Sendable：因为我们保证在调用者线程执行，且 Manager 内部串行管理
         let handler: ((any AppService, LifecycleContext) throws -> LifecycleResult)?
     }
     
@@ -37,7 +38,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
     /// 已注册的任务类名集合（用于去重）
     private var registeredClassNames: Set<String> = []
     /// 常驻任务实例表
-    private var residentTasks: [String: AppService] = [:]
+    private var residentTasks: [String: any AppService] = [:]
     /// 是否已完成一次清单引导
     private var hasBootstrapped = false
     /// 分组缓存
@@ -110,7 +111,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
             
             // 实例化或获取常驻任务
             // 注意：需在 isolationQueue 中安全访问 residentTasks
-            let taskOrNil = isolationQueue.sync { () -> AppService? in
+            let taskOrNil = isolationQueue.sync { () -> (any AppService)? in
                 if let resident = self.residentTasks[item.type.id] {
                     return resident
                 }
@@ -198,7 +199,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
     private func instantiateTask(
         from desc: TaskDescriptor,
         context: LifecycleContext
-    ) -> AppService? {
+    ) -> (any AppService)? {
         // 优先使用工厂
         if let factoryName = desc.factoryClassName,
            let factoryType = NSClassFromString(factoryName) as? LifecycleTaskFactory.Type {
@@ -207,7 +208,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
         }
         
         // 反射实例化
-        guard let taskType = NSClassFromString(desc.className) as? AppService.Type else { return nil }
+        guard let taskType = NSClassFromString(desc.className) as? any AppService.Type else { return nil }
         let task = taskType.init()
         return task
     }
@@ -222,7 +223,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
             }
             
             // Resolve Type
-            guard let type = NSClassFromString(d.className) as? AppService.Type else {
+            guard let type = NSClassFromString(d.className) as? any AppService.Type else {
                 continue
             }
             
@@ -266,7 +267,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
     }
     
     // 辅助：调用泛型静态方法 register
-    private func collectHandlers(for type: AppService.Type) -> [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)] {
+    private func collectHandlers(for type: any AppService.Type) -> [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)] {
         // 利用 Swift 的运行时特性或辅助协议来调用泛型方法
         // 这里我们需要一个技巧：让 AppService 遵守一个辅助协议，该协议暴露非泛型的 register 入口，或者我们通过反射
         
@@ -274,7 +275,11 @@ public final class AppLifecycleManager: @unchecked Sendable {
         // 但 Registry 是泛型的 AppServiceRegistry<Service>。
         // 我们需要构造一个闭包，让 Service 自己去推断类型。
         
-        return invokeRegister(type)
+        func openExistential<T: AppService>(_ type: T.Type) -> [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)] {
+            return invokeRegister(type)
+        }
+        
+        return openExistential(type)
     }
     
     private func invokeRegister<T: AppService>(_ type: T.Type) -> [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)] {

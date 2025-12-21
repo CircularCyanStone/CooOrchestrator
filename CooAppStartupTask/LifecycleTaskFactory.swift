@@ -15,5 +15,5 @@ public protocol LifecycleTaskFactory: AnyObject, Sendable {
     ///   - context: 任务上下文
     ///   - args: 清单透传的参数字典
     /// - Returns: 构造完成的任务实例
-    func make(context: LifecycleContext, args: [String: Sendable]) -> AppService
+    func make(context: LifecycleContext, args: [String: Sendable]) -> any AppService
 }

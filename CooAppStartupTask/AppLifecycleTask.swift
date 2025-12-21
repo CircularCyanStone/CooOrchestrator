@@ -31,16 +31,17 @@ public protocol AppService: AnyObject, Sendable {
 
 /// 服务注册器
 /// - 用于在应用启动时收集各服务的事件绑定关系
-public final class AppServiceRegistry<Service: AppService>: Sendable {
+public final class AppServiceRegistry<Service: AppService>: @unchecked Sendable {
     
     /// 内部使用的事件处理闭包
     /// 使用 Any AppService 以便在 Manager 中通用存储
-    public typealias Handler = @Sendable (Service, LifecycleContext) throws -> LifecycleResult
+    public typealias Handler = (Service, LifecycleContext) throws -> LifecycleResult
     
     /// 注册项（内部使用）
-    public struct Entry: Sendable {
+    /// - Note: 这里的 Handler 不再要求 @Sendable，因为它们在调用者线程执行，且受 Manager 锁保护
+    public struct Entry: @unchecked Sendable {
         let event: AppLifecycleEvent
-        let handler: @Sendable (any AppService, LifecycleContext) throws -> LifecycleResult
+        let handler: (any AppService, LifecycleContext) throws -> LifecycleResult
     }
     
     // 线程安全的存储（实际上 Registry 仅在 Serial Queue 中同步使用，但为了 Sendable 标记）
@@ -52,6 +53,7 @@ public final class AppServiceRegistry<Service: AppService>: Sendable {
         defer { lock.unlock() }
         return _entries
     }
+
     
     public init() {}
     
@@ -64,7 +66,7 @@ public final class AppServiceRegistry<Service: AppService>: Sendable {
         defer { lock.unlock() }
         
         // 封装闭包以支持类型擦除
-        let anyHandler: @Sendable (any AppService, LifecycleContext) throws -> LifecycleResult = { service, context in
+        let anyHandler: (any AppService, LifecycleContext) throws -> LifecycleResult = { service, context in
             guard let specificService = service as? Service else {
                 // 理论上不会发生，除非 Manager 逻辑错误
                 return .continue()
@@ -76,7 +78,7 @@ public final class AppServiceRegistry<Service: AppService>: Sendable {
     }
     
     /// 注册事件处理（支持 Void 返回值的便捷方法）
-    public func add(_ event: AppLifecycleEvent, handler: @escaping @Sendable (Service, LifecycleContext) throws -> Void) {
+    public func add(_ event: AppLifecycleEvent, handler: @escaping (Service, LifecycleContext) throws -> Void) {
         add(event) { service, context in
             try handler(service, context)
             return .continue()
