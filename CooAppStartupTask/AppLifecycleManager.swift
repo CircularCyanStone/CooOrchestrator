@@ -79,11 +79,15 @@ public final class AppLifecycleManager: @unchecked Sendable {
     /// 启动引导：扫描并加载所有清单中的任务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
     public func resolve() {
+        let start = CFAbsoluteTimeGetCurrent()
         isolationQueue.sync {
             if !hasBootstrapped {
                 let discovered = ManifestDiscovery.loadAllDescriptors()
                 self.mergeDescriptors(discovered)
                 self.hasBootstrapped = true
+                
+                let end = CFAbsoluteTimeGetCurrent()
+                Logging.logPerf("Resolve: Bootstrap completed. Total Cost: \(String(format: "%.4fs", end - start))")
             }
         }
     }
@@ -235,6 +239,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
     }
     
     private func mergeDescriptors(_ items: [TaskDescriptor]) {
+        let start = CFAbsoluteTimeGetCurrent()
         // 1. 批量解析类型，避免在循环中多次调用 NSClassFromString
         // 同时过滤掉已经注册过的类（假设类维度去重是业务需求）
         
@@ -277,6 +282,9 @@ public final class AppLifecycleManager: @unchecked Sendable {
             // 原地排序，只对受影响的列表排序
             cacheByEvent[event]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
         }
+        
+        let end = CFAbsoluteTimeGetCurrent()
+        Logging.logPerf("MergeDescriptors: Processed \(items.count) items, Inserted \(entriesToInsert.count) groups. Cost: \(String(format: "%.4fs", end - start))")
     }
     
     // 提取辅助方法，逻辑更清晰

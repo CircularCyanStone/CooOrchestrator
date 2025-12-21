@@ -10,7 +10,9 @@ public enum ManifestDiscovery {
     /// 加载主应用与所有已加载框架的清单并合并
     /// - Returns: 解析得到的任务描述符数组
     public static func loadAllDescriptors() -> [TaskDescriptor] {
+        let start = CFAbsoluteTimeGetCurrent()
         var result: [TaskDescriptor] = []
+        
         // 优化：只扫描 Main Bundle 和内嵌的 Frameworks
         // 排除系统库（如 UIKit, SwiftUI, Foundation 等），大幅减少扫描范围
         let mainBundlePath = Bundle.main.bundlePath
@@ -18,9 +20,6 @@ public enum ManifestDiscovery {
         
         let targetBundles = allBundles.filter { bundle in
             if bundle == Bundle.main { return true }
-            
-            // 严谨判断：只处理位于主 App Bundle 内部的 Frameworks (嵌入式 Frameworks)
-            // 这包括 .app/Frameworks/ 下的动态库，以及可能的 Plugins
             guard let bundlePath = bundle.bundlePath as String? else { return false }
             return bundlePath.hasPrefix(mainBundlePath)
         }
@@ -28,6 +27,10 @@ public enum ManifestDiscovery {
         for bundle in targetBundles {
             result.append(contentsOf: loadDescriptors(in: bundle))
         }
+        
+        let end = CFAbsoluteTimeGetCurrent()
+        Logging.logPerf("ManifestDiscovery: Scanned \(targetBundles.count) bundles, found \(result.count) tasks. Cost: \(String(format: "%.4fs", end - start))")
+        
         return result
     }
     

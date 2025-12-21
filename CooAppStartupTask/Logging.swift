@@ -15,6 +15,15 @@ public enum Logging {
     /// 系统日志记录器
     static let logger = Logger(subsystem: subsystem, category: category)
     
+    /// 日志开关（默认开启，以便调试启动流程，生产环境建议关闭）
+    public static var isEnabled: Bool = true
+    
+    /// 记录性能/调试日志
+    public static func logPerf(_ message: String) {
+        guard isEnabled else { return }
+        print("[Lifecycle] [Performance] \(message)")
+    }
+    
     /// 记录任务执行日志
     /// - Parameters:
     ///   - className: 任务类名
@@ -27,6 +36,7 @@ public enum Logging {
                         success: Bool,
                         message: String? = nil,
                         cost: TimeInterval = 0) {
+        guard isEnabled else { return }
         let status = success ? "✅" : "❌"
         let costStr = String(format: "%.4fs", cost)
         let msg = message.map { " - \($0)" } ?? ""
@@ -35,6 +45,7 @@ public enum Logging {
     
     /// 记录显式拦截
     public static func logIntercept(_ className: String, event: AppLifecycleEvent) {
+        guard isEnabled else { return }
         print("[Lifecycle] [\(event.rawValue)] 🛑 Intercepted by \(className)")
     }
 }
