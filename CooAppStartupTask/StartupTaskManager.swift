@@ -76,7 +76,7 @@ public final class StartupTaskManager {
             }
         }
     }
-
+    
     /// 根据描述符创建任务实例
     /// - Parameters:
     ///   - desc: 任务描述符
