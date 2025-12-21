@@ -3,25 +3,43 @@
 
 import Foundation
 
-/// 启动任务协议
-/// - 约束：继承自 NSObject 且符合 Sendable，以支持跨线程调度与反射实例化。
-/// - 执行环境：run 方法不绑定特定隔离域（Non-isolated），执行环境跟随调用者（fire 所在的线程）。
-public protocol AppLifecycleTask: NSObject, Sendable {
-    /// 任务唯一标识，用于日志标记与常驻持有 Map 的键
-    static var id: String { get }
-    /// 执行时机（如 `didFinishLaunchBegin`）
-    static var phase: AppLifecyclePhase { get }
-    /// 优先级，数值越大排序越靠前
-    static var priority: LifecycleTaskPriority { get }
-    /// 执行完成后的持有策略（常驻或自动销毁）
-    static var residency: LifecycleTaskRetentionPolicy { get }
+/// 应用服务协议（原 AppLifecycleTask）
+/// - 模块/服务需遵守此协议以接收生命周期事件
+public protocol AppService: AnyObject, Sendable {
     
-    /// 必须提供无参构造器，以便管理器反射实例化
+    /// 唯一标识符（默认为类名）
+    static var id: String { get }
+    
+    /// 优先级（默认为 .medium）
+    /// - 决定同一事件下多个服务的执行顺序
+    static var priority: LifecycleTaskPriority { get }
+    
+    /// 驻留策略（默认为 .destroy）
+    /// - destroy: 执行完即释放（适合一次性任务）
+    /// - hold: 首次实例化后常驻内存（适合服务型模块）
+    static var retention: LifecycleTaskRetentionPolicy { get }
+    
+    /// 订阅的生命周期事件集合
+    /// - Note: 替代 Manifest 中的 events 配置，支持代码智能提示
+    static var events: Set<AppLifecycleEvent> { get }
+    
+    /// 构造器（需支持无参构造）
     init()
     
-    /// 执行任务主体逻辑
-    /// - Parameter context: 任务运行上下文（包含环境、参数、共享数据）
-    /// - Returns: 执行结果与流程控制指令
-    /// - Throws: 允许抛出错误，由管理器捕获并记录日志，不阻断流程
-    func run(context: LifecycleContext) throws -> LifecycleResult
+    /// 处理生命周期事件
+    /// - Parameter context: 包含事件类型、参数及共享数据的上下文
+    /// - Returns: 执行结果（.continue 或 .stop）
+    func serve(context: LifecycleContext) throws -> LifecycleResult
 }
+
+// MARK: - Default Implementation
+
+public extension AppService {
+    static var id: String { String(describing: self) }
+    static var priority: LifecycleTaskPriority { .medium }
+    static var retention: LifecycleTaskRetentionPolicy { .destroy }
+    static var events: Set<AppLifecycleEvent> { [.didFinishLaunching] }
+}
+
+// 兼容旧名（逐步废弃）
+public typealias AppLifecycleTask = AppService

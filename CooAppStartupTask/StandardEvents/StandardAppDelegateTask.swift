@@ -112,15 +112,15 @@ public extension StandardAppDelegateTask {
     
     // MARK: - Auto Routing
     
-    func run(context: LifecycleContext) throws -> LifecycleResult {
+    func serve(context: LifecycleContext) throws -> LifecycleResult {
         // 尝试从参数中获取 UIApplication
-        // 注意：由于 run 方法非隔离，无法直接访问 MainActor 的 UIApplication.shared，必须通过参数传递
+        // 注意：由于 serve 方法非隔离，无法直接访问 MainActor 的 UIApplication.shared，必须通过参数传递
         guard let app = context.parameters[.application] as? UIApplication else {
             // 如果缺少 application 参数，无法执行后续逻辑，直接跳过
             return .continue()
         }
         
-        switch context.phase {
+        switch context.event {
         case .didFinishLaunchBegin, .didFinishLaunchEnd, .didFinishLaunching:
             let options = context.parameters[.launchOptions] as? [UIApplication.LaunchOptionsKey: Any]
             return application(app, didFinishLaunchingWithOptions: options)

@@ -5,18 +5,17 @@
 import Foundation
 import CooAppStartupTask
 
-public final class UpgradePromptTask: NSObject, AppLifecycleTask {
+public final class UpgradePromptTask: NSObject, AppService {
     public static let id: String = "upgrade.prompt"
-    public static let phase: AppLifecyclePhase = .didFinishLaunchBegin
     public static let priority: LifecycleTaskPriority = .init(rawValue: 150)
-    public static let residency: LifecycleTaskRetentionPolicy = .destroy
+    public static let retention: LifecycleTaskRetentionPolicy = .destroy
 
     // 协议变更
     public required override init() {
         super.init()
     }
 
-    public func run(context: LifecycleContext) throws -> LifecycleResult {
-        return .ok
+    public func serve(context: LifecycleContext) throws -> LifecycleResult {
+        return .continue()
     }
 }

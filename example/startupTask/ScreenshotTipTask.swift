@@ -5,18 +5,17 @@
 import Foundation
 import CooAppStartupTask
 
-public final class ScreenshotTipTask: NSObject, AppLifecycleTask {
+public final class ScreenshotTipTask: NSObject, AppService {
     public static let id: String = "screenshot.tip"
-    public static let phase: AppLifecyclePhase = .didFinishLaunchEnd
     public static let priority: LifecycleTaskPriority = .init(rawValue: 100)
-    public static let residency: LifecycleTaskRetentionPolicy = .destroy
+    public static let retention: LifecycleTaskRetentionPolicy = .destroy
 
     // 协议变更
     public required override init() {
         super.init()
     }
 
-    public func run(context: LifecycleContext) throws -> LifecycleResult {
-        return .ok
+    public func serve(context: LifecycleContext) throws -> LifecycleResult {
+        return .continue()
     }
 }

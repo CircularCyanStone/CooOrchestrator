@@ -68,12 +68,12 @@ public extension StandardSceneDelegateTask {
     
     // MARK: - Auto Routing
     
-    func run(context: LifecycleContext) throws -> LifecycleResult {
+    func serve(context: LifecycleContext) throws -> LifecycleResult {
         guard let scene = context.parameters[.scene] as? UIScene else {
             return .continue()
         }
         
-        switch context.phase {
+        switch context.event {
         case .sceneWillConnect:
             guard let session = context.parameters[.session] as? UISceneSession,
                   let options = context.parameters[.connectionOptions] as? UIScene.ConnectionOptions else {

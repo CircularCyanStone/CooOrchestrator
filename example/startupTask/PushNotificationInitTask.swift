@@ -5,11 +5,11 @@
 import Foundation
 import CooAppStartupTask
 
-public final class PushNotificationInitTask: NSObject, AppLifecycleTask {
+public final class PushNotificationInitTask: NSObject, AppService {
     public static let id: String = "push.init"
-    public static let phase: AppLifecyclePhase = .didFinishLaunchBegin
     public static let priority: LifecycleTaskPriority = .init(rawValue: 200)
-    public static let residency: LifecycleTaskRetentionPolicy = .hold
+    public static let retention: LifecycleTaskRetentionPolicy = .hold
+    // static let events: Set<AppLifecycleEvent> = [.didFinishLaunching, .didRegisterForRemoteNotifications] (配置在 Manifest 或注册时)
 
     // 协议变更：init 必须无参
     public required override init() {
@@ -17,8 +17,8 @@ public final class PushNotificationInitTask: NSObject, AppLifecycleTask {
     }
 
     // 协议变更：run 接收 context 参数，支持 throws
-    public func run(context: LifecycleContext) throws -> LifecycleResult {
+    public func serve(context: LifecycleContext) throws -> LifecycleResult {
         // 使用 context...
-        return .ok
+        return .continue()
     }
 }

@@ -12,11 +12,9 @@ public final class AppLifecycleManager: @unchecked Sendable {
     // 已经解析的任务条目
     private struct ResolvedTaskEntry: Sendable {
         let desc: TaskDescriptor
-        let type: AppLifecycleTask.Type
-        let effPhase: AppLifecyclePhase
+        let type: AppService.Type
+        let effEvent: AppLifecycleEvent
         let effPriority: LifecycleTaskPriority
-        
-        // 标记任务留存测测策略
         let effResidency: LifecycleTaskRetentionPolicy
     }
     
@@ -33,11 +31,11 @@ public final class AppLifecycleManager: @unchecked Sendable {
     /// 已注册的任务类名集合（用于去重）
     private var registeredClassNames: Set<String> = []
     /// 常驻任务实例表
-    private var residentTasks: [String: AppLifecycleTask] = [:]
+    private var residentTasks: [String: AppService] = [:]
     /// 是否已完成一次清单引导
     private var hasBootstrapped = false
     /// 分组缓存
-    private var cacheByPhase: [AppLifecyclePhase: [ResolvedTaskEntry]] = [:]
+    private var cacheByEvent: [AppLifecycleEvent: [ResolvedTaskEntry]] = [:]
     
     // MARK: - Public API
     
@@ -52,13 +50,13 @@ public final class AppLifecycleManager: @unchecked Sendable {
     
     /// 触发指定时机的任务执行
     /// - Parameters:
-    ///   - phase: 执行时机
+    ///   - event: 执行时机
     ///   - parameters: 动态事件参数（如 application, launchOptions 等）
     ///   - environment: 运行环境对象
     /// - Returns: 最终的执行结果（如果被中断，则返回中断时的值；否则返回 .void）
     @discardableResult
     public func fire(
-        _ phase: AppLifecyclePhase,
+        _ event: AppLifecycleEvent,
         parameters: [LifecycleParameterKey: Any] = [:],
         environment: AppEnvironment = .init()
     ) -> LifecycleReturnValue {
@@ -75,25 +73,33 @@ public final class AppLifecycleManager: @unchecked Sendable {
         }
         
         // 2. 读取对应阶段的任务列表（Snapshot）
-        let phaseDescriptors = isolationQueue.sync { cacheByPhase[phase] ?? [] }
+        let eventEntries = isolationQueue.sync { cacheByEvent[event] ?? [] }
         
         // 3. 准备责任链环境
         let sharedUserInfo = LifecycleContextUserInfo()
         var finalReturnValue: LifecycleReturnValue = .void
         
         // 4. 遍历执行（在调用者线程）
-        for item in phaseDescriptors {
+        for item in eventEntries {
             // 构造 Context
             let context = LifecycleContext(
-                phase: phase,
+                event: event,
                 environment: environment,
                 args: item.desc.args,
                 parameters: parameters,
                 userInfo: sharedUserInfo
             )
             
-            // 实例化任务
-            guard let task = instantiateTask(from: item.desc, context: context) else { continue }
+            // 实例化或获取常驻任务
+            // 注意：需在 isolationQueue 中安全访问 residentTasks
+            let taskOrNil = isolationQueue.sync { () -> AppService? in
+                if let resident = self.residentTasks[item.type.id] {
+                    return resident
+                }
+                return self.instantiateTask(from: item.desc, context: context)
+            }
+            
+            guard let task = taskOrNil else { continue }
             
             let start = CFAbsoluteTimeGetCurrent()
             var isSuccess = true
@@ -102,7 +108,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
             
             // 执行任务（捕获异常）
             do {
-                let result = try task.run(context: context)
+                let result = try task.serve(context: context)
                 switch result {
                 case .continue(let s, let m):
                     isSuccess = s
@@ -113,7 +119,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
                     finalReturnValue = r
                     shouldStop = true
                     // 记录显式拦截
-                    Logging.logIntercept(item.desc.className, phase: phase)
+                    Logging.logIntercept(item.desc.className, event: event)
                 }
             } catch {
                 isSuccess = false
@@ -125,17 +131,18 @@ public final class AppLifecycleManager: @unchecked Sendable {
             // 记录日志
             Logging.logTask(
                 item.desc.className,
-                phase: item.effPhase,
+                event: item.effEvent,
                 success: isSuccess,
                 message: message,
                 cost: end - start
             )
             
-            // 处理常驻
+            // 处理常驻 (如果是新实例且策略为 hold)
             if case .hold = item.effResidency {
                 isolationQueue.async {
-                    // 常驻任务，添加到常驻列表里
-                    self.residentTasks[type(of: task).id] = task
+                    if self.residentTasks[item.type.id] == nil {
+                        self.residentTasks[item.type.id] = task
+                    }
                 }
             }
             
@@ -143,6 +150,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
                 break
             }
         }
+        
         return finalReturnValue
     }
     
@@ -150,11 +158,11 @@ public final class AppLifecycleManager: @unchecked Sendable {
     /// - Note: 这是 fire(_:environment:) 的便捷泛型封装
     @discardableResult
     public func fire<T>(
-        _ phase: AppLifecyclePhase,
+        _ event: AppLifecycleEvent,
         parameters: [LifecycleParameterKey: Any] = [:],
         environment: AppEnvironment = .init()
     ) -> T? {
-        let ret = fire(phase, parameters: parameters, environment: environment)
+        let ret = fire(event, parameters: parameters, environment: environment)
         return ret.value()
     }
     
@@ -163,7 +171,7 @@ public final class AppLifecycleManager: @unchecked Sendable {
     private func instantiateTask(
         from desc: TaskDescriptor,
         context: LifecycleContext
-    ) -> AppLifecycleTask? {
+    ) -> AppService? {
         // 优先使用工厂
         if let factoryName = desc.factoryClassName,
            let factoryType = NSClassFromString(factoryName) as? LifecycleTaskFactory.Type {
@@ -172,13 +180,13 @@ public final class AppLifecycleManager: @unchecked Sendable {
         }
         
         // 反射实例化
-        guard let taskType = NSClassFromString(desc.className) as? AppLifecycleTask.Type else { return nil }
+        guard let taskType = NSClassFromString(desc.className) as? AppService.Type else { return nil }
         let task = taskType.init()
         return task
     }
     
     private func mergeDescriptors(_ items: [TaskDescriptor]) {
-        var changedPhases: Set<AppLifecyclePhase> = []
+        var changedEvents: Set<AppLifecycleEvent> = []
         
         for d in items {
             // Deduplication check
@@ -187,31 +195,35 @@ public final class AppLifecycleManager: @unchecked Sendable {
             }
             
             // Resolve Type
-            guard let type = NSClassFromString(d.className) as? AppLifecycleTask.Type else {
+            guard let type = NSClassFromString(d.className) as? AppService.Type else {
                 continue
             }
             
             // Mark as registered
             registeredClassNames.insert(d.className)
             
-            // Create Entry
-            let effPhase = d.phase ?? type.phase
-            let entry = ResolvedTaskEntry(
-                desc: d,
-                type: type,
-                effPhase: effPhase,
-                effPriority: d.priority ?? type.priority,
-                effResidency: d.retentionPolicy ?? type.residency
-            )
+            // Determine interested events
+            // 从类静态属性中获取订阅事件（替代 Manifest 配置）
+            let events = type.events
             
-            // Add to Cache
-            cacheByPhase[effPhase, default: []].append(entry)
-            changedPhases.insert(effPhase)
+            for event in events {
+                let entry = ResolvedTaskEntry(
+                    desc: d,
+                    type: type,
+                    effEvent: event,
+                    effPriority: d.priority ?? type.priority,
+                    effResidency: d.retentionPolicy ?? type.retention
+                )
+                
+                // Add to Cache
+                cacheByEvent[event, default: []].append(entry)
+                changedEvents.insert(event)
+            }
         }
         
         // Sort modified phases
-        for p in changedPhases {
-            cacheByPhase[p]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
+        for p in changedEvents {
+            cacheByEvent[p]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
         }
     }
 }

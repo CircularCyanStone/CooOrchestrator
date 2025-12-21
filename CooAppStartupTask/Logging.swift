@@ -15,24 +15,26 @@ public enum Logging {
     /// 系统日志记录器
     static let logger = Logger(subsystem: subsystem, category: category)
     
-    /// 记录单个任务的执行信息
+    /// 记录任务执行日志
     /// - Parameters:
     ///   - className: 任务类名
-    ///   - phase: 执行时机
+    ///   - event: 执行时机
     ///   - success: 是否成功
-    ///   - message: 可选消息（错误或备注）
-    ///   - cost: 执行耗时（秒）
+    ///   - message: 附加信息
+    ///   - cost: 耗时（秒）
     public static func logTask(_ className: String,
-                        phase: AppLifecyclePhase,
+                        event: AppLifecycleEvent,
                         success: Bool,
-                        message: String?,
-                        cost: CFTimeInterval) {
-        let status = success ? "OK" : "FAIL"
-        logger.log("task=\(className) phase=\(String(describing: phase)) status=\(status) cost=\(cost)s msg=\(message ?? "")")
+                        message: String? = nil,
+                        cost: TimeInterval = 0) {
+        let status = success ? "✅" : "❌"
+        let costStr = String(format: "%.4fs", cost)
+        let msg = message.map { " - \($0)" } ?? ""
+        print("[Lifecycle] [\(event.rawValue)] \(status) \(className) (\(costStr))\(msg)")
     }
     
-    /// 记录拦截事件（Warning 级别）
-    public static func logIntercept(_ className: String, phase: AppLifecyclePhase) {
-        logger.warning("🚫 Event '\(phase.rawValue)' was INTERCEPTED by task '\(className)'. Subsequent tasks will NOT be executed.")
+    /// 记录显式拦截
+    public static func logIntercept(_ className: String, event: AppLifecycleEvent) {
+        print("[Lifecycle] [\(event.rawValue)] 🛑 Intercepted by \(className)")
     }
 }

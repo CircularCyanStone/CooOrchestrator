@@ -3,8 +3,9 @@
 
 import Foundation
 
-/// 应用生命周期阶段，任务执行时机（结构体封装，支持自定义扩展）
-public struct AppLifecyclePhase: RawRepresentable, Hashable, Sendable {
+/// 应用生命周期事件（原 Phase）
+/// - 标识一个特定的系统事件或自定义触发点
+public struct AppLifecycleEvent: RawRepresentable, Hashable, Sendable {
     public let rawValue: String
     
     public init(rawValue: String) {
@@ -27,6 +28,11 @@ public struct LifecycleTaskPriority: RawRepresentable, Comparable, Sendable {
     public static func < (lhs: LifecycleTaskPriority, rhs: LifecycleTaskPriority) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
+    
+    public static let low = LifecycleTaskPriority(rawValue: 250)
+    public static let medium = LifecycleTaskPriority(rawValue: 500)
+    public static let high = LifecycleTaskPriority(rawValue: 750)
+    public static let critical = LifecycleTaskPriority(rawValue: 1000)
 }
 
 /// 任务执行后的持有策略（字符串原始值，便于清单直接映射）

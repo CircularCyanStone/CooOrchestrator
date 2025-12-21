@@ -72,20 +72,18 @@ public enum ManifestDiscovery {
         var list: [TaskDescriptor] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
-            let phaseStr = item[ManifestKeys.phase] as? String
+            
             let residencyStr = item[ManifestKeys.residency] as? String
             let priorityVal = item[ManifestKeys.priority] as? Int
             let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
             let factory = item[ManifestKeys.factory] as? String
             
-            let phase = phaseStr.flatMap(AppLifecyclePhase.init(rawValue:))
             let residency = residencyStr.flatMap(LifecycleTaskRetentionPolicy.init(rawValue:))
             let priority = priorityVal.map { LifecycleTaskPriority(rawValue: $0) }
             
             list.append(TaskDescriptor(className: className,
-                                       phase: phase,
                                        priority: priority,
-                                       residency: residency,
+                                       retentionPolicy: residency,
                                        args: args,
                                        factoryClassName: factory))
         }
@@ -98,7 +96,6 @@ enum ManifestKeys {
     static let rootOld = "StartupTasks"
     static let rootNew = "LifecycleTasks"
     static let className = "class"
-    static let phase = "phase"
     static let priority = "priority"
     static let residency = "residency"
     static let args = "args"
