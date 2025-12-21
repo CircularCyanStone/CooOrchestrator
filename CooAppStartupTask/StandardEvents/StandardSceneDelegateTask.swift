@@ -7,7 +7,7 @@ import UIKit
 /// 标准 SceneDelegate 生命周期任务协议
 /// - 适用于 iOS 13+ 的多窗口场景
 /// - 开发者可以选择遵守此协议，直接实现对应的生命周期方法
-public protocol StandardSceneDelegateTask: AppLifecycleTask {
+public protocol StandardSceneDelegateTask: AppService {
     
     // MARK: - Scene Life Cycle
     

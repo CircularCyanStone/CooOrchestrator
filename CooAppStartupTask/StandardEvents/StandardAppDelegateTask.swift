@@ -7,7 +7,7 @@ import UIKit
 /// 标准 AppDelegate 生命周期任务协议
 /// - 开发者可以选择遵守此协议，直接实现对应的生命周期方法，而无需在 `run` 方法中手动 switch phase。
 /// - 所有方法均返回 `LifecycleResult`，支持责任链控制（如阻断后续任务）。
-public protocol StandardAppDelegateTask: AppLifecycleTask {
+public protocol StandardAppDelegateTask: AppService {
     
     // MARK: - App Life Cycle
     

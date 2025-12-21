@@ -45,12 +45,9 @@ public final class AppServiceRegistry<Service: AppService>: @unchecked Sendable 
     }
     
     // 线程安全的存储（实际上 Registry 仅在 Serial Queue 中同步使用，但为了 Sendable 标记）
-    private let lock = NSLock()
     private var _entries: [Entry] = []
     
     var entries: [Entry] {
-        lock.lock()
-        defer { lock.unlock() }
         return _entries
     }
 
@@ -62,9 +59,6 @@ public final class AppServiceRegistry<Service: AppService>: @unchecked Sendable 
     ///   - event: 关注的事件
     ///   - handler: 处理闭包
     public func add(_ event: AppLifecycleEvent, handler: @escaping Handler) {
-        lock.lock()
-        defer { lock.unlock() }
-        
         // 封装闭包以支持类型擦除
         let anyHandler: (any AppService, LifecycleContext) throws -> LifecycleResult = { service, context in
             guard let specificService = service as? Service else {
@@ -94,5 +88,3 @@ public extension AppService {
     static var retention: LifecycleTaskRetentionPolicy { .destroy }
 }
 
-// 兼容旧名（逐步废弃）
-public typealias AppLifecycleTask = AppService
