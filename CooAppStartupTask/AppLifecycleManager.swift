@@ -55,6 +55,27 @@ public final class AppLifecycleManager: @unchecked Sendable {
         }
     }
     
+    /// 便捷注册服务（类型安全）
+    /// - Parameters:
+    ///   - type: 服务类型
+    ///   - priority: 覆盖默认优先级（可选）
+    ///   - retention: 覆盖默认驻留策略（可选）
+    ///   - args: 静态参数（可选）
+    public func register<T: AppService>(
+        service type: T.Type,
+        priority: LifecycleTaskPriority? = nil,
+        retention: LifecycleTaskRetentionPolicy? = nil,
+        args: [String: Sendable] = [:]
+    ) {
+        let desc = TaskDescriptor(
+            className: NSStringFromClass(type), // 自动获取正确的类名
+            priority: priority,
+            retentionPolicy: retention,
+            args: args
+        )
+        self.register([desc])
+    }
+    
     /// 启动引导：扫描并加载所有清单中的任务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
     public func resolve() {

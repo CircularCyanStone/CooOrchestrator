@@ -18,12 +18,11 @@ public enum ManifestDiscovery {
         
         let targetBundles = allBundles.filter { bundle in
             if bundle == Bundle.main { return true }
-            // 简单判断：如果 bundle 路径在 app 包内，或者是用户自定义的 bundle (通常路径包含 app 名称或不以 /System 开头)
-            // 更安全的做法是：只处理 bundlePath 以 Bundle.main.bundlePath 开头的（针对嵌入式 Framework）
-            // 或者 bundleID 匹配特定的前缀。
-            // 这里我们采用保守策略：排除系统库路径。
-            guard let path = bundle.bundlePath as String? else { return false }
-            return !path.hasPrefix("/System/") && !path.hasPrefix("/usr/lib/")
+            
+            // 严谨判断：只处理位于主 App Bundle 内部的 Frameworks (嵌入式 Frameworks)
+            // 这包括 .app/Frameworks/ 下的动态库，以及可能的 Plugins
+            guard let bundlePath = bundle.bundlePath as String? else { return false }
+            return bundlePath.hasPrefix(mainBundlePath)
         }
         
         for bundle in targetBundles {
