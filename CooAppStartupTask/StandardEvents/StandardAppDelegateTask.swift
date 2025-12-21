@@ -83,6 +83,44 @@ public protocol StandardAppDelegateTask: AppLifecycleTask {
 
 public extension StandardAppDelegateTask {
     
+    // MARK: - Automatic Registry
+    
+    /// 自动注册标准事件处理
+    static func register(in registry: AppServiceRegistry<Self>) {
+        // 绑定 Application Life Cycle
+        registry.add(.didFinishLaunchBegin) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didFinishLaunchEnd) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didFinishLaunching) { s, c in try s.dispatchApplicationEvent(c) }
+        
+        registry.add(.didBecomeActive) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.willResignActive) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didEnterBackground) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.willEnterForeground) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.willTerminate) { s, c in try s.dispatchApplicationEvent(c) }
+        
+        registry.add(.didReceiveMemoryWarning) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.significantTimeChange) { s, c in try s.dispatchApplicationEvent(c) }
+        
+        // 绑定 Open URL
+        registry.add(.openURL) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.continueUserActivity) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didUpdateUserActivity) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didFailToContinueUserActivity) { s, c in try s.dispatchApplicationEvent(c) }
+        
+        // 绑定 Background Fetch
+        registry.add(.performFetch) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.handleEventsForBackgroundURLSession) { s, c in try s.dispatchApplicationEvent(c) }
+        
+        // 绑定 Notifications
+        registry.add(.didRegisterForRemoteNotifications) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didFailToRegisterForRemoteNotifications) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didReceiveRemoteNotification) { s, c in try s.dispatchApplicationEvent(c) }
+        
+        // 绑定 Scene
+        registry.add(.configurationForConnecting) { s, c in try s.dispatchApplicationEvent(c) }
+        registry.add(.didDiscardSceneSessions) { s, c in try s.dispatchApplicationEvent(c) }
+    }
+    
     // MARK: Default Implementations (Return .continue())
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> LifecycleResult { .continue() }
@@ -110,9 +148,9 @@ public extension StandardAppDelegateTask {
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> LifecycleResult { .continue() }
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) -> LifecycleResult { .continue() }
     
-    // MARK: - Auto Routing
+    // MARK: - Internal Dispatcher
     
-    func serve(context: LifecycleContext) throws -> LifecycleResult {
+    func dispatchApplicationEvent(_ context: LifecycleContext) throws -> LifecycleResult {
         // 尝试从参数中获取 UIApplication
         // 注意：由于 serve 方法非隔离，无法直接访问 MainActor 的 UIApplication.shared，必须通过参数传递
         guard let app = context.parameters[.application] as? UIApplication else {
@@ -209,3 +247,4 @@ public extension StandardAppDelegateTask {
         }
     }
 }
+

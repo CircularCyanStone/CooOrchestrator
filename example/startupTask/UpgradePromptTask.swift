@@ -15,7 +15,10 @@ public final class UpgradePromptTask: NSObject, AppService {
         super.init()
     }
 
-    public func serve(context: LifecycleContext) throws -> LifecycleResult {
-        return .continue()
+    public static func register(in registry: AppServiceRegistry<UpgradePromptTask>) {
+        registry.add(.didFinishLaunching) { s, c in
+            // 检查更新...
+            return .continue()
+        }
     }
 }

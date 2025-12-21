@@ -15,7 +15,10 @@ public final class ScreenshotTipTask: NSObject, AppService {
         super.init()
     }
 
-    public func serve(context: LifecycleContext) throws -> LifecycleResult {
-        return .continue()
+    public static func register(in registry: AppServiceRegistry<ScreenshotTipTask>) {
+        registry.add(.didFinishLaunchEnd) { s, c in
+            // 处理逻辑...
+            return .continue()
+        }
     }
 }

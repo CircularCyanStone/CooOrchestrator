@@ -11,38 +11,40 @@ public final class EnvironmentDemoTask: NSObject, AppService {
         super.init()
     }
 
-    // 协议变更：run 接收 context 参数，支持 throws
-    public func serve(context: LifecycleContext) throws -> LifecycleResult {
-        let bundle = context.environment.bundle
-        let identifier = bundle.bundleIdentifier ?? "unknown.bundle"
-        let version = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "0.0"
-        let build = (bundle.infoDictionary?["CFBundleVersion"] as? String) ?? "0"
+    // 协议变更：注册事件处理
+    public static func register(in registry: AppServiceRegistry<EnvironmentDemoTask>) {
+        registry.add(.didFinishLaunching) { service, context in
+            let bundle = context.environment.bundle
+            let identifier = bundle.bundleIdentifier ?? "unknown.bundle"
+            let version = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "0.0"
+            let build = (bundle.infoDictionary?["CFBundleVersion"] as? String) ?? "0"
 
-        let msg: String
-        if let url = bundle.url(forResource: "EnvDemo", withExtension: "plist", subdirectory: "startupTask"),
-           let data = try? Data(contentsOf: url),
-           let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-           let dict = obj as? [String: Any],
-           let welcome = dict["WelcomeMessage"] as? String {
-            msg = welcome
-        } else if let path = bundle.paths(forResourcesOfType: "plist", inDirectory: nil).first(where: { $0.hasSuffix("/startupTask/EnvDemo.plist") }),
-                  let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
-                  let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-                  let dict = obj as? [String: Any],
-                  let welcome = dict["WelcomeMessage"] as? String {
-            msg = welcome
-        } else {
-            msg = "EnvDemo.plist not found"
+            let msg: String
+            if let url = bundle.url(forResource: "EnvDemo", withExtension: "plist", subdirectory: "startupTask"),
+               let data = try? Data(contentsOf: url),
+               let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+               let dict = obj as? [String: Any],
+               let welcome = dict["WelcomeMessage"] as? String {
+                msg = welcome
+            } else if let path = bundle.paths(forResourcesOfType: "plist", inDirectory: nil).first(where: { $0.hasSuffix("/startupTask/EnvDemo.plist") }),
+                      let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+                      let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                      let dict = obj as? [String: Any],
+                      let welcome = dict["WelcomeMessage"] as? String {
+                msg = welcome
+            } else {
+                msg = "EnvDemo.plist not found"
+            }
+
+            // 依然可以调用 Logging，但实际上 Manager 也会记录一次
+            Logging.logTask(
+                "EnvironmentDemoTask",
+                event: context.event,
+                success: true,
+                message: "bundle=\(identifier) v\(version)(\(build)) msg=\(msg)",
+                cost: 0
+            )
+            return .continue()
         }
-
-        // 依然可以调用 Logging，但实际上 Manager 也会记录一次
-        Logging.logTask(
-            "EnvironmentDemoTask",
-            event: context.event,
-            success: true,
-            message: "bundle=\(identifier) v\(version)(\(build)) msg=\(msg)",
-            cost: 0
-        )
-        return .continue()
     }
 }

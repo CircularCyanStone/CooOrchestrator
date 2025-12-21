@@ -51,6 +51,25 @@ public protocol StandardSceneDelegateTask: AppLifecycleTask {
 
 public extension StandardSceneDelegateTask {
     
+    // MARK: - Automatic Registry
+    
+    static func register(in registry: AppServiceRegistry<Self>) {
+        // Lifecycle
+        registry.add(.sceneWillConnect) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneDidDisconnect) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneDidBecomeActive) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneWillResignActive) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneWillEnterForeground) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneDidEnterBackground) { s, c in try s.dispatchSceneEvent(c) }
+        
+        // Events
+        registry.add(.sceneOpenURLContexts) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneContinueUserActivity) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneDidUpdateUserActivity) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneDidFailToContinueUserActivity) { s, c in try s.dispatchSceneEvent(c) }
+        registry.add(.sceneStateRestorationActivity) { s, c in try s.dispatchSceneEvent(c) }
+    }
+    
     // MARK: Default Implementations
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> LifecycleResult { .continue() }
@@ -66,9 +85,9 @@ public extension StandardSceneDelegateTask {
     func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> LifecycleResult { .continue() }
     func stateRestorationActivity(for scene: UIScene) -> LifecycleResult { .continue() }
     
-    // MARK: - Auto Routing
+    // MARK: - Internal Dispatcher
     
-    func serve(context: LifecycleContext) throws -> LifecycleResult {
+    func dispatchSceneEvent(_ context: LifecycleContext) throws -> LifecycleResult {
         guard let scene = context.parameters[.scene] as? UIScene else {
             return .continue()
         }

@@ -16,6 +16,8 @@ public final class AppLifecycleManager: @unchecked Sendable {
         let effEvent: AppLifecycleEvent
         let effPriority: LifecycleTaskPriority
         let effResidency: LifecycleTaskRetentionPolicy
+        // 绑定的处理器（从 Registry 获取）
+        let handler: ((any AppService, LifecycleContext) throws -> LifecycleResult)?
     }
     
     /// 单例实例
@@ -23,6 +25,10 @@ public final class AppLifecycleManager: @unchecked Sendable {
     
     /// 内部串行队列，用于保护 descriptors, residentTasks, cacheByPhase 等状态
     private let isolationQueue = DispatchQueue(label: "com.coo.lifecycle.manager", qos: .userInitiated)
+    
+    /// 服务注册表缓存（Type ID -> Handlers）
+    /// 存储每个 Service 类注册的所有事件处理闭包
+    private var serviceHandlers: [String: [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)]] = [:]
     
     private init() {}
     
@@ -48,6 +54,18 @@ public final class AppLifecycleManager: @unchecked Sendable {
         }
     }
     
+    /// 启动引导：扫描并加载所有清单中的任务
+    /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
+    public func resolve() {
+        isolationQueue.sync {
+            if !hasBootstrapped {
+                let discovered = ManifestDiscovery.loadAllDescriptors()
+                self.mergeDescriptors(discovered)
+                self.hasBootstrapped = true
+            }
+        }
+    }
+    
     /// 触发指定时机的任务执行
     /// - Parameters:
     ///   - event: 执行时机
@@ -62,11 +80,11 @@ public final class AppLifecycleManager: @unchecked Sendable {
     ) -> LifecycleReturnValue {
         
         // 1. 引导加载（如果需要）
+        // 虽然推荐显式调用 resolve()，但为了健壮性，这里保留懒加载兜底
+        // 如果用户忘记调用 resolve()，这里会确保第一次 fire 时进行加载
         isolationQueue.sync {
             if !hasBootstrapped {
-                // 1.1. 清单扫描，并解析成清单描述实体
                 let discovered = ManifestDiscovery.loadAllDescriptors()
-                // 1.2. 合并任务描述
                 self.mergeDescriptors(discovered)
                 self.hasBootstrapped = true
             }
@@ -108,18 +126,27 @@ public final class AppLifecycleManager: @unchecked Sendable {
             
             // 执行任务（捕获异常）
             do {
-                let result = try task.serve(context: context)
-                switch result {
-                case .continue(let s, let m):
-                    isSuccess = s
-                    message = m
-                case .stop(let r, let s, let m):
-                    isSuccess = s
-                    message = m
-                    finalReturnValue = r
-                    shouldStop = true
-                    // 记录显式拦截
-                    Logging.logIntercept(item.desc.className, event: event)
+                // 如果有绑定的 Handler，直接调用
+                // 如果没有，说明可能是在 Registry 迁移过渡期，或者逻辑错误
+                if let handler = item.handler {
+                    let result = try handler(task, context)
+                    switch result {
+                    case .continue(let s, let m):
+                        isSuccess = s
+                        message = m
+                    case .stop(let r, let s, let m):
+                        isSuccess = s
+                        message = m
+                        finalReturnValue = r
+                        shouldStop = true
+                        // 记录显式拦截
+                        Logging.logIntercept(item.desc.className, event: event)
+                    }
+                } else {
+                    // Fallback: 如果没有 handler，跳过执行
+                    // 在新架构下，必须通过 Registry 注册 handler
+                    isSuccess = false
+                    message = "No handler registered for event \(event.rawValue)"
                 }
             } catch {
                 isSuccess = false
@@ -203,16 +230,27 @@ public final class AppLifecycleManager: @unchecked Sendable {
             registeredClassNames.insert(d.className)
             
             // Determine interested events
-            // 从类静态属性中获取订阅事件（替代 Manifest 配置）
-            let events = type.events
+            // 1. 检查缓存中是否有该服务的 Handlers
+            // 2. 如果没有，则创建临时实例调用 register 方法进行收集（这是静态注册的关键）
+            // 注意：我们利用泛型 Registry 收集信息，但只存储类型擦除后的 Handler
             
-            for event in events {
+            var handlers = serviceHandlers[type.id]
+            if handlers == nil {
+                // 收集注册信息
+                handlers = collectHandlers(for: type)
+                serviceHandlers[type.id] = handlers
+            }
+            
+            guard let validHandlers = handlers else { continue }
+            
+            for (event, handler) in validHandlers {
                 let entry = ResolvedTaskEntry(
                     desc: d,
                     type: type,
                     effEvent: event,
                     effPriority: d.priority ?? type.priority,
-                    effResidency: d.retentionPolicy ?? type.retention
+                    effResidency: d.retentionPolicy ?? type.retention,
+                    handler: handler
                 )
                 
                 // Add to Cache
@@ -224,6 +262,27 @@ public final class AppLifecycleManager: @unchecked Sendable {
         // Sort modified phases
         for p in changedEvents {
             cacheByEvent[p]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
+        }
+    }
+    
+    // 辅助：调用泛型静态方法 register
+    private func collectHandlers(for type: AppService.Type) -> [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)] {
+        // 利用 Swift 的运行时特性或辅助协议来调用泛型方法
+        // 这里我们需要一个技巧：让 AppService 遵守一个辅助协议，该协议暴露非泛型的 register 入口，或者我们通过反射
+        
+        // 实际上，最简单的办法是实例化一个 Registry，然后传入。
+        // 但 Registry 是泛型的 AppServiceRegistry<Service>。
+        // 我们需要构造一个闭包，让 Service 自己去推断类型。
+        
+        return invokeRegister(type)
+    }
+    
+    private func invokeRegister<T: AppService>(_ type: T.Type) -> [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)] {
+        let registry = AppServiceRegistry<T>()
+        T.register(in: registry)
+        
+        return registry.entries.map { entry in
+            (entry.event, entry.handler)
         }
     }
 }

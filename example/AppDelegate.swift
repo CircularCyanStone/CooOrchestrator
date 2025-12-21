@@ -14,6 +14,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // 1. 显式启动解析（推荐）
+        AppLifecycleManager.shared.resolve()
+        
+        // 2. 触发启动事件
         AppLifecycleManager.shared.fire(
             .didFinishLaunching,
             parameters: [

@@ -9,16 +9,26 @@ public final class PushNotificationInitTask: NSObject, AppService {
     public static let id: String = "push.init"
     public static let priority: LifecycleTaskPriority = .init(rawValue: 200)
     public static let retention: LifecycleTaskRetentionPolicy = .hold
-    // static let events: Set<AppLifecycleEvent> = [.didFinishLaunching, .didRegisterForRemoteNotifications] (配置在 Manifest 或注册时)
-
+    
     // 协议变更：init 必须无参
     public required override init() {
         super.init()
     }
 
-    // 协议变更：run 接收 context 参数，支持 throws
-    public func serve(context: LifecycleContext) throws -> LifecycleResult {
-        // 使用 context...
-        return .continue()
+    // 协议变更：注册事件处理
+    public static func register(in registry: AppServiceRegistry<PushNotificationInitTask>) {
+        // 注册启动事件
+        registry.add(.didFinishLaunching) { service, context in
+            // 初始化推送 SDK
+            print("PushNotificationInitTask: Initializing SDK...")
+            return .continue()
+        }
+        
+        // 注册推送注册成功事件
+        registry.add(.didRegisterForRemoteNotifications) { service, context in
+            guard let token = context.parameters[.deviceToken] as? Data else { return .continue() }
+            print("PushNotificationInitTask: Registered token: \(token)")
+            return .continue()
+        }
     }
 }
