@@ -53,11 +53,13 @@ public final class AppLifecycleManager: @unchecked Sendable {
     /// 触发指定时机的任务执行
     /// - Parameters:
     ///   - phase: 执行时机
+    ///   - parameters: 动态事件参数（如 application, launchOptions 等）
     ///   - environment: 运行环境对象
     /// - Returns: 最终的执行结果（如果被中断，则返回中断时的值；否则返回 .void）
     @discardableResult
     public func fire(
         _ phase: AppLifecyclePhase,
+        parameters: [LifecycleParameterKey: Any] = [:],
         environment: AppEnvironment = .init()
     ) -> LifecycleReturnValue {
         
@@ -86,8 +88,10 @@ public final class AppLifecycleManager: @unchecked Sendable {
                 phase: phase,
                 environment: environment,
                 args: item.desc.args,
+                parameters: parameters,
                 userInfo: sharedUserInfo
             )
+            
             // 实例化任务
             guard let task = instantiateTask(from: item.desc, context: context) else { continue }
             
@@ -147,9 +151,10 @@ public final class AppLifecycleManager: @unchecked Sendable {
     @discardableResult
     public func fire<T>(
         _ phase: AppLifecyclePhase,
+        parameters: [LifecycleParameterKey: Any] = [:],
         environment: AppEnvironment = .init()
     ) -> T? {
-        let ret = fire(phase, environment: environment)
+        let ret = fire(phase, parameters: parameters, environment: environment)
         return ret.value()
     }
     

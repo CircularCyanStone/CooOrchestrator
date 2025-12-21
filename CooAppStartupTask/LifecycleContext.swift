@@ -32,13 +32,16 @@ public final class LifecycleContextUserInfo: @unchecked Sendable {
 
 /// 任务运行上下文（引用类型，支持责任链数据共享）
 /// - Note: 使用 LifecycleContextUserInfo 确保多线程环境下的数据安全
-public final class LifecycleContext: Sendable {
+/// - Note: 标记为 @unchecked Sendable 以支持携带非 Sendable 的系统对象参数（如 UIApplication）
+public final class LifecycleContext: @unchecked Sendable {
     /// 当前触发的生命周期阶段
     public let phase: AppLifecyclePhase
     /// 运行环境（如 bundle 等）
     public let environment: AppEnvironment
     /// 通过清单传入的静态参数集合
     public let args: [String: Sendable]
+    /// 动态事件参数（如 application, launchOptions 等）
+    public let parameters: [LifecycleParameterKey: Any]
     /// 动态共享数据（线程安全）
     public let userInfo: LifecycleContextUserInfo
     
@@ -47,14 +50,17 @@ public final class LifecycleContext: Sendable {
     ///   - phase: 当前阶段
     ///   - environment: 运行环境
     ///   - args: 任务参数
+    ///   - parameters: 动态事件参数
     ///   - userInfo: 共享数据容器（默认自动创建）
     public init(phase: AppLifecyclePhase,
                 environment: AppEnvironment,
                 args: [String: Sendable] = [:],
+                parameters: [LifecycleParameterKey: Any] = [:],
                 userInfo: LifecycleContextUserInfo = .init()) {
         self.phase = phase
         self.environment = environment
         self.args = args
+        self.parameters = parameters
         self.userInfo = userInfo
     }
 }

@@ -10,15 +10,12 @@ public struct AppLifecyclePhase: RawRepresentable, Hashable, Sendable {
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
-    
-    /// 预设阶段：App 启动完成开始（对应 didFinishLaunchingWithOptions 开始）
-    public static let didFinishLaunchBegin = AppLifecyclePhase(rawValue: "didFinishLaunchBegin")
-    /// 预设阶段：App 启动完成结束（对应 didFinishLaunchingWithOptions 结束）
-    public static let didFinishLaunchEnd = AppLifecyclePhase(rawValue: "didFinishLaunchEnd")
-    /// 预设阶段：App 进入后台
-    public static let didEnterBackground = AppLifecyclePhase(rawValue: "didEnterBackground")
-    /// 预设阶段：App 进入前台
-    public static let willEnterForeground = AppLifecyclePhase(rawValue: "willEnterForeground")
+}
+
+/// 生命周期事件参数键名
+public struct LifecycleParameterKey: RawRepresentable, Hashable, Sendable {
+    public let rawValue: String
+    public init(rawValue: String) { self.rawValue = rawValue }
 }
 
 /// 任务优先级包装（可比较、可发送）
