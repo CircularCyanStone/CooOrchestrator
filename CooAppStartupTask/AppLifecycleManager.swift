@@ -214,37 +214,28 @@ public final class AppLifecycleManager: @unchecked Sendable {
     }
     
     private func mergeDescriptors(_ items: [TaskDescriptor]) {
-        var changedEvents: Set<AppLifecycleEvent> = []
+        // 1. 批量解析类型，避免在循环中多次调用 NSClassFromString
+        // 同时过滤掉已经注册过的类（假设类维度去重是业务需求）
+        
+        var entriesToInsert: [AppLifecycleEvent: [ResolvedTaskEntry]] = [:]
         
         for d in items {
-            // Deduplication check
-            if registeredClassNames.contains(d.className) {
-                continue
-            }
+            // 快速去重检查 (String 比较比 Class 查找快)
+            if registeredClassNames.contains(d.className) { continue }
             
-            // Resolve Type
-            guard let type = NSClassFromString(d.className) as? any AppService.Type else {
-                continue
-            }
+            // 昂贵的运行时查找
+            guard let type = NSClassFromString(d.className) as? any AppService.Type else { continue }
             
-            // Mark as registered
+            // 标记已注册
             registeredClassNames.insert(d.className)
             
-            // Determine interested events
-            // 1. 检查缓存中是否有该服务的 Handlers
-            // 2. 如果没有，则创建临时实例调用 register 方法进行收集（这是静态注册的关键）
-            // 注意：我们利用泛型 Registry 收集信息，但只存储类型擦除后的 Handler
+            // 2. 获取 Handlers (带缓存)
+            // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
+            let handlers = self.resolveHandlers(for: type)
+            if handlers.isEmpty { continue }
             
-            var handlers = serviceHandlers[type.id]
-            if handlers == nil {
-                // 收集注册信息
-                handlers = collectHandlers(for: type)
-                serviceHandlers[type.id] = handlers
-            }
-            
-            guard let validHandlers = handlers else { continue }
-            
-            for (event, handler) in validHandlers {
+            // 3. 内存聚合，而非直接操作 cacheByEvent (减少锁内临界区时间，虽然目前是在 sync 块里)
+            for (event, handler) in handlers {
                 let entry = ResolvedTaskEntry(
                     desc: d,
                     type: type,
@@ -253,17 +244,28 @@ public final class AppLifecycleManager: @unchecked Sendable {
                     effResidency: d.retentionPolicy ?? type.retention,
                     handler: handler
                 )
-                
-                // Add to Cache
-                cacheByEvent[event, default: []].append(entry)
-                changedEvents.insert(event)
+                entriesToInsert[event, default: []].append(entry)
             }
         }
         
-        // Sort modified phases
-        for p in changedEvents {
-            cacheByEvent[p]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
+        // 4. 批量合并到主缓存并排序
+        if entriesToInsert.isEmpty { return }
+        
+        for (event, newEntries) in entriesToInsert {
+            cacheByEvent[event, default: []].append(contentsOf: newEntries)
+            // 原地排序，只对受影响的列表排序
+            cacheByEvent[event]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
         }
+    }
+    
+    // 提取辅助方法，逻辑更清晰
+    private func resolveHandlers(for type: any AppService.Type) -> [(AppLifecycleEvent, (any AppService, LifecycleContext) throws -> LifecycleResult)] {
+        if let cached = serviceHandlers[type.id] {
+            return cached
+        }
+        let handlers = collectHandlers(for: type)
+        serviceHandlers[type.id] = handlers
+        return handlers
     }
     
     // 辅助：调用泛型静态方法 register
