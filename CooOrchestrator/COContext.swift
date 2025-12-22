@@ -34,6 +34,57 @@ public final class COContext: @unchecked Sendable {
                 storage[key] = newValue
             }
         }
+        
+        // MARK: - Convenience Accessors
+        
+        /// 获取字符串值
+        public func getString(_ key: COContextKey) -> String? {
+            self[key]
+        }
+        
+        /// 获取布尔值（支持类型转换：Int/String -> Bool）
+        public func getBool(_ key: COContextKey) -> Bool? {
+            // 利用下标语法的锁保护
+            let val: Any? = self[key]
+            
+            if let b = val as? Bool { return b }
+            if let i = val as? Int { return i != 0 }
+            if let s = val as? String {
+                let lower = s.lowercased()
+                return lower == "true" || lower == "yes" || lower == "1"
+            }
+            return nil
+        }
+        
+        /// 获取整数值（支持类型转换：String/Double -> Int）
+        public func getInt(_ key: COContextKey) -> Int? {
+            let val: Any? = self[key]
+            
+            if let i = val as? Int { return i }
+            if let d = val as? Double { return Int(d) }
+            if let s = val as? String { return Int(s) }
+            return nil
+        }
+        
+        /// 获取浮点数值（支持类型转换：String/Int -> Double）
+        public func getDouble(_ key: COContextKey) -> Double? {
+            let val: Any? = self[key]
+            
+            if let d = val as? Double { return d }
+            if let i = val as? Int { return Double(i) }
+            if let s = val as? String { return Double(s) }
+            return nil
+        }
+        
+        /// 获取字典
+        public func getDictionary(_ key: COContextKey) -> [String: Any]? {
+            self[key]
+        }
+        
+        /// 获取数组
+        public func getArray(_ key: COContextKey) -> [Any]? {
+            self[key]
+        }
     }
     
     /// 动态共享数据（线程安全）
