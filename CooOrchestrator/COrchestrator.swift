@@ -1,13 +1,13 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：启动任务调度器，支持多线程安全分发，管理任务生命周期与日志。
-// 类型功能描述：CooOrchestrator 作为单例管理器，维护任务注册表、常驻任务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
+// 类型功能描述：COrchestrator 作为单例管理器，维护任务注册表、常驻任务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
 
 import Foundation
 
-/// 启动任务调度器 (CooOrchestrator)
+/// 启动任务调度器 (COrchestrator)
 /// - 职责：统一按“时机 + 优先级”顺序执行任务；支持责任链分发与流程控制。
 /// - 并发模型：非隔离（Non-isolated），内部使用串行队列保护状态。fire 方法在调用者线程执行，支持同步返回值。
-public final class CooOrchestrator: @unchecked Sendable {
+public final class COrchestrator: @unchecked Sendable {
     
     // 已经解析的任务条目
     private struct ResolvedTaskEntry: @unchecked Sendable {
@@ -22,7 +22,7 @@ public final class CooOrchestrator: @unchecked Sendable {
     }
     
     /// 单例实例
-    public static let shared = CooOrchestrator()
+    public static let shared = COrchestrator()
     
     /// 内部串行队列，用于保护 descriptors, residentTasks, cacheByPhase 等状态
     private let isolationQueue = DispatchQueue(label: "com.coo.orchestrator", qos: .userInitiated)

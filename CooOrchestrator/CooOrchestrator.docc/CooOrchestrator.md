@@ -1,4 +1,4 @@
-# ``CooOrchestrator``
+# ``COrchestrator``
 
 一个用于模块化管理应用生命周期与服务分发的编排框架，提供统一的服务协议、时机与优先级、生命周期与自动注册（Manifest），支持多线程安全调度。
 
@@ -14,7 +14,7 @@
   - 声明静态元数据（`id/priority/retention`）
   - 实现 `register(in:)` 绑定事件
 - 在宿主 App 集成：
-  - `CooOrchestrator.shared.fire(.didFinishLaunching)`
+  - `COrchestrator.shared.fire(.didFinishLaunching)`
 
 ### 调度与注册
 - 编排器在首次触发时自动加载所有模块的清单并注册任务。
@@ -33,7 +33,7 @@
 - ``COTaskDescriptor``
 
 ### 调度器与注册
-- ``CooOrchestrator``
+- ``COrchestrator``
 - 清单解析：``COManifestDiscovery``
 
 ### 示例

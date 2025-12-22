@@ -9,7 +9,7 @@ import os
 /// - 使用 `OSLog` 记录任务执行信息；若系统不支持或失败，自动降级到 `print`（由 `Logger` 处理）。
 public enum COLogger {
     /// 日志子系统标识，默认取主 bundle 标识
-    static let subsystem = Bundle.main.bundleIdentifier ?? "CooOrchestrator"
+    static let subsystem = Bundle.main.bundleIdentifier ?? "COrchestrator"
     /// 日志分类，固定为启动任务
     static let category = "AppLifecycle"
     /// 系统日志记录器
