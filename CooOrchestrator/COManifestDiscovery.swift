@@ -7,9 +7,27 @@ import Foundation
 /// Manifest 解析器
 /// - 职责：从各模块私有清单读取服务配置并转换为统一的 `COServiceDescriptor` 集合。
 public enum COManifestDiscovery {
+    /// 线程安全的描述符收集器
+    private class DescriptorCollector: @unchecked Sendable {
+        private var items: [COServiceDescriptor] = []
+        private let lock = NSLock()
+        
+        func append(_ newItems: [COServiceDescriptor]) {
+            lock.lock()
+            items.append(contentsOf: newItems)
+            lock.unlock()
+        }
+        
+        var allItems: [COServiceDescriptor] {
+            lock.lock()
+            defer { lock.unlock() }
+            return items
+        }
+    }
+
     /// 加载主应用与所有已加载框架的清单并合并
     /// - Returns: 解析得到的服务描述符数组
-    public static func loadAllDescriptors() -> [COServiceDescriptor] {
+    static func loadAllDescriptors() -> [COServiceDescriptor] {
         let start = CFAbsoluteTimeGetCurrent()
         var result: [COServiceDescriptor] = []
         
@@ -28,11 +46,22 @@ public enum COManifestDiscovery {
         }
         let findBundleCost = CFAbsoluteTimeGetCurrent() - findBundleStart
         
-        // 2. 扫描 Bundles
+        // 2. 扫描 Bundles (并发优化)
         let scanStart = CFAbsoluteTimeGetCurrent()
-        for bundle in targetBundles {
-            result.append(contentsOf: loadDescriptors(in: bundle))
+        
+        // 使用 Collector 封装锁与状态，规避闭包捕获 var 的检查
+        let collector = DescriptorCollector()
+        let bundlesToScan = targetBundles
+        
+        DispatchQueue.concurrentPerform(iterations: bundlesToScan.count) { index in
+            let bundle = bundlesToScan[index]
+            let descriptors = loadDescriptors(in: bundle)
+            if !descriptors.isEmpty {
+                collector.append(descriptors)
+            }
         }
+        result.append(contentsOf: collector.allItems)
+        
         let scanCost = CFAbsoluteTimeGetCurrent() - scanStart
         
         let end = CFAbsoluteTimeGetCurrent()
@@ -50,7 +79,7 @@ public enum COManifestDiscovery {
     /// 加载指定 `bundle` 内的清单
     /// - Parameter bundle: 目标模块的 bundle
     /// - Returns: 解析结果数组；若未配置清单则返回空数组
-    public static func loadDescriptors(in bundle: Bundle) -> [COServiceDescriptor] {
+    static func loadDescriptors(in bundle: Bundle) -> [COServiceDescriptor] {
         var descs: [COServiceDescriptor] = []
         let start = CFAbsoluteTimeGetCurrent()
         
@@ -70,7 +99,6 @@ public enum COManifestDiscovery {
             let ioStart = CFAbsoluteTimeGetCurrent()
             // 细分IO：Data读取 vs Plist反序列化
             if let data = try? Data(contentsOf: url) {
-                let plistStart = CFAbsoluteTimeGetCurrent()
                 if let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
                    let arr = obj as? [[String: Sendable]] {
                     // IO部分结束（含反序列化）
@@ -106,7 +134,6 @@ public enum COManifestDiscovery {
     /// - Parameter array: 解析到的数组对象
     /// - Returns: 合法条目的 `COServiceDescriptor` 列表
     private static func parse(array: [[String: Sendable]]) -> [COServiceDescriptor] {
-        let start = CFAbsoluteTimeGetCurrent()
         var list: [COServiceDescriptor] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
@@ -125,10 +152,6 @@ public enum COManifestDiscovery {
                                        args: args,
                                        factoryClassName: factory))
         }
-        
-        let cost = CFAbsoluteTimeGetCurrent() - start
-        // COLogger.logPerf("   -> Parse \(list.count) items cost: \(String(format: "%.6fs", cost))")
-        
         return list
     }
 }
