@@ -42,7 +42,7 @@ public final class CORegistry<Service: COService>: @unchecked Sendable {
     public struct Entry: @unchecked Sendable {
         let event: COEvent
         let handler: (any COService, COContext) throws -> COResult
-    } 
+    }
     
     // 线程安全的存储（实际上 Registry 仅在 Serial Queue 中同步使用，但为了 Sendable 标记）
     private var _entries: [Entry] = []

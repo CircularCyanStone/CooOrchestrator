@@ -1,5 +1,5 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：定义任务运行上下文及其相关环境数据结构，支持线程安全的数据共享。
+// 文件功能描述：定义服务运行上下文及其相关环境数据结构，支持线程安全的数据共享。
 
 import Foundation
 
@@ -30,7 +30,7 @@ public final class COContextUserInfo: @unchecked Sendable {
     }
 }
 
-/// 任务运行上下文（引用类型，支持责任链数据共享）
+/// 服务运行上下文（引用类型，支持责任链数据共享）
 /// - Note: 使用 COContextUserInfo 确保多线程环境下的数据安全
 /// - Note: 标记为 @unchecked Sendable 以支持携带非 Sendable 的系统对象参数（如 UIApplication）
 public final class COContext: @unchecked Sendable {
@@ -49,7 +49,7 @@ public final class COContext: @unchecked Sendable {
     /// - Parameters:
     ///   - event: 当前事件
     ///   - environment: 运行环境
-    ///   - args: 任务参数
+    ///   - args: 服务参数
     ///   - parameters: 动态事件参数
     ///   - userInfo: 共享数据容器（默认自动创建）
     public init(event: COEvent,

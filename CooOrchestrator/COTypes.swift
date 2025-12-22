@@ -1,5 +1,5 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：定义生命周期任务的基础枚举与结构体类型，包括执行时机、优先级与驻留策略。
+// 文件功能描述：定义生命周期服务的基础枚举与结构体类型，包括执行时机、优先级与驻留策略。
 
 import Foundation
 
@@ -19,7 +19,7 @@ public struct COParameterKey: RawRepresentable, Hashable, Sendable {
     public init(rawValue: String) { self.rawValue = rawValue }
 }
 
-/// 任务优先级包装（可比较、可发送）
+/// 服务优先级包装（可比较、可发送）
 public struct COPriority: RawRepresentable, Comparable, Sendable {
     /// 底层优先级数值（越大越先执行）
     public let rawValue: Int
@@ -35,7 +35,7 @@ public struct COPriority: RawRepresentable, Comparable, Sendable {
     public static let critical = COPriority(rawValue: 1000)
 }
 
-/// 任务执行后的持有策略（字符串原始值，便于清单直接映射）
+/// 服务执行后的持有策略（字符串原始值，便于清单直接映射）
 public enum CORetentionPolicy: String, Sendable {
     /// 执行结束即释放，不被管理器持有
     case destroy

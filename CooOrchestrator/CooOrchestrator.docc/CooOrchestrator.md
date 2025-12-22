@@ -30,7 +30,7 @@
 - ``CORetentionPolicy``
 - ``COContext``
 - ``COResult``
-- ``COTaskDescriptor``
+- ``COServiceDescriptor``
 
 ### 调度器与注册
 - ``COrchestrator``

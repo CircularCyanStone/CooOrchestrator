@@ -1,17 +1,17 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：启动任务调度器，支持多线程安全分发，管理任务生命周期与日志。
-// 类型功能描述：COrchestrator 作为单例管理器，维护任务注册表、常驻任务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
+// 文件功能描述：服务编排调度器，支持多线程安全分发，管理服务生命周期与日志。
+// 类型功能描述：COrchestrator 作为单例管理器，维护服务注册表、常驻服务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
 
 import Foundation
 
-/// 启动任务调度器 (COrchestrator)
-/// - 职责：统一按“时机 + 优先级”顺序执行任务；支持责任链分发与流程控制。
+/// 服务编排调度器 (COrchestrator)
+/// - 职责：统一按“时机 + 优先级”顺序执行服务逻辑；支持责任链分发与流程控制。
 /// - 并发模型：非隔离（Non-isolated），内部使用串行队列保护状态。fire 方法在调用者线程执行，支持同步返回值。
 public final class COrchestrator: @unchecked Sendable {
     
-    // 已经解析的任务条目
-    private struct ResolvedTaskEntry: @unchecked Sendable {
-        let desc: COTaskDescriptor
+    // 已经解析的服务条目
+    private struct ResolvedServiceEntry: @unchecked Sendable {
+        let desc: COServiceDescriptor
         let type: any COService.Type
         let effEvent: COEvent
         let effPriority: COPriority
@@ -24,7 +24,7 @@ public final class COrchestrator: @unchecked Sendable {
     /// 单例实例
     public static let shared = COrchestrator()
     
-    /// 内部串行队列，用于保护 descriptors, residentTasks, cacheByPhase 等状态
+    /// 内部串行队列，用于保护 descriptors, residentServices, cacheByPhase 等状态
     private let isolationQueue = DispatchQueue(label: "com.coo.orchestrator", qos: .userInitiated)
     
     /// 服务注册表缓存（Type ID -> Handlers）
@@ -35,20 +35,20 @@ public final class COrchestrator: @unchecked Sendable {
     
     // MARK: - Protected State (Must access via isolationQueue)
     
-    /// 已注册的任务类名集合（用于去重）
+    /// 已注册的服务类名集合（用于去重）
     private var registeredClassNames: Set<String> = []
-    /// 常驻任务实例表
-    private var residentTasks: [String: any COService] = [:]
+    /// 常驻服务实例表
+    private var residentServices: [String: any COService] = [:]
     /// 是否已完成一次清单引导
     private var hasBootstrapped = false
     /// 分组缓存
-    private var cacheByEvent: [COEvent: [ResolvedTaskEntry]] = [:]
+    private var cacheByEvent: [COEvent: [ResolvedServiceEntry]] = [:]
     
     // MARK: - Public API
     
-    /// 注册一批任务描述符
-    /// - Parameter newDescriptors: 新增的任务描述符数组
-    public func register(_ newDescriptors: [COTaskDescriptor]) {
+    /// 注册一批服务描述符
+    /// - Parameter newDescriptors: 新增的服务描述符数组
+    public func register(_ newDescriptors: [COServiceDescriptor]) {
         if newDescriptors.isEmpty { return }
         isolationQueue.async {
             self.mergeDescriptors(newDescriptors)
@@ -67,7 +67,7 @@ public final class COrchestrator: @unchecked Sendable {
         retention: CORetentionPolicy? = nil,
         args: [String: Sendable] = [:]
     ) {
-        let desc = COTaskDescriptor(
+        let desc = COServiceDescriptor(
             className: NSStringFromClass(type), // 自动获取正确的类名
             priority: priority,
             retentionPolicy: retention,
@@ -76,7 +76,7 @@ public final class COrchestrator: @unchecked Sendable {
         self.register([desc])
     }
     
-    /// 启动引导：扫描并加载所有清单中的任务
+    /// 启动引导：扫描并加载所有清单中的服务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
     public func resolve() {
         let start = CFAbsoluteTimeGetCurrent()
@@ -92,7 +92,7 @@ public final class COrchestrator: @unchecked Sendable {
         }
     }
     
-    /// 触发指定时机的任务执行
+    /// 触发指定时机的服务执行
     /// - Parameters:
     ///   - event: 执行时机
     ///   - parameters: 动态事件参数（如 application, launchOptions 等）
@@ -116,7 +116,7 @@ public final class COrchestrator: @unchecked Sendable {
             }
         }
         
-        // 2. 读取对应阶段的任务列表（Snapshot）
+        // 2. 读取对应阶段的服务列表（Snapshot）
         let eventEntries = isolationQueue.sync { cacheByEvent[event] ?? [] }
         
         // 3. 准备责任链环境
@@ -134,28 +134,28 @@ public final class COrchestrator: @unchecked Sendable {
                 userInfo: sharedUserInfo
             )
             
-            // 实例化或获取常驻任务
-            // 注意：需在 isolationQueue 中安全访问 residentTasks
-            let taskOrNil = isolationQueue.sync { () -> (any COService)? in
-                if let resident = self.residentTasks[item.type.id] {
+            // 实例化或获取常驻服务
+            // 注意：需在 isolationQueue 中安全访问 residentServices
+            let serviceOrNil = isolationQueue.sync { () -> (any COService)? in
+                if let resident = self.residentServices[item.type.id] {
                     return resident
                 }
-                return self.instantiateTask(from: item.desc, context: context)
+                return self.instantiateService(from: item.desc, context: context)
             }
             
-            guard let task = taskOrNil else { continue }
+            guard let service = serviceOrNil else { continue }
             
             let start = CFAbsoluteTimeGetCurrent()
             var isSuccess = true
             var message: String? = nil
             var shouldStop = false
             
-            // 执行任务（捕获异常）
+            // 执行服务（捕获异常）
             do {
                 // 如果有绑定的 Handler，直接调用
                 // 如果没有，说明可能是在 Registry 迁移过渡期，或者逻辑错误
                 if let handler = item.handler {
-                    let result = try handler(task, context)
+                    let result = try handler(service, context)
                     switch result {
                     case .continue(let s, let m):
                         isSuccess = s
@@ -193,8 +193,8 @@ public final class COrchestrator: @unchecked Sendable {
             // 处理常驻 (如果是新实例且策略为 hold)
             if case .hold = item.effResidency {
                 isolationQueue.async {
-                    if self.residentTasks[item.type.id] == nil {
-                        self.residentTasks[item.type.id] = task
+                    if self.residentServices[item.type.id] == nil {
+                        self.residentServices[item.type.id] = service
                     }
                 }
             }
@@ -207,7 +207,7 @@ public final class COrchestrator: @unchecked Sendable {
         return finalReturnValue
     }
     
-    /// 触发任务执行并获取泛型返回值
+    /// 触发服务执行并获取泛型返回值
     /// - Note: 这是 fire(_:environment:) 的便捷泛型封装
     @discardableResult
     public func fire<T>(
@@ -221,29 +221,29 @@ public final class COrchestrator: @unchecked Sendable {
     
     // MARK: - Private Helper
     
-    private func instantiateTask(
-        from desc: COTaskDescriptor,
+    private func instantiateService(
+        from desc: COServiceDescriptor,
         context: COContext
     ) -> (any COService)? {
         // 优先使用工厂
         if let factoryName = desc.factoryClassName,
-           let factoryType = NSClassFromString(factoryName) as? COTaskFactory.Type {
+           let factoryType = NSClassFromString(factoryName) as? COServiceFactory.Type {
             let factory = factoryType.init()
             return factory.make(context: context, args: desc.args)
         }
         
         // 反射实例化
-        guard let taskType = NSClassFromString(desc.className) as? any COService.Type else { return nil }
-        let task = taskType.init()
-        return task
+        guard let serviceType = NSClassFromString(desc.className) as? any COService.Type else { return nil }
+        let service = serviceType.init()
+        return service
     }
     
-    private func mergeDescriptors(_ items: [COTaskDescriptor]) {
+    private func mergeDescriptors(_ items: [COServiceDescriptor]) {
         let start = CFAbsoluteTimeGetCurrent()
         // 1. 批量解析类型，避免在循环中多次调用 NSClassFromString
         // 同时过滤掉已经注册过的类（假设类维度去重是业务需求）
         
-        var entriesToInsert: [COEvent: [ResolvedTaskEntry]] = [:]
+        var entriesToInsert: [COEvent: [ResolvedServiceEntry]] = [:]
         
         for d in items {
             // 快速去重检查 (String 比较比 Class 查找快)
@@ -262,7 +262,7 @@ public final class COrchestrator: @unchecked Sendable {
             
             // 3. 内存聚合，而非直接操作 cacheByEvent (减少锁内临界区时间，虽然目前是在 sync 块里)
             for (event, handler) in handlers {
-                let entry = ResolvedTaskEntry(
+                let entry = ResolvedServiceEntry(
                     desc: d,
                     type: type,
                     effEvent: event,

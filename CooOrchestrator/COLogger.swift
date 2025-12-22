@@ -47,9 +47,9 @@ public enum COLogger {
         print("[Lifecycle] [Performance] \(message)")
     }
     
-    /// 记录任务执行日志
+    /// 记录服务执行日志
     /// - Parameters:
-    ///   - className: 任务类名
+    ///   - className: 服务类名
     ///   - event: 执行时机
     ///   - success: 是否成功
     ///   - message: 附加信息
