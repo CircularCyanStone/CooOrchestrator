@@ -4,21 +4,21 @@
 import Foundation
 
 /// 任务描述符（对应 Manifest 中的一条配置）
-public struct TaskDescriptor: Sendable {
+public struct COTaskDescriptor: Sendable {
     /// 任务类名
     public let className: String
     /// 指定优先级（可选）
-    public let priority: LifecycleTaskPriority?
+    public let priority: COPriority?
     /// 指定持有策略（可选）
-    public let retentionPolicy: LifecycleTaskRetentionPolicy?
+    public let retentionPolicy: CORetentionPolicy?
     /// 静态参数
     public let args: [String: Sendable]
     /// 工厂类名（可选）
     public let factoryClassName: String?
     
     public init(className: String,
-                priority: LifecycleTaskPriority? = nil,
-                retentionPolicy: LifecycleTaskRetentionPolicy? = nil,
+                priority: COPriority? = nil,
+                retentionPolicy: CORetentionPolicy? = nil,
                 args: [String: Sendable] = [:],
                 factoryClassName: String? = nil) {
         self.className = className

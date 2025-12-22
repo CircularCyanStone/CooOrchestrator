@@ -3,19 +3,19 @@
 // 类型功能描述：ScreenshotTipTask 实现 StartupTask 协议，autoDestroy 策略，执行后自动释放。
 
 import Foundation
-import CooAppStartupTask
+import CooOrchestrator
 
-public final class ScreenshotTipTask: NSObject, AppService {
+public final class ScreenshotTipTask: NSObject, COService {
     public static let id: String = "screenshot.tip"
-    public static let priority: LifecycleTaskPriority = .init(rawValue: 100)
-    public static let retention: LifecycleTaskRetentionPolicy = .destroy
+    public static let priority: COPriority = .init(rawValue: 100)
+    public static let retention: CORetentionPolicy = .destroy
 
     // 协议变更
     public required override init() {
         super.init()
     }
 
-    public static func register(in registry: AppServiceRegistry<ScreenshotTipTask>) {
+    public static func register(in registry: CORegistry<ScreenshotTipTask>) {
         registry.add(.didFinishLaunchEnd) { s, c in
             // 处理逻辑...
             return .continue()

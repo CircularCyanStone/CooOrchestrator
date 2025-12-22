@@ -4,7 +4,7 @@
 import Foundation
 
 /// 线程安全的共享数据容器
-public final class LifecycleContextUserInfo: @unchecked Sendable {
+public final class COContextUserInfo: @unchecked Sendable {
     private let lock = NSLock()
     private var storage: [String: Any] = [:]
     
@@ -31,19 +31,19 @@ public final class LifecycleContextUserInfo: @unchecked Sendable {
 }
 
 /// 任务运行上下文（引用类型，支持责任链数据共享）
-/// - Note: 使用 LifecycleContextUserInfo 确保多线程环境下的数据安全
+/// - Note: 使用 COContextUserInfo 确保多线程环境下的数据安全
 /// - Note: 标记为 @unchecked Sendable 以支持携带非 Sendable 的系统对象参数（如 UIApplication）
-public final class LifecycleContext: @unchecked Sendable {
+public final class COContext: @unchecked Sendable {
     /// 当前触发的生命周期事件
-    public let event: AppLifecycleEvent
+    public let event: COEvent
     /// 运行环境（如 bundle 等）
     public let environment: AppEnvironment
     /// 通过清单传入的静态参数集合
     public let args: [String: Sendable]
     /// 动态事件参数（如 application, launchOptions 等）
-    public let parameters: [LifecycleParameterKey: Any]
+    public let parameters: [COParameterKey: Any]
     /// 动态共享数据（线程安全）
-    public let userInfo: LifecycleContextUserInfo
+    public let userInfo: COContextUserInfo
     
     /// 上下文构造器
     /// - Parameters:
@@ -52,11 +52,11 @@ public final class LifecycleContext: @unchecked Sendable {
     ///   - args: 任务参数
     ///   - parameters: 动态事件参数
     ///   - userInfo: 共享数据容器（默认自动创建）
-    public init(event: AppLifecycleEvent,
+    public init(event: COEvent,
                 environment: AppEnvironment,
                 args: [String: Sendable] = [:],
-                parameters: [LifecycleParameterKey: Any] = [:],
-                userInfo: LifecycleContextUserInfo = .init()) {
+                parameters: [COParameterKey: Any] = [:],
+                userInfo: COContextUserInfo = .init()) {
         self.event = event
         self.environment = environment
         self.args = args

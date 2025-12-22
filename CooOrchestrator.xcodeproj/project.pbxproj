@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FB15F5062EF592A000E1DA93 /* CooAppStartupTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooAppStartupTask.framework */; };
+		FB15F5062EF592A000E1DA93 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		FB15F2752EF58F7200E1DA93 /* example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = example.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FBD17C8B2EF3D61900C9CDB2 /* CooAppStartupTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CooAppStartupTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CooOrchestrator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -34,9 +34,9 @@
 			path = example;
 			sourceTree = "<group>";
 		};
-		FBD17C8D2EF3D61900C9CDB2 /* CooAppStartupTask */ = {
+		FBCC77992EF8D92C0023F4D3 /* CooOrchestrator */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CooAppStartupTask;
+			path = CooOrchestrator;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -46,7 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB15F5062EF592A000E1DA93 /* CooAppStartupTask.framework in Frameworks */,
+				FB15F5062EF592A000E1DA93 /* CooOrchestrator.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +70,7 @@
 		FBD17C812EF3D61900C9CDB2 = {
 			isa = PBXGroup;
 			children = (
-				FBD17C8D2EF3D61900C9CDB2 /* CooAppStartupTask */,
+				FBCC77992EF8D92C0023F4D3 /* CooOrchestrator */,
 				FB15F2762EF58F7200E1DA93 /* example */,
 				FB15F5052EF592A000E1DA93 /* Frameworks */,
 				FBD17C8C2EF3D61900C9CDB2 /* Products */,
@@ -80,7 +80,7 @@
 		FBD17C8C2EF3D61900C9CDB2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FBD17C8B2EF3D61900C9CDB2 /* CooAppStartupTask.framework */,
+				FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */,
 				FB15F2752EF58F7200E1DA93 /* example.app */,
 			);
 			name = Products;
@@ -121,9 +121,9 @@
 			productReference = FB15F2752EF58F7200E1DA93 /* example.app */;
 			productType = "com.apple.product-type.application";
 		};
-		FBD17C8A2EF3D61900C9CDB2 /* CooAppStartupTask */ = {
+		FBD17C8A2EF3D61900C9CDB2 /* CooOrchestrator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FBD17C942EF3D61900C9CDB2 /* Build configuration list for PBXNativeTarget "CooAppStartupTask" */;
+			buildConfigurationList = FBD17C942EF3D61900C9CDB2 /* Build configuration list for PBXNativeTarget "CooOrchestrator" */;
 			buildPhases = (
 				FBD17C862EF3D61900C9CDB2 /* Headers */,
 				FBD17C872EF3D61900C9CDB2 /* Sources */,
@@ -135,13 +135,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				FBD17C8D2EF3D61900C9CDB2 /* CooAppStartupTask */,
+				FBCC77992EF8D92C0023F4D3 /* CooOrchestrator */,
 			);
-			name = CooAppStartupTask;
+			name = CooOrchestrator;
 			packageProductDependencies = (
 			);
-			productName = CooAppStartupTask;
-			productReference = FBD17C8B2EF3D61900C9CDB2 /* CooAppStartupTask.framework */;
+			productName = CooOrchestrator;
+			productReference = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -162,7 +162,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FBD17C852EF3D61900C9CDB2 /* Build configuration list for PBXProject "CooAppStartupTask" */;
+			buildConfigurationList = FBD17C852EF3D61900C9CDB2 /* Build configuration list for PBXProject "CooOrchestrator" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -176,7 +176,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				FBD17C8A2EF3D61900C9CDB2 /* CooAppStartupTask */,
+				FBD17C8A2EF3D61900C9CDB2 /* CooOrchestrator */,
 				FB15F2742EF58F7200E1DA93 /* example */,
 			);
 		};
@@ -426,7 +426,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = com.coo.CooAppStartupTask;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coo.CooOrchestrator;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -462,7 +462,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = com.coo.CooAppStartupTask;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coo.CooOrchestrator;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -486,7 +486,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FBD17C852EF3D61900C9CDB2 /* Build configuration list for PBXProject "CooAppStartupTask" */ = {
+		FBD17C852EF3D61900C9CDB2 /* Build configuration list for PBXProject "CooOrchestrator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FBD17C922EF3D61900C9CDB2 /* Debug */,
@@ -495,7 +495,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FBD17C942EF3D61900C9CDB2 /* Build configuration list for PBXNativeTarget "CooAppStartupTask" */ = {
+		FBD17C942EF3D61900C9CDB2 /* Build configuration list for PBXNativeTarget "CooOrchestrator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FBD17C952EF3D61900C9CDB2 /* Debug */,

@@ -1,17 +1,17 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：读取各模块私有清单（Info.plist 或资源 StartupTasks.plist），解析为任务描述符集合并提供统一的加载入口。
-// 类型功能描述：ManifestDiscovery 负责从 bundle 中发现并解析清单；ManifestKeys/ValueParser 提供键名与枚举值解析。
+// 类型功能描述：COManifestDiscovery 负责从 bundle 中发现并解析清单；ManifestKeys/ValueParser 提供键名与枚举值解析。
 
 import Foundation
 
 /// Manifest 解析器
-/// - 职责：从各模块私有清单读取任务配置并转换为统一的 `TaskDescriptor` 集合。
-public enum ManifestDiscovery {
+/// - 职责：从各模块私有清单读取任务配置并转换为统一的 `COTaskDescriptor` 集合。
+public enum COManifestDiscovery {
     /// 加载主应用与所有已加载框架的清单并合并
     /// - Returns: 解析得到的任务描述符数组
-    public static func loadAllDescriptors() -> [TaskDescriptor] {
+    public static func loadAllDescriptors() -> [COTaskDescriptor] {
         let start = CFAbsoluteTimeGetCurrent()
-        var result: [TaskDescriptor] = []
+        var result: [COTaskDescriptor] = []
         
         // 优化：只扫描 Main Bundle 和内嵌的 Frameworks
         // 排除系统库（如 UIKit, SwiftUI, Foundation 等），大幅减少扫描范围
@@ -29,7 +29,7 @@ public enum ManifestDiscovery {
         }
         
         let end = CFAbsoluteTimeGetCurrent()
-        Logging.logPerf("ManifestDiscovery: Scanned \(targetBundles.count) bundles, found \(result.count) tasks. Cost: \(String(format: "%.4fs", end - start))")
+        COLogger.logPerf("COManifestDiscovery: Scanned \(targetBundles.count) bundles, found \(result.count) tasks. Cost: \(String(format: "%.4fs", end - start))")
         
         return result
     }
@@ -37,8 +37,8 @@ public enum ManifestDiscovery {
     /// 加载指定 `bundle` 内的清单
     /// - Parameter bundle: 目标模块的 bundle
     /// - Returns: 解析结果数组；若未配置清单则返回空数组
-    public static func loadDescriptors(in bundle: Bundle) -> [TaskDescriptor] {
-        var descs: [TaskDescriptor] = []
+    public static func loadDescriptors(in bundle: Bundle) -> [COTaskDescriptor] {
+        var descs: [COTaskDescriptor] = []
         
         // 尝试加载新 Key (LifecycleTasks) 和旧 Key (StartupTasks)
         let keysToTry = [ManifestKeys.rootNew, ManifestKeys.rootOld]
@@ -71,9 +71,9 @@ public enum ManifestDiscovery {
     
     /// 将清单数组转换为描述符数组
     /// - Parameter array: 解析到的数组对象
-    /// - Returns: 合法条目的 `TaskDescriptor` 列表
-    private static func parse(array: [[String: Sendable]]) -> [TaskDescriptor] {
-        var list: [TaskDescriptor] = []
+    /// - Returns: 合法条目的 `COTaskDescriptor` 列表
+    private static func parse(array: [[String: Sendable]]) -> [COTaskDescriptor] {
+        var list: [COTaskDescriptor] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
             
@@ -82,10 +82,10 @@ public enum ManifestDiscovery {
             let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
             let factory = item[ManifestKeys.factory] as? String
             
-            let residency = residencyStr.flatMap(LifecycleTaskRetentionPolicy.init(rawValue:))
-            let priority = priorityVal.map { LifecycleTaskPriority(rawValue: $0) }
+            let residency = residencyStr.flatMap(CORetentionPolicy.init(rawValue:))
+            let priority = priorityVal.map { COPriority(rawValue: $0) }
             
-            list.append(TaskDescriptor(className: className,
+            list.append(COTaskDescriptor(className: className,
                                        priority: priority,
                                        retentionPolicy: residency,
                                        args: args,

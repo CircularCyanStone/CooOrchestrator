@@ -7,44 +7,44 @@ import UIKit
 /// 标准 SceneDelegate 生命周期任务协议
 /// - 适用于 iOS 13+ 的多窗口场景
 /// - 开发者可以选择遵守此协议，直接实现对应的生命周期方法
-public protocol StandardSceneDelegateTask: AppService {
+public protocol StandardSceneDelegateTask: COService {
     
     // MARK: - Scene Life Cycle
     
     /// Scene 连接 (scene:willConnectTo:options:)
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> LifecycleResult
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult
     
     /// Scene 断开 (sceneDidDisconnect)
-    func sceneDidDisconnect(_ scene: UIScene) -> LifecycleResult
+    func sceneDidDisconnect(_ scene: UIScene) -> COResult
     
     /// Scene 激活 (sceneDidBecomeActive)
-    func sceneDidBecomeActive(_ scene: UIScene) -> LifecycleResult
+    func sceneDidBecomeActive(_ scene: UIScene) -> COResult
     
     /// Scene 取消激活 (sceneWillResignActive)
-    func sceneWillResignActive(_ scene: UIScene) -> LifecycleResult
+    func sceneWillResignActive(_ scene: UIScene) -> COResult
     
     /// Scene 进入前台 (sceneWillEnterForeground)
-    func sceneWillEnterForeground(_ scene: UIScene) -> LifecycleResult
+    func sceneWillEnterForeground(_ scene: UIScene) -> COResult
     
     /// Scene 进入后台 (sceneDidEnterBackground)
-    func sceneDidEnterBackground(_ scene: UIScene) -> LifecycleResult
+    func sceneDidEnterBackground(_ scene: UIScene) -> COResult
     
     // MARK: - Scene Events
     
     /// 打开 URL 上下文 (scene:openURLContexts:)
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> LifecycleResult
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> COResult
     
     /// 继续用户活动 (scene:continue:)
-    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> LifecycleResult
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> COResult
     
     /// 更新用户活动 (scene:didUpdate:)
-    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity) -> LifecycleResult
+    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity) -> COResult
     
     /// 用户活动失败 (scene:didFailToContinueUserActivity:error:)
-    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> LifecycleResult
+    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> COResult
     
     /// 状态恢复 (stateRestorationActivity(for:))
-    func stateRestorationActivity(for scene: UIScene) -> LifecycleResult
+    func stateRestorationActivity(for scene: UIScene) -> COResult
 }
 
 // MARK: - Default Implementation & Routing
@@ -53,7 +53,7 @@ public extension StandardSceneDelegateTask {
     
     // MARK: - Automatic Registry
     
-    static func register(in registry: AppServiceRegistry<Self>) {
+    static func register(in registry: CORegistry<Self>) {
         // Lifecycle
         registry.add(.sceneWillConnect) { s, c in try s.dispatchSceneEvent(c) }
         registry.add(.sceneDidDisconnect) { s, c in try s.dispatchSceneEvent(c) }
@@ -72,22 +72,22 @@ public extension StandardSceneDelegateTask {
     
     // MARK: Default Implementations
     
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> LifecycleResult { .continue() }
-    func sceneDidDisconnect(_ scene: UIScene) -> LifecycleResult { .continue() }
-    func sceneDidBecomeActive(_ scene: UIScene) -> LifecycleResult { .continue() }
-    func sceneWillResignActive(_ scene: UIScene) -> LifecycleResult { .continue() }
-    func sceneWillEnterForeground(_ scene: UIScene) -> LifecycleResult { .continue() }
-    func sceneDidEnterBackground(_ scene: UIScene) -> LifecycleResult { .continue() }
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult { .continue() }
+    func sceneDidDisconnect(_ scene: UIScene) -> COResult { .continue() }
+    func sceneDidBecomeActive(_ scene: UIScene) -> COResult { .continue() }
+    func sceneWillResignActive(_ scene: UIScene) -> COResult { .continue() }
+    func sceneWillEnterForeground(_ scene: UIScene) -> COResult { .continue() }
+    func sceneDidEnterBackground(_ scene: UIScene) -> COResult { .continue() }
     
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> LifecycleResult { .continue() }
-    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> LifecycleResult { .continue() }
-    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity) -> LifecycleResult { .continue() }
-    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> LifecycleResult { .continue() }
-    func stateRestorationActivity(for scene: UIScene) -> LifecycleResult { .continue() }
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> COResult { .continue() }
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> COResult { .continue() }
+    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity) -> COResult { .continue() }
+    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> COResult { .continue() }
+    func stateRestorationActivity(for scene: UIScene) -> COResult { .continue() }
     
     // MARK: - Internal Dispatcher
     
-    func dispatchSceneEvent(_ context: LifecycleContext) throws -> LifecycleResult {
+    func dispatchSceneEvent(_ context: COContext) throws -> COResult {
         guard let scene = context.parameters[.scene] as? UIScene else {
             return .continue()
         }

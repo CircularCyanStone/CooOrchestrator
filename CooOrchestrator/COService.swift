@@ -5,23 +5,23 @@ import Foundation
 
 /// 应用服务协议（原 AppLifecycleTask）
 /// - 模块/服务需遵守此协议以接收生命周期事件
-public protocol AppService: AnyObject, Sendable {
+public protocol COService: AnyObject, Sendable {
     
     /// 唯一标识符（默认为类名）
     static var id: String { get }
     
     /// 优先级（默认为 .medium）
     /// - 决定同一事件下多个服务的执行顺序
-    static var priority: LifecycleTaskPriority { get }
+    static var priority: COPriority { get }
     
     /// 驻留策略（默认为 .destroy）
     /// - destroy: 执行完即释放（适合一次性任务）
     /// - hold: 首次实例化后常驻内存（适合服务型模块）
-    static var retention: LifecycleTaskRetentionPolicy { get }
+    static var retention: CORetentionPolicy { get }
     
     /// 注册服务事件
     /// - Parameter registry: 注册器，用于绑定事件处理闭包
-    static func register(in registry: AppServiceRegistry<Self>)
+    static func register(in registry: CORegistry<Self>)
     
     /// 构造器（需支持无参构造）
     init()
@@ -31,17 +31,17 @@ public protocol AppService: AnyObject, Sendable {
 
 /// 服务注册器
 /// - 用于在应用启动时收集各服务的事件绑定关系
-public final class AppServiceRegistry<Service: AppService>: @unchecked Sendable {
+public final class CORegistry<Service: COService>: @unchecked Sendable {
     
     /// 内部使用的事件处理闭包
-    /// 使用 Any AppService 以便在 Manager 中通用存储
-    public typealias Handler = (Service, LifecycleContext) throws -> LifecycleResult
+    /// 使用 Any COService 以便在 Manager 中通用存储
+    public typealias Handler = (Service, COContext) throws -> COResult
     
     /// 注册项（内部使用）
     /// - Note: 这里的 Handler 不再要求 @Sendable，因为它们在调用者线程执行，且受 Manager 锁保护
     public struct Entry: @unchecked Sendable {
-        let event: AppLifecycleEvent
-        let handler: (any AppService, LifecycleContext) throws -> LifecycleResult
+        let event: COEvent
+        let handler: (any COService, COContext) throws -> COResult
     }
     
     // 线程安全的存储（实际上 Registry 仅在 Serial Queue 中同步使用，但为了 Sendable 标记）
@@ -58,9 +58,9 @@ public final class AppServiceRegistry<Service: AppService>: @unchecked Sendable 
     /// - Parameters:
     ///   - event: 关注的事件
     ///   - handler: 处理闭包
-    public func add(_ event: AppLifecycleEvent, handler: @escaping Handler) {
+    public func add(_ event: COEvent, handler: @escaping Handler) {
         // 封装闭包以支持类型擦除
-        let anyHandler: (any AppService, LifecycleContext) throws -> LifecycleResult = { service, context in
+        let anyHandler: (any COService, COContext) throws -> COResult = { service, context in
             guard let specificService = service as? Service else {
                 // 理论上不会发生，除非 Manager 逻辑错误
                 return .continue()
@@ -72,7 +72,7 @@ public final class AppServiceRegistry<Service: AppService>: @unchecked Sendable 
     }
     
     /// 注册事件处理（支持 Void 返回值的便捷方法）
-    public func add(_ event: AppLifecycleEvent, handler: @escaping (Service, LifecycleContext) throws -> Void) {
+    public func add(_ event: COEvent, handler: @escaping (Service, COContext) throws -> Void) {
         add(event) { service, context in
             try handler(service, context)
             return .continue()
@@ -82,9 +82,8 @@ public final class AppServiceRegistry<Service: AppService>: @unchecked Sendable 
 
 // MARK: - Default Implementation
 
-public extension AppService {
+public extension COService {
     static var id: String { String(describing: self) }
-    static var priority: LifecycleTaskPriority { .medium }
-    static var retention: LifecycleTaskRetentionPolicy { .destroy }
+    static var priority: COPriority { .medium }
+    static var retention: CORetentionPolicy { .destroy }
 }
-

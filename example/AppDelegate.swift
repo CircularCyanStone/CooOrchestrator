@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import CooAppStartupTask
+import CooOrchestrator
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,10 +15,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // 1. 显式启动解析（推荐）
-        AppLifecycleManager.shared.resolve()
+        CooOrchestrator.shared.resolve()
         
         // 2. 触发启动事件
-        AppLifecycleManager.shared.fire(
+        CooOrchestrator.shared.fire(
             .didFinishLaunching,
             parameters: [
                 .application: application,

@@ -5,7 +5,7 @@ import Foundation
 
 /// 应用生命周期事件（原 Phase）
 /// - 标识一个特定的系统事件或自定义触发点
-public struct AppLifecycleEvent: RawRepresentable, Hashable, Sendable {
+public struct COEvent: RawRepresentable, Hashable, Sendable {
     public let rawValue: String
     
     public init(rawValue: String) {
@@ -14,29 +14,29 @@ public struct AppLifecycleEvent: RawRepresentable, Hashable, Sendable {
 }
 
 /// 生命周期事件参数键名
-public struct LifecycleParameterKey: RawRepresentable, Hashable, Sendable {
+public struct COParameterKey: RawRepresentable, Hashable, Sendable {
     public let rawValue: String
     public init(rawValue: String) { self.rawValue = rawValue }
 }
 
 /// 任务优先级包装（可比较、可发送）
-public struct LifecycleTaskPriority: RawRepresentable, Comparable, Sendable {
+public struct COPriority: RawRepresentable, Comparable, Sendable {
     /// 底层优先级数值（越大越先执行）
     public let rawValue: Int
     /// 以原始数值构造优先级
     public init(rawValue: Int) { self.rawValue = rawValue }
-    public static func < (lhs: LifecycleTaskPriority, rhs: LifecycleTaskPriority) -> Bool {
+    public static func < (lhs: COPriority, rhs: COPriority) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
     
-    public static let low = LifecycleTaskPriority(rawValue: 250)
-    public static let medium = LifecycleTaskPriority(rawValue: 500)
-    public static let high = LifecycleTaskPriority(rawValue: 750)
-    public static let critical = LifecycleTaskPriority(rawValue: 1000)
+    public static let low = COPriority(rawValue: 250)
+    public static let medium = COPriority(rawValue: 500)
+    public static let high = COPriority(rawValue: 750)
+    public static let critical = COPriority(rawValue: 1000)
 }
 
 /// 任务执行后的持有策略（字符串原始值，便于清单直接映射）
-public enum LifecycleTaskRetentionPolicy: String, Sendable {
+public enum CORetentionPolicy: String, Sendable {
     /// 执行结束即释放，不被管理器持有
     case destroy
     /// 执行后被管理器以 `id` 持有，直至进程结束或手动清理

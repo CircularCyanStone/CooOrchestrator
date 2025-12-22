@@ -1,10 +1,10 @@
 import Foundation
-import CooAppStartupTask
+import CooOrchestrator
 
-public final class EnvironmentDemoTask: NSObject, AppService {
+public final class EnvironmentDemoTask: NSObject, COService {
     public static let id: String = "env.demo"
-    public static let priority: LifecycleTaskPriority = .init(rawValue: 50)
-    public static let retention: LifecycleTaskRetentionPolicy = .destroy
+    public static let priority: COPriority = .init(rawValue: 50)
+    public static let retention: CORetentionPolicy = .destroy
     
     // 协议变更：init 必须无参
     public required override init() {
@@ -12,7 +12,7 @@ public final class EnvironmentDemoTask: NSObject, AppService {
     }
 
     // 协议变更：注册事件处理
-    public static func register(in registry: AppServiceRegistry<EnvironmentDemoTask>) {
+    public static func register(in registry: CORegistry<EnvironmentDemoTask>) {
         registry.add(.didFinishLaunching) { service, context in
             let bundle = context.environment.bundle
             let identifier = bundle.bundleIdentifier ?? "unknown.bundle"
@@ -37,7 +37,7 @@ public final class EnvironmentDemoTask: NSObject, AppService {
             }
 
             // 依然可以调用 Logging，但实际上 Manager 也会记录一次
-            Logging.logTask(
+            COLogger.logTask(
                 "EnvironmentDemoTask",
                 event: context.event,
                 success: true,

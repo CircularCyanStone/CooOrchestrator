@@ -3,12 +3,12 @@
 // 类型功能描述：PushNotificationInitTask 实现 StartupTask 协议，早期时机执行，优先级高，执行后被调度器持有。
 
 import Foundation
-import CooAppStartupTask
+import CooOrchestrator
 
-public final class PushNotificationInitTask: NSObject, AppService {
+public final class PushNotificationInitTask: NSObject, COService {
     public static let id: String = "push.init"
-    public static let priority: LifecycleTaskPriority = .init(rawValue: 200)
-    public static let retention: LifecycleTaskRetentionPolicy = .hold
+    public static let priority: COPriority = .init(rawValue: 200)
+    public static let retention: CORetentionPolicy = .hold
     
     // 协议变更：init 必须无参
     public required override init() {
@@ -16,7 +16,7 @@ public final class PushNotificationInitTask: NSObject, AppService {
     }
 
     // 协议变更：注册事件处理
-    public static func register(in registry: AppServiceRegistry<PushNotificationInitTask>) {
+    public static func register(in registry: CORegistry<PushNotificationInitTask>) {
         // 注册启动事件
         registry.add(.didFinishLaunching) { service, context in
             // 初始化推送 SDK
