@@ -39,6 +39,7 @@ public enum COManifestDiscovery {
     /// - Returns: 解析结果数组；若未配置清单则返回空数组
     public static func loadDescriptors(in bundle: Bundle) -> [COServiceDescriptor] {
         var descs: [COServiceDescriptor] = []
+        let start = CFAbsoluteTimeGetCurrent()
         
         // 1. Info.plist (极速，推荐)
         if let info = bundle.infoDictionary {
@@ -46,15 +47,44 @@ public enum COManifestDiscovery {
                 descs.append(contentsOf: parse(array: arr))
             }
         }
+        let afterInfo = CFAbsoluteTimeGetCurrent()
         
         // 2. Resource plist (独立文件，仅作兼容，不推荐)
-        // 移除了深度扫描逻辑，仅支持根目录下的标准命名文件
-        if let url = bundle.url(forResource: "COServices", withExtension: "plist"),
-           let data = try? Data(contentsOf: url),
-           let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-           let arr = obj as? [[String: Sendable]] {
-            descs.append(contentsOf: parse(array: arr))
+        var resIOCost: TimeInterval = 0
+        var resParseCost: TimeInterval = 0
+        
+        if let url = bundle.url(forResource: "COServices", withExtension: "plist") {
+            let ioStart = CFAbsoluteTimeGetCurrent()
+            // 细分IO：Data读取 vs Plist反序列化
+            if let data = try? Data(contentsOf: url) {
+                let plistStart = CFAbsoluteTimeGetCurrent()
+                if let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                   let arr = obj as? [[String: Sendable]] {
+                    // IO部分结束（含反序列化）
+                    resIOCost = CFAbsoluteTimeGetCurrent() - ioStart
+                    
+                    // Parse部分
+                    let parseStart = CFAbsoluteTimeGetCurrent()
+                    let parsed = parse(array: arr)
+                    resParseCost = CFAbsoluteTimeGetCurrent() - parseStart
+                    
+                    descs.append(contentsOf: parsed)
+                }
+            }
         }
+        let afterRes = CFAbsoluteTimeGetCurrent()
+        
+        // 统计耗时
+        let totalCost = afterRes - start
+        let infoCost = afterInfo - start
+        let resTotalCost = afterRes - afterInfo
+        
+        // 强制输出，不受阈值限制，便于调试
+        var msg = " - Scan \(bundle.bundleIdentifier ?? "unknown"): \(String(format: "%.6fs", totalCost))\n"
+        msg += "   |-- Info: \(String(format: "%.6fs", infoCost))\n"
+        msg += "   |-- Res : \(String(format: "%.6fs", resTotalCost)) (IO: \(String(format: "%.6fs", resIOCost)), Parse: \(String(format: "%.6fs", resParseCost)))"
+        
+        COLogger.logPerf(msg)
         
         return descs
     }
@@ -63,6 +93,7 @@ public enum COManifestDiscovery {
     /// - Parameter array: 解析到的数组对象
     /// - Returns: 合法条目的 `COServiceDescriptor` 列表
     private static func parse(array: [[String: Sendable]]) -> [COServiceDescriptor] {
+        let start = CFAbsoluteTimeGetCurrent()
         var list: [COServiceDescriptor] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
@@ -81,6 +112,10 @@ public enum COManifestDiscovery {
                                        args: args,
                                        factoryClassName: factory))
         }
+        
+        let cost = CFAbsoluteTimeGetCurrent() - start
+        // COLogger.logPerf("   -> Parse \(list.count) items cost: \(String(format: "%.6fs", cost))")
+        
         return list
     }
 }
