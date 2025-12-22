@@ -119,7 +119,8 @@ public final class COrchestrator: @unchecked Sendable {
         let eventEntries = isolationQueue.sync { cacheByEvent[event] ?? [] }
         
         // 3. 准备责任链环境
-        let sharedUserInfo = COContextUserInfo()
+        // 使用 SharedState 来在不同的 Task Context 之间共享数据
+        let sharedUserInfo = COContext.UserInfo()
         var finalReturnValue: COReturnValue = .void
         
         // 4. 遍历执行（在调用者线程）

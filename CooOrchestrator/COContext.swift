@@ -4,35 +4,7 @@
 
 import Foundation
 
-/// 线程安全的共享数据容器
-public final class COContextUserInfo: @unchecked Sendable {
-    private let lock = NSLock()
-    private var storage: [String: Any] = [:]
-    
-    public init() {}
-    
-    public func get<T>(_ key: String) -> T? {
-        lock.lock()
-        defer { lock.unlock() }
-        return storage[key] as? T
-    }
-    
-    public func set(_ key: String, value: Any) {
-        lock.lock()
-        defer { lock.unlock() }
-        storage[key] = value
-    }
-    
-    /// 批量合并（用于初始化等场景）
-    public func merge(_ other: [String: Any]) {
-        lock.lock()
-        defer { lock.unlock() }
-        storage.merge(other) { _, new in new }
-    }
-}
-
 /// 服务运行上下文（引用类型，支持责任链数据共享）
-/// - Note: 使用 COContextUserInfo 确保多线程环境下的数据安全
 /// - Note: 标记为 @unchecked Sendable 以支持携带非 Sendable 的系统对象参数（如 UIApplication）
 public final class COContext: @unchecked Sendable {
     /// 当前触发的生命周期事件
@@ -41,24 +13,49 @@ public final class COContext: @unchecked Sendable {
     public let args: [String: Sendable]
     /// 动态事件参数（如 application, launchOptions 等）
     public let parameters: [COParameterKey: Any]
+    
+    // MARK: - Shared State (Thread Safe)
+    /// 内部共享状态容器（引用类型，确保在不同 Context 实例间共享）
+    public final class UserInfo: @unchecked Sendable {
+        private let lock = NSLock()
+        private var storage: [COContextKey: Any] = [:]
+        
+        public init() {}
+        
+        public subscript<T>(_ key: COContextKey) -> T? {
+            get {
+                lock.lock()
+                defer { lock.unlock() }
+                return storage[key] as? T
+            }
+            set {
+                lock.lock()
+                defer { lock.unlock() }
+                storage[key] = newValue
+            }
+        }
+    }
+    
     /// 动态共享数据（线程安全）
-    public let userInfo: COContextUserInfo
+    public let userInfo: UserInfo
     
     /// 上下文构造器
-    /// - Parameters:
-    ///   - event: 当前事件
-    ///   - args: 服务参数
-    ///   - parameters: 动态事件参数
-    ///   - userInfo: 共享数据容器（默认自动创建）
     public init(event: COEvent,
                 args: [String: Sendable] = [:],
                 parameters: [COParameterKey: Any] = [:],
-                userInfo: COContextUserInfo = .init()) {
+                userInfo: UserInfo = .init()) {
         self.event = event
         self.args = args
         self.parameters = parameters
         self.userInfo = userInfo
     }
+}
+
+/// 上下文共享数据的键名（类型安全包装）
+/// - Note: 建议通过扩展定义静态键名，例如 extension COContextKey { static let userToken = ... }
+public struct COContextKey: Hashable, Sendable {
+    public let rawValue: String
+    public init(_ rawValue: String) { self.rawValue = rawValue }
 }
 
 
