@@ -4,14 +4,6 @@
 
 import Foundation
 
-/// 应用环境对象
-/// - 职责：提供服务运行时的基础环境信息（如 Bundle），便于从清单或运行时获取元数据。
-public struct AppEnvironment: Sendable {
-    public let bundle: Bundle
-    public init(bundle: Bundle = .main) {
-        self.bundle = bundle
-    }
-}
 
 /// 服务注册表（泛型容器）
 /// - 职责：收集特定服务类型的所有事件处理闭包。

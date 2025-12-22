@@ -14,7 +14,8 @@ public final class EnvironmentDemoTask: NSObject, COService {
     // 协议变更：注册事件处理
     public static func register(in registry: CORegistry<EnvironmentDemoTask>) {
         registry.add(.didFinishLaunching) { service, context in
-            let bundle = context.environment.bundle
+            // 直接使用 Bundle.main，或根据需要使用其他 Bundle
+            let bundle = Bundle.main
             let identifier = bundle.bundleIdentifier ?? "unknown.bundle"
             let version = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "0.0"
             let build = (bundle.infoDictionary?["CFBundleVersion"] as? String) ?? "0"

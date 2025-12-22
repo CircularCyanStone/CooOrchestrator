@@ -101,8 +101,7 @@ public final class COrchestrator: @unchecked Sendable {
     @discardableResult
     public func fire(
         _ event: COEvent,
-        parameters: [COParameterKey: Any] = [:],
-        environment: AppEnvironment = .init()
+        parameters: [COParameterKey: Any] = [:]
     ) -> COReturnValue {
         
         // 1. 引导加载（如果需要）
@@ -128,7 +127,6 @@ public final class COrchestrator: @unchecked Sendable {
             // 构造 Context
             let context = COContext(
                 event: event,
-                environment: environment,
                 args: item.desc.args,
                 parameters: parameters,
                 userInfo: sharedUserInfo
@@ -213,9 +211,8 @@ public final class COrchestrator: @unchecked Sendable {
     public func fire<T>(
         _ event: COEvent,
         parameters: [COParameterKey: Any] = [:],
-        environment: AppEnvironment = .init()
     ) -> T? {
-        let ret = fire(event, parameters: parameters, environment: environment)
+        let ret = fire(event, parameters: parameters)
         return ret.value()
     }
     

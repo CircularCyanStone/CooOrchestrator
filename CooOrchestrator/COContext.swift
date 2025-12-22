@@ -37,8 +37,6 @@ public final class COContextUserInfo: @unchecked Sendable {
 public final class COContext: @unchecked Sendable {
     /// 当前触发的生命周期事件
     public let event: COEvent
-    /// 运行环境（如 bundle 等）
-    public let environment: AppEnvironment
     /// 通过清单传入的静态参数集合
     public let args: [String: Sendable]
     /// 动态事件参数（如 application, launchOptions 等）
@@ -49,17 +47,14 @@ public final class COContext: @unchecked Sendable {
     /// 上下文构造器
     /// - Parameters:
     ///   - event: 当前事件
-    ///   - environment: 运行环境
     ///   - args: 服务参数
     ///   - parameters: 动态事件参数
     ///   - userInfo: 共享数据容器（默认自动创建）
     public init(event: COEvent,
-                environment: AppEnvironment,
                 args: [String: Sendable] = [:],
                 parameters: [COParameterKey: Any] = [:],
                 userInfo: COContextUserInfo = .init()) {
         self.event = event
-        self.environment = environment
         self.args = args
         self.parameters = parameters
         self.userInfo = userInfo
