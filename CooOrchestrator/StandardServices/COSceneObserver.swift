@@ -4,10 +4,11 @@
 import Foundation
 import UIKit
 
-/// 标准 SceneDelegate 生命周期服务协议
+/// 标准 SceneDelegate 生命周期观察者协议
 /// - 适用于 iOS 13+ 的多窗口场景
 /// - 开发者可以选择遵守此协议，直接实现对应的生命周期方法
-public protocol StandardSceneDelegateTask: COService {
+/// - 注意：此协议不继承 `COService`，需显式遵守 `COService` 协议并手动注册感兴趣的事件。
+public protocol COSceneObserver: Sendable {
     
     // MARK: - Scene Life Cycle
     
@@ -49,26 +50,7 @@ public protocol StandardSceneDelegateTask: COService {
 
 // MARK: - Default Implementation & Routing
 
-public extension StandardSceneDelegateTask {
-    
-    // MARK: - Automatic Registry
-    
-    static func register(in registry: CORegistry<Self>) {
-        // Lifecycle
-        registry.add(.sceneWillConnect) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneDidDisconnect) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneDidBecomeActive) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneWillResignActive) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneWillEnterForeground) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneDidEnterBackground) { s, c in try s.dispatchSceneEvent(c) }
-        
-        // Events
-        registry.add(.sceneOpenURLContexts) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneContinueUserActivity) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneDidUpdateUserActivity) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneDidFailToContinueUserActivity) { s, c in try s.dispatchSceneEvent(c) }
-        registry.add(.sceneStateRestorationActivity) { s, c in try s.dispatchSceneEvent(c) }
-    }
+public extension COSceneObserver {
     
     // MARK: Default Implementations
     
@@ -87,6 +69,10 @@ public extension StandardSceneDelegateTask {
     
     // MARK: - Internal Dispatcher
     
+    /// 将通用上下文分发到具体的协议方法
+    /// - Parameter context: 服务上下文
+    /// - Returns: 执行结果
+    @discardableResult
     func dispatchSceneEvent(_ context: COContext) throws -> COResult {
         guard let scene = context.parameters[.scene] as? UIScene else {
             return .continue()

@@ -4,8 +4,9 @@
 
 import Foundation
 import CooOrchestrator
+import UIKit
 
-public final class PushNotificationInitTask: NSObject, COService {
+public final class PushNotificationInitTask: NSObject, COService, COApplicationObserver {
     public static let id: String = "push.init"
     public static let priority: COPriority = .init(rawValue: 200)
     public static let retention: CORetentionPolicy = .hold
@@ -17,18 +18,21 @@ public final class PushNotificationInitTask: NSObject, COService {
 
     // 协议变更：注册事件处理
     public static func register(in registry: CORegistry<PushNotificationInitTask>) {
-        // 注册启动事件
-        registry.add(.didFinishLaunching) { service, context in
-            // 初始化推送 SDK
-            print("PushNotificationInitTask: Initializing SDK...")
-            return .continue()
-        }
-        
+        // 注册启动事件 (委托给 dispatchApplicationEvent)
+        registry.add(.didFinishLaunching) { s, c in try s.dispatchApplicationEvent(c) }
         // 注册推送注册成功事件
-        registry.add(.didRegisterForRemoteNotifications) { service, context in
-            guard let token = context.parameters[.deviceToken] as? Data else { return .continue() }
-            print("PushNotificationInitTask: Registered token: \(token)")
-            return .continue()
-        }
+        registry.add(.didRegisterForRemoteNotifications) { s, c in try s.dispatchApplicationEvent(c) }
+    }
+    
+    // MARK: - COApplicationObserver
+    
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> COResult {
+        print("PushNotificationInitTask: Initializing SDK...")
+        return .continue()
+    }
+    
+    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) -> COResult {
+        print("PushNotificationInitTask: Registered token: \(deviceToken)")
+        return .continue()
     }
 }

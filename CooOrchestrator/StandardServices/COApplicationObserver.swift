@@ -4,10 +4,11 @@
 import Foundation
 import UIKit
 
-/// 标准 AppDelegate 生命周期服务协议
-/// - 开发者可以选择遵守此协议，直接实现对应的生命周期方法，而无需在 `run` 方法中手动 switch phase。
+/// 标准 AppDelegate 生命周期观察者协议
+/// - 开发者可以选择遵守此协议，直接实现对应的生命周期方法，而无需在 `register` 中手动 switch event。
 /// - 所有方法均返回 `COResult`，支持责任链控制（如阻断后续服务）。
-public protocol StandardAppDelegateTask: COService {
+/// - 注意：此协议不继承 `COService`，需显式遵守 `COService` 协议并手动注册感兴趣的事件。
+public protocol COApplicationObserver: Sendable {
     
     // MARK: - App Life Cycle
     
@@ -81,45 +82,7 @@ public protocol StandardAppDelegateTask: COService {
 
 // MARK: - Default Implementation & Routing
 
-public extension StandardAppDelegateTask {
-    
-    // MARK: - Automatic Registry
-    
-    /// 自动注册标准事件处理
-    static func register(in registry: CORegistry<Self>) {
-        // 绑定 Application Life Cycle
-        registry.add(.didFinishLaunchBegin) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didFinishLaunchEnd) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didFinishLaunching) { s, c in try s.dispatchApplicationEvent(c) }
-        
-        registry.add(.didBecomeActive) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.willResignActive) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didEnterBackground) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.willEnterForeground) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.willTerminate) { s, c in try s.dispatchApplicationEvent(c) }
-        
-        registry.add(.didReceiveMemoryWarning) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.significantTimeChange) { s, c in try s.dispatchApplicationEvent(c) }
-        
-        // 绑定 Open URL
-        registry.add(.openURL) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.continueUserActivity) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didUpdateUserActivity) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didFailToContinueUserActivity) { s, c in try s.dispatchApplicationEvent(c) }
-        
-        // 绑定 Background Fetch
-        registry.add(.performFetch) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.handleEventsForBackgroundURLSession) { s, c in try s.dispatchApplicationEvent(c) }
-        
-        // 绑定 Notifications
-        registry.add(.didRegisterForRemoteNotifications) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didFailToRegisterForRemoteNotifications) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didReceiveRemoteNotification) { s, c in try s.dispatchApplicationEvent(c) }
-        
-        // 绑定 Scene
-        registry.add(.configurationForConnecting) { s, c in try s.dispatchApplicationEvent(c) }
-        registry.add(.didDiscardSceneSessions) { s, c in try s.dispatchApplicationEvent(c) }
-    }
+public extension COApplicationObserver {
     
     // MARK: Default Implementations (Return .continue())
     
@@ -150,6 +113,10 @@ public extension StandardAppDelegateTask {
     
     // MARK: - Internal Dispatcher
     
+    /// 将通用上下文分发到具体的协议方法
+    /// - Parameter context: 服务上下文
+    /// - Returns: 执行结果
+    @discardableResult
     func dispatchApplicationEvent(_ context: COContext) throws -> COResult {
         // 尝试从参数中获取 UIApplication
         // 注意：由于 serve 方法非隔离，无法直接访问 MainActor 的 UIApplication.shared，必须通过参数传递

@@ -1,5 +1,5 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：定义标准生命周期事件（AppDelegate & SceneDelegate）的 Phase 常量与参数 Key。
+// 文件功能描述：定义标准生命周期事件（AppDelegate & SceneDelegate）的 Event 常量与参数 Key。
 
 import Foundation
 

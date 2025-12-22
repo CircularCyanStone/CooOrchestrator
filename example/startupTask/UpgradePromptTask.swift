@@ -10,7 +10,6 @@ public final class UpgradePromptTask: NSObject, COService {
     public static let priority: COPriority = .init(rawValue: 150)
     public static let retention: CORetentionPolicy = .destroy
 
-    // 协议变更
     public required override init() {
         super.init()
     }
