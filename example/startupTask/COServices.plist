@@ -5,42 +5,34 @@
 	<dict>
 		<key>class</key>
 		<string>example.PushNotificationInitTask</string>
-		<key>phase</key>
-		<string>appLaunchEarly</string>
 		<key>priority</key>
 		<integer>200</integer>
-		<key>residency</key>
-		<string>resident</string>
+		<key>retention</key>
+		<string>hold</string>
 	</dict>
 	<dict>
 		<key>class</key>
 		<string>example.ScreenshotTipTask</string>
-		<key>phase</key>
-		<string>appLaunchLate</string>
 		<key>priority</key>
 		<integer>100</integer>
-		<key>residency</key>
-		<string>autoDestroy</string>
+		<key>retention</key>
+		<string>destroy</string>
 	</dict>
 	<dict>
 		<key>class</key>
 		<string>example.UpgradePromptTask</string>
-		<key>phase</key>
-		<string>appLaunchEarly</string>
 		<key>priority</key>
 		<integer>150</integer>
-		<key>residency</key>
-		<string>autoDestroy</string>
+		<key>retention</key>
+		<string>destroy</string>
 	</dict>
 	<dict>
 		<key>class</key>
 		<string>example.EnvironmentDemoTask</string>
-		<key>phase</key>
-		<string>appLaunchEarly</string>
 		<key>priority</key>
 		<integer>50</integer>
-		<key>residency</key>
-		<string>autoDestroy</string>
+		<key>retention</key>
+		<string>destroy</string>
 	</dict>
 </array>
 </plist>

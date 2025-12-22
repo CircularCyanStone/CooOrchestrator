@@ -40,30 +40,20 @@ public enum COManifestDiscovery {
     public static func loadDescriptors(in bundle: Bundle) -> [COServiceDescriptor] {
         var descs: [COServiceDescriptor] = []
         
-        // 尝试加载新 Key (LifecycleTasks) 和旧 Key (StartupTasks)
-        let keysToTry = [ManifestKeys.rootNew, ManifestKeys.rootOld]
-        
         // 1. Info.plist (极速，推荐)
         if let info = bundle.infoDictionary {
-            for key in keysToTry {
-                if let arr = info[key] as? [[String: Sendable]] {
-                    descs.append(contentsOf: parse(array: arr))
-                }
+            if let arr = info[ManifestKeys.root] as? [[String: Sendable]] {
+                descs.append(contentsOf: parse(array: arr))
             }
         }
         
         // 2. Resource plist (独立文件，仅作兼容，不推荐)
         // 移除了深度扫描逻辑，仅支持根目录下的标准命名文件
-        // 优先查找新文件名
-        let filesToTry = ["LifecycleTasks", "StartupTasks"]
-        
-        for fileName in filesToTry {
-            if let url = bundle.url(forResource: fileName, withExtension: "plist"),
-               let data = try? Data(contentsOf: url),
-               let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-               let arr = obj as? [[String: Sendable]] {
-                descs.append(contentsOf: parse(array: arr))
-            }
+        if let url = bundle.url(forResource: "COServices", withExtension: "plist"),
+           let data = try? Data(contentsOf: url),
+           let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+           let arr = obj as? [[String: Sendable]] {
+            descs.append(contentsOf: parse(array: arr))
         }
         
         return descs
@@ -77,17 +67,17 @@ public enum COManifestDiscovery {
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
             
-            let residencyStr = item[ManifestKeys.residency] as? String
+            let retentionStr = item[ManifestKeys.retention] as? String
             let priorityVal = item[ManifestKeys.priority] as? Int
             let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
             let factory = item[ManifestKeys.factory] as? String
             
-            let residency = residencyStr.flatMap(CORetentionPolicy.init(rawValue:))
+            let retention = retentionStr.flatMap(CORetentionPolicy.init(rawValue:))
             let priority = priorityVal.map { COPriority(rawValue: $0) }
             
             list.append(COServiceDescriptor(className: className,
                                        priority: priority,
-                                       retentionPolicy: residency,
+                                       retentionPolicy: retention,
                                        args: args,
                                        factoryClassName: factory))
         }
@@ -97,11 +87,10 @@ public enum COManifestDiscovery {
 
 /// 清单键名常量
 enum ManifestKeys {
-    static let rootOld = "StartupTasks"
-    static let rootNew = "LifecycleTasks"
+    static let root = "COServices"
     static let className = "class"
     static let priority = "priority"
-    static let residency = "residency"
+    static let retention = "retention"
     static let args = "args"
     static let factory = "factory"
 }
