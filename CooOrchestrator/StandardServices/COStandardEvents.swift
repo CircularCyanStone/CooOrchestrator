@@ -13,6 +13,7 @@ public extension COEvent {
     static let didFinishLaunchBegin = COEvent(rawValue: "didFinishLaunchBegin")
     /// 预设阶段：App 启动完成结束（对应 didFinishLaunchingWithOptions 结束）
     static let didFinishLaunchEnd = COEvent(rawValue: "didFinishLaunchEnd")
+    
     /// 预设阶段：App 启动完成（didFinishLaunchingWithOptions）
     /// - Note: 推荐使用 didFinishLaunchBegin/End 进行更细粒度的控制，此 Key 用于统一分发
     static let didFinishLaunching = COEvent(rawValue: "didFinishLaunching")

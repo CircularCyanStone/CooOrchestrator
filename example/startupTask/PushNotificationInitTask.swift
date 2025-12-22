@@ -19,9 +19,15 @@ public final class PushNotificationInitTask: NSObject, COService, COApplicationO
     // 协议变更：注册事件处理
     public static func register(in registry: CORegistry<PushNotificationInitTask>) {
         // 注册启动事件 (委托给 dispatchApplicationEvent)
-        registry.add(.didFinishLaunching) { s, c in try s.dispatchApplicationEvent(c) }
-        // 注册推送注册成功事件
-        registry.add(.didRegisterForRemoteNotifications) { s, c in try s.dispatchApplicationEvent(c) }
+        addApplication(.didFinishLaunching, in: registry)
+        addApplication(.didRegisterForRemoteNotifications, in: registry)
+        registry.add(.sceneDidBecomeActive) { s, c in
+            //
+            print("========")
+        }
+        registry.add(.sceneWillResignActive) { s, c in
+            print("========")
+        }
     }
     
     // MARK: - COApplicationObserver

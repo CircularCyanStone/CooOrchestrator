@@ -3,6 +3,7 @@
 // 类型功能描述：ScreenshotTipTask 实现 StartupTask 协议，autoDestroy 策略，执行后自动释放。
 
 import Foundation
+import UIKit
 import CooOrchestrator
 
 public final class ScreenshotTipTask: NSObject, COService {
@@ -18,7 +19,16 @@ public final class ScreenshotTipTask: NSObject, COService {
     public static func register(in registry: CORegistry<ScreenshotTipTask>) {
         registry.add(.didFinishLaunchEnd) { s, c in
             // 处理逻辑...
+            print("========")
             return .continue()
         }
+        addScene(.sceneWillConnect, in: registry)
+    }
+}
+extension ScreenshotTipTask: COSceneObserver {
+    
+    public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult {
+        print("========")
+        return .continue(success: true)
     }
 }

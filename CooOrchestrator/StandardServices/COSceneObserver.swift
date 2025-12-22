@@ -53,6 +53,11 @@ public protocol COSceneObserver: Sendable {
 public extension COSceneObserver {
     
     // MARK: Default Implementations
+    static func addScene<Service: COService & COSceneObserver>(_ event: COEvent, in registry: CORegistry<Service>) {
+        registry.add(event) { s, c in
+            try s.dispatchSceneEvent(c)
+        }
+    }
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult { .continue() }
     func sceneDidDisconnect(_ scene: UIScene) -> COResult { .continue() }

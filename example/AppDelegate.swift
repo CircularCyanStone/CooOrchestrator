@@ -25,6 +25,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .launchOptions: launchOptions as Any
             ]
         )
+        COrchestrator.shared.fire(.didFinishLaunchBegin, parameters: [
+            .application: application,
+            .launchOptions : launchOptions as Any
+        ])
+        
+        COrchestrator.shared.fire(.didFinishLaunchEnd, parameters: [
+            .application: application,
+            .launchOptions : launchOptions as Any
+        ])
+        
         return true
     }
 

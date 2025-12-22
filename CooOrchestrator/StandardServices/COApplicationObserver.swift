@@ -85,6 +85,11 @@ public protocol COApplicationObserver: Sendable {
 public extension COApplicationObserver {
     
     // MARK: Default Implementations (Return .continue())
+    static func addApplication<Service: COService & COApplicationObserver>(_ event: COEvent, in registry: CORegistry<Service>) {
+        registry.add(event) { s, c in
+            try s.dispatchApplicationEvent(c)
+        }
+    }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> COResult { .continue() }
     func applicationDidBecomeActive(_ application: UIApplication) -> COResult { .continue() }
@@ -117,7 +122,7 @@ public extension COApplicationObserver {
     /// - Parameter context: 服务上下文
     /// - Returns: 执行结果
     @discardableResult
-    func dispatchApplicationEvent(_ context: COContext) throws -> COResult {
+    private func dispatchApplicationEvent(_ context: COContext) throws -> COResult {
         // 尝试从参数中获取 UIApplication
         // 注意：由于 serve 方法非隔离，无法直接访问 MainActor 的 UIApplication.shared，必须通过参数传递
         guard let app = context.parameters[.application] as? UIApplication else {
