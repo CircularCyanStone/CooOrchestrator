@@ -34,9 +34,9 @@
 			path = example;
 			sourceTree = "<group>";
 		};
-		FBCC77992EF8D92C0023F4D3 /* CooOrchestrator */ = {
+		FBCC79E22EF93E840023F4D3 /* Sources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CooOrchestrator;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -70,7 +70,7 @@
 		FBD17C812EF3D61900C9CDB2 = {
 			isa = PBXGroup;
 			children = (
-				FBCC77992EF8D92C0023F4D3 /* CooOrchestrator */,
+				FBCC79E22EF93E840023F4D3 /* Sources */,
 				FB15F2762EF58F7200E1DA93 /* example */,
 				FB15F5052EF592A000E1DA93 /* Frameworks */,
 				FBD17C8C2EF3D61900C9CDB2 /* Products */,
@@ -135,7 +135,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				FBCC77992EF8D92C0023F4D3 /* CooOrchestrator */,
+				FBCC79E22EF93E840023F4D3 /* Sources */,
 			);
 			name = CooOrchestrator;
 			packageProductDependencies = (
