@@ -13,23 +13,39 @@ public enum COManifestDiscovery {
         let start = CFAbsoluteTimeGetCurrent()
         var result: [COServiceDescriptor] = []
         
+        // 1. 获取所有 Bundles
+        let allBundlesStart = CFAbsoluteTimeGetCurrent()
+        let allBundles = Bundle.allFrameworks + [Bundle.main]
+        let allBundlesCost = CFAbsoluteTimeGetCurrent() - allBundlesStart
+        
+        // 2. 过滤目标 Bundles
         // 优化：只扫描 Main Bundle 和内嵌的 Frameworks
         // 排除系统库（如 UIKit, SwiftUI, Foundation 等），大幅减少扫描范围
+        let filterStart = CFAbsoluteTimeGetCurrent()
         let mainBundlePath = Bundle.main.bundlePath
-        let allBundles = Bundle.allFrameworks + [Bundle.main]
-        
         let targetBundles = allBundles.filter { bundle in
             if bundle == Bundle.main { return true }
             guard let bundlePath = bundle.bundlePath as String? else { return false }
             return bundlePath.hasPrefix(mainBundlePath)
         }
+        let filterCost = CFAbsoluteTimeGetCurrent() - filterStart
         
+        // 3. 扫描 Bundles
+        let scanStart = CFAbsoluteTimeGetCurrent()
         for bundle in targetBundles {
             result.append(contentsOf: loadDescriptors(in: bundle))
         }
+        let scanCost = CFAbsoluteTimeGetCurrent() - scanStart
         
         let end = CFAbsoluteTimeGetCurrent()
-        COLogger.logPerf("COManifestDiscovery: Scanned \(targetBundles.count) bundles, found \(result.count) services. Cost: \(String(format: "%.4fs", end - start))")
+        
+        let totalCost = end - start
+        var logMsg = "COManifestDiscovery: Scanned \(targetBundles.count) bundles (from \(allBundles.count)), found \(result.count) services. Cost: \(String(format: "%.4fs", totalCost))\n"
+        logMsg += " - Get All Bundles: \(String(format: "%.4fs", allBundlesCost))\n"
+        logMsg += " - Filter Bundles : \(String(format: "%.4fs", filterCost))\n"
+        logMsg += " - Scan Bundles   : \(String(format: "%.4fs", scanCost))"
+        
+        COLogger.logPerf(logMsg)
         
         return result
     }
