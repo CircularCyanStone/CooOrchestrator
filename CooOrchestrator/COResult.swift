@@ -15,11 +15,6 @@ public enum COResult: Sendable {
     /// - success: 服务本身执行是否成功
     /// - message: 可选的日志信息
     case stop(result: COReturnValue = .void, success: Bool = true, message: String? = nil)
-    
-    /// 便捷成功结果（等同于 continue）
-    public static var ok: COResult { .continue() }
-    /// 便捷失败结果（等同于 continue，但在日志中记录错误）
-    public static func fail(_ message: String?) -> COResult { .continue(success: false, message: message) }
 }
 
 /// 系统代理方法的返回值封装

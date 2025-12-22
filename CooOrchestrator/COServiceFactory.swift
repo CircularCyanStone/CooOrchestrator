@@ -15,5 +15,5 @@ public protocol COServiceFactory: AnyObject, Sendable {
     ///   - context: 运行上下文
     ///   - args: 清单透传的参数字典
     /// - Returns: 构造完成的服务实例
-    func make(context: COContext, args: [String: Sendable]) -> any COService
+    func make(context: COContext, args: [String: any Sendable]) -> any COService
 }

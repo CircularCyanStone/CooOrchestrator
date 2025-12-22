@@ -1,5 +1,6 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：定义服务运行上下文及其相关环境数据结构，支持线程安全的数据共享。
+// 文件功能描述：定义服务执行的上下文环境，封装事件参数、共享数据与静态配置。
+// 类型功能描述：COContext 是贯穿整个责任链的核心数据对象，承载了运行时环境与用户数据。
 
 import Foundation
 
@@ -65,12 +66,4 @@ public final class COContext: @unchecked Sendable {
     }
 }
 
-/// 基础运行环境
-public struct AppEnvironment: Sendable {
-    /// 运行的主 Bundle（默认 `.main`）
-    public let bundle: Bundle
-    /// 环境构造器
-    public init(bundle: Bundle = .main) {
-        self.bundle = bundle
-    }
-}
+

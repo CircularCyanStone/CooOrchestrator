@@ -1,78 +1,51 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：定义启动任务的核心协议。
+// 文件功能描述：定义应用服务的基础协议，包括唯一标识、优先级、驻留策略及注册入口。
+// 类型功能描述：COService 是所有业务模块对接生命周期的入口协议；Registry 用于收集服务的回调闭包。
 
 import Foundation
 
-/// 应用服务协议（原 AppLifecycleTask）
-/// - 模块/服务需遵守此协议以接收生命周期事件
-public protocol COService: AnyObject, Sendable {
-    
-    /// 唯一标识符（默认为类名）
-    static var id: String { get }
-    
-    /// 优先级（默认为 .medium）
-    /// - 决定同一事件下多个服务的执行顺序
-    static var priority: COPriority { get }
-    
-    /// 驻留策略（默认为 .destroy）
-    /// - destroy: 执行完即释放（适合一次性任务）
-    /// - hold: 首次实例化后常驻内存（适合服务型模块）
-    static var retention: CORetentionPolicy { get }
-    
-    /// 注册服务事件
-    /// - Parameter registry: 注册器，用于绑定事件处理闭包
-    static func register(in registry: CORegistry<Self>)
-    
-    /// 构造器（需支持无参构造）
-    init()
+/// 应用环境对象
+/// - 职责：提供服务运行时的基础环境信息（如 Bundle），便于从清单或运行时获取元数据。
+public struct AppEnvironment: Sendable {
+    public let bundle: Bundle
+    public init(bundle: Bundle = .main) {
+        self.bundle = bundle
+    }
 }
 
-// MARK: - Registry
-
-/// 服务注册器
-/// - 用于在应用启动时收集各服务的事件绑定关系
-public final class CORegistry<Service: COService>: @unchecked Sendable {
-    
-    /// 内部使用的事件处理闭包
-    /// 使用 Any COService 以便在 Manager 中通用存储
-    public typealias Handler = (Service, COContext) throws -> COResult
-    
-    /// 注册项（内部使用）
-    /// - Note: 这里的 Handler 不再要求 @Sendable，因为它们在调用者线程执行，且受 Manager 锁保护
-    public struct Entry: @unchecked Sendable {
+/// 服务注册表（泛型容器）
+/// - 职责：收集特定服务类型的所有事件处理闭包。
+/// - 设计：使用泛型 T 确保注册时的类型安全，避免强制转换。
+public final class CORegistry<T: COService>: @unchecked Sendable {
+    // 存储注册项：事件 -> 闭包
+    struct Entry {
         let event: COEvent
         let handler: (any COService, COContext) throws -> COResult
     }
     
-    // 线程安全的存储（实际上 Registry 仅在 Serial Queue 中同步使用，但为了 Sendable 标记）
-    private var _entries: [Entry] = []
-    
-    var entries: [Entry] {
-        return _entries
-    }
-
+    var entries: [Entry] = []
     
     public init() {}
     
-    /// 注册事件处理
+    /// 注册事件处理闭包
     /// - Parameters:
-    ///   - event: 关注的事件
-    ///   - handler: 处理闭包
-    public func add(_ event: COEvent, handler: @escaping Handler) {
-        // 封装闭包以支持类型擦除
-        let anyHandler: (any COService, COContext) throws -> COResult = { service, context in
-            guard let specificService = service as? Service else {
-                // 理论上不会发生，除非 Manager 逻辑错误
-                return .continue()
+    ///   - event: 监听的生命周期事件
+    ///   - handler: 处理闭包，传入具体的服务实例与上下文
+    public func add(_ event: COEvent, handler: @escaping (T, COContext) throws -> COResult) {
+        let typeErasedHandler: (any COService, COContext) throws -> COResult = { service, context in
+            guard let s = service as? T else {
+                throw NSError(domain: "COOrchestrator", code: -1, userInfo: [NSLocalizedDescriptionKey: "Type mismatch"])
             }
-            return try handler(specificService, context)
+            return try handler(s, context)
         }
-        
-        _entries.append(Entry(event: event, handler: anyHandler))
+        entries.append(Entry(event: event, handler: typeErasedHandler))
     }
     
     /// 注册事件处理（支持 Void 返回值的便捷方法）
-    public func add(_ event: COEvent, handler: @escaping (Service, COContext) throws -> Void) {
+    /// - Parameters:
+    ///   - event: 监听的生命周期事件
+    ///   - handler: 处理闭包（无返回值，默认继续）
+    public func add(_ event: COEvent, handler: @escaping (T, COContext) throws -> Void) {
         add(event) { service, context in
             try handler(service, context)
             return .continue()
@@ -80,8 +53,25 @@ public final class CORegistry<Service: COService>: @unchecked Sendable {
     }
 }
 
-// MARK: - Default Implementation
+/// 应用服务协议（原 AppLifecycleTask）
+/// - 模块/服务需遵守此协议以接收生命周期事件
+public protocol COService: AnyObject, Sendable {
+    /// 服务唯一标识（默认为类名）
+    static var id: String { get }
+    /// 默认优先级（默认为 .medium）
+    static var priority: COPriority { get }
+    /// 默认驻留策略（默认为 .destroy，即用完即毁）
+    static var retention: CORetentionPolicy { get }
+    
+    /// 必须提供无参构造器（用于反射或工厂创建）
+    init()
+    
+    /// 注册服务感兴趣的事件
+    /// - Parameter registry: 注册表容器
+    static func register(in registry: CORegistry<Self>)
+}
 
+// MARK: - Default Implementation
 public extension COService {
     static var id: String { String(describing: self) }
     static var priority: COPriority { .medium }

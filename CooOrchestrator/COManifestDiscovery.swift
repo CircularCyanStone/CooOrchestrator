@@ -1,12 +1,22 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：读取各模块私有清单（Info.plist 或资源 LifecycleTasks.plist），解析为服务描述符集合并提供统一的加载入口。
+// 文件功能描述：读取各模块私有清单（Info.plist 或资源 COServices.plist），解析为服务描述符集合并提供统一的加载入口。
 // 类型功能描述：COManifestDiscovery 负责从 bundle 中发现并解析清单；ManifestKeys/ValueParser 提供键名与枚举值解析。
 
 import Foundation
 
+/// 清单键名常量
+enum ManifestKeys {
+    static let root = "COServices"
+    static let className = "class"
+    static let priority = "priority"
+    static let retention = "retention"
+    static let args = "args"
+    static let factory = "factory"
+}
+
 /// Manifest 解析器
 /// - 职责：从各模块私有清单读取服务配置并转换为统一的 `COServiceDescriptor` 集合。
-public enum COManifestDiscovery {
+enum COManifestDiscovery {
     /// 线程安全的描述符收集器
     private class DescriptorCollector: @unchecked Sendable {
         private var items: [COServiceDescriptor] = []
@@ -154,14 +164,4 @@ public enum COManifestDiscovery {
         }
         return list
     }
-}
-
-/// 清单键名常量
-enum ManifestKeys {
-    static let root = "COServices"
-    static let className = "class"
-    static let priority = "priority"
-    static let retention = "retention"
-    static let args = "args"
-    static let factory = "factory"
 }
