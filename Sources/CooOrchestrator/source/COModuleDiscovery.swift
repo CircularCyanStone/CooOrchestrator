@@ -11,8 +11,8 @@ public struct COModuleDiscovery: COServiceSource {
     
     public init() {}
     
-    public func load() -> [COServiceDescriptor] {
-        var result: [COServiceDescriptor] = []
+    public func load() -> [COServiceDefinition] {
+        var result: [COServiceDefinition] = []
         
         // 读取主 Bundle 下的 COModules.plist
         guard let modulesURL = Bundle.main.url(forResource: "COModules", withExtension: "plist"),

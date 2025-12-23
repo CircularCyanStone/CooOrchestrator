@@ -10,24 +10,24 @@ public protocol COServiceSource {
     /// 必须提供无参初始化，以便框架通过反射自动加载
     init()
     /// 加载服务描述符
-    func load() -> [COServiceDescriptor]
+    func load() -> [COServiceDefinition]
 }
 
 /// 服务描述符（对应 Manifest 中的一条配置）
-public struct COServiceDescriptor: @unchecked Sendable {
+public struct COServiceDefinition: @unchecked Sendable {
     
     /// 服务类
-    public let serviceClass: AnyClass
+    let serviceClass: AnyClass
     
     /// 工厂类（可选）
-    public let factoryClass: AnyClass?
+    let factoryClass: AnyClass?
 
     /// 指定优先级（可选）
-    public let priority: COPriority?
+    let priority: COPriority?
     /// 指定持有策略（可选）
-    public let retentionPolicy: CORetentionPolicy?
+    let retentionPolicy: CORetentionPolicy?
     /// 静态参数
-    public let args: [String: Sendable]
+    let args: [String: Sendable]
     
     public init(serviceClass: AnyClass,
                 priority: COPriority? = nil,
@@ -43,7 +43,7 @@ public struct COServiceDescriptor: @unchecked Sendable {
 }
 
 // MARK: - Convenient Builder
-public extension COServiceDescriptor {
+public extension COServiceDefinition {
     /// 便捷构造器（泛型约束，类型安全）
     /// - Parameters:
     ///   - type: 服务类型 (必须遵循 COService)
@@ -56,8 +56,8 @@ public extension COServiceDescriptor {
         priority: COPriority? = nil,
         retention: CORetentionPolicy? = nil,
         args: [String: Sendable] = [:]
-    ) -> COServiceDescriptor {
-        return COServiceDescriptor(
+    ) -> COServiceDefinition {
+        return COServiceDefinition(
             serviceClass: type,
             priority: priority,
             retentionPolicy: retention,

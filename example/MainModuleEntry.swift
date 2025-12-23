@@ -7,7 +7,7 @@ class MainModuleEntry: COServiceSource {
     
     required init() {}
     
-    func load() -> [COServiceDescriptor] {
+    func load() -> [COServiceDefinition] {
         return [
             // 使用便捷泛型 API 注册服务
             // 演示：注册 EnvironmentDemoTask

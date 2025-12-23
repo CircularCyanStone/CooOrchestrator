@@ -11,7 +11,7 @@ public final class COrchestrator: @unchecked Sendable {
     
     // 已经解析的服务条目
     private struct ResolvedServiceEntry: @unchecked Sendable {
-        let desc: COServiceDescriptor
+        let desc: COServiceDefinition
         let type: any COService.Type
         let effEvent: COEvent
         let effPriority: COPriority
@@ -48,7 +48,7 @@ public final class COrchestrator: @unchecked Sendable {
     
     /// 注册一批服务描述符
     /// - Parameter newDescriptors: 新增的服务描述符数组
-    public func register(_ newDescriptors: [COServiceDescriptor]) {
+    public func register(_ newDescriptors: [COServiceDefinition]) {
         if newDescriptors.isEmpty { return }
         isolationQueue.async {
             self.mergeDescriptors(newDescriptors)
@@ -67,7 +67,7 @@ public final class COrchestrator: @unchecked Sendable {
         retention: CORetentionPolicy? = nil,
         args: [String: Sendable] = [:]
     ) {
-        let desc = COServiceDescriptor(
+        let desc = COServiceDefinition(
             serviceClass: type,
             priority: priority,
             retentionPolicy: retention,
@@ -84,7 +84,7 @@ public final class COrchestrator: @unchecked Sendable {
         isolationQueue.sync {
             if !hasBootstrapped {
                 // 加载所有源
-                var allDescriptors: [COServiceDescriptor] = []
+                var allDescriptors: [COServiceDefinition] = []
                 for source in sources {
                     allDescriptors.append(contentsOf: source.load())
                 }
@@ -227,7 +227,7 @@ public final class COrchestrator: @unchecked Sendable {
     // MARK: - Private Helper
     
     private func instantiateService(
-        from desc: COServiceDescriptor,
+        from desc: COServiceDefinition,
         context: COContext
     ) -> (any COService)? {
         let className = NSStringFromClass(desc.serviceClass)
@@ -250,7 +250,7 @@ public final class COrchestrator: @unchecked Sendable {
         return service
     }
     
-    private func mergeDescriptors(_ items: [COServiceDescriptor]) {
+    private func mergeDescriptors(_ items: [COServiceDefinition]) {
         let start = CFAbsoluteTimeGetCurrent()
         // 1. 批量解析类型，避免在循环中多次调用 NSClassFromString
         // 同时过滤掉已经注册过的类（假设类维度去重是业务需求）

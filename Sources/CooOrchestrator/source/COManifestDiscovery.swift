@@ -15,27 +15,27 @@ enum ManifestKeys {
 }
 
 /// Manifest 解析器
-/// - 职责：从各模块私有清单读取服务配置并转换为统一的 `COServiceDescriptor` 集合。
+/// - 职责：从各模块私有清单读取服务配置并转换为统一的 `COServiceDefinition` 集合。
 public struct COManifestDiscovery: COServiceSource {
     
     public init() {}
     
-    public func load() -> [COServiceDescriptor] {
+    public func load() -> [COServiceDefinition] {
         return Self.loadAllDescriptors()
     }
     
     /// 线程安全的描述符收集器
     private class DescriptorCollector: @unchecked Sendable {
-        private var items: [COServiceDescriptor] = []
+        private var items: [COServiceDefinition] = []
         private let lock = NSLock()
         
-        func append(_ newItems: [COServiceDescriptor]) {
+        func append(_ newItems: [COServiceDefinition]) {
             lock.lock()
             items.append(contentsOf: newItems)
             lock.unlock()
         }
         
-        var allItems: [COServiceDescriptor] {
+        var allItems: [COServiceDefinition] {
             lock.lock()
             defer { lock.unlock() }
             return items
@@ -44,9 +44,9 @@ public struct COManifestDiscovery: COServiceSource {
 
     /// 加载主应用与所有已加载框架的清单并合并
     /// - Returns: 解析得到的服务描述符数组
-    static func loadAllDescriptors() -> [COServiceDescriptor] {
+    static func loadAllDescriptors() -> [COServiceDefinition] {
         let start = CFAbsoluteTimeGetCurrent()
-        var result: [COServiceDescriptor] = []
+        var result: [COServiceDefinition] = []
         
         // 1. 获取目标 Bundles (Main + Embedded Frameworks)
         let findBundleStart = CFAbsoluteTimeGetCurrent()
@@ -113,8 +113,8 @@ public struct COManifestDiscovery: COServiceSource {
     /// 加载指定 `bundle` 内的清单
     /// - Parameter bundle: 目标模块的 bundle
     /// - Returns: 解析结果数组；若未配置清单则返回空数组
-    static func loadDescriptors(in bundle: Bundle) -> [COServiceDescriptor] {
-        var descs: [COServiceDescriptor] = []
+    static func loadDescriptors(in bundle: Bundle) -> [COServiceDefinition] {
+        var descs: [COServiceDefinition] = []
         let start = CFAbsoluteTimeGetCurrent()
         
         // 1. Info.plist (极速，推荐)
@@ -163,9 +163,9 @@ public struct COManifestDiscovery: COServiceSource {
     
     /// 将清单数组转换为描述符数组
     /// - Parameter array: 解析到的数组对象
-    /// - Returns: 合法条目的 `COServiceDescriptor` 列表
-    private static func parse(array: [[String: Sendable]]) -> [COServiceDescriptor] {
-        var list: [COServiceDescriptor] = []
+    /// - Returns: 合法条目的 `COServiceDefinition` 列表
+    private static func parse(array: [[String: Sendable]]) -> [COServiceDefinition] {
+        var list: [COServiceDefinition] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else {
                 COLogger.log("Warning: className not exsit in manifest.")
@@ -194,7 +194,7 @@ public struct COManifestDiscovery: COServiceSource {
             let retention = retentionStr.flatMap(CORetentionPolicy.init(rawValue:))
             let priority = priorityVal.map { COPriority(rawValue: $0) }
             
-            list.append(COServiceDescriptor(serviceClass: serviceClass,
+            list.append(COServiceDefinition(serviceClass: serviceClass,
                                        priority: priority,
                                        retentionPolicy: retention,
                                        args: args,
