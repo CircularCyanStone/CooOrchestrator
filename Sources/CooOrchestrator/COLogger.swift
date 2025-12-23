@@ -55,4 +55,10 @@ public enum COLogger: Sendable {
         guard isEnabled else { return }
         print("[Lifecycle] [Performance] \(message)")
     }
+    
+    /// 记录普通日志
+    public static func log(_ message: String) {
+        guard isEnabled else { return }
+        print("[Lifecycle] [Info] \(message)")
+    }
 }

@@ -4,27 +4,30 @@
 import Foundation
 
 /// 服务描述符（对应 Manifest 中的一条配置）
-public struct COServiceDescriptor: Sendable {
-    /// 服务类名
-    public let className: String
+public struct COServiceDescriptor: @unchecked Sendable {
+    
+    /// 服务类
+    public let serviceClass: AnyClass
+    
+    /// 工厂类（可选）
+    public let factoryClass: AnyClass?
+
     /// 指定优先级（可选）
     public let priority: COPriority?
     /// 指定持有策略（可选）
     public let retentionPolicy: CORetentionPolicy?
     /// 静态参数
     public let args: [String: Sendable]
-    /// 工厂类名（可选）
-    public let factoryClassName: String?
     
-    public init(className: String,
+    public init(serviceClass: AnyClass,
                 priority: COPriority? = nil,
                 retentionPolicy: CORetentionPolicy? = nil,
                 args: [String: Sendable] = [:],
-                factoryClassName: String? = nil) {
-        self.className = className
+                factoryClass: AnyClass? = nil) {
+        self.serviceClass = serviceClass
         self.priority = priority
         self.retentionPolicy = retentionPolicy
         self.args = args
-        self.factoryClassName = factoryClassName
+        self.factoryClass = factoryClass
     }
 }

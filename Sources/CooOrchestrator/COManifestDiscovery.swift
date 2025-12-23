@@ -145,19 +145,33 @@ enum COManifestDiscovery {
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else { continue }
             
+            // 立即转换为 Class，如果转换失败则跳过
+            guard let serviceClass = NSClassFromString(className) else {
+                COLogger.log("Warning: Failed to resolve class '\(className)' from manifest.")
+                continue
+            }
+            
             let retentionStr = item[ManifestKeys.retention] as? String
             let priorityVal = item[ManifestKeys.priority] as? Int
             let args = item[ManifestKeys.args] as? [String: Sendable] ?? [:]
-            let factory = item[ManifestKeys.factory] as? String
+            let factoryName = item[ManifestKeys.factory] as? String
+            
+            var factoryClass: AnyClass? = nil
+            if let fName = factoryName {
+                factoryClass = NSClassFromString(fName)
+                if factoryClass == nil {
+                     COLogger.log("Warning: Failed to resolve factory class '\(fName)' for service '\(className)'.")
+                }
+            }
             
             let retention = retentionStr.flatMap(CORetentionPolicy.init(rawValue:))
             let priority = priorityVal.map { COPriority(rawValue: $0) }
             
-            list.append(COServiceDescriptor(className: className,
+            list.append(COServiceDescriptor(serviceClass: serviceClass,
                                        priority: priority,
                                        retentionPolicy: retention,
                                        args: args,
-                                       factoryClassName: factory))
+                                       factoryClass: factoryClass))
         }
         return list
     }

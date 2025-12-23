@@ -35,8 +35,8 @@ public final class COrchestrator: @unchecked Sendable {
     
     // MARK: - Protected State (Must access via isolationQueue)
     
-    /// 已注册的服务类名集合（用于去重）
-    private var registeredClassNames: Set<String> = []
+    /// 已注册的服务类 ID 集合（用于去重）
+    private var registeredServiceIDs: Set<ObjectIdentifier> = []
     /// 常驻服务实例表
     private var residentServices: [String: any COService] = [:]
     /// 是否已完成一次清单引导
@@ -68,7 +68,7 @@ public final class COrchestrator: @unchecked Sendable {
         args: [String: Sendable] = [:]
     ) {
         let desc = COServiceDescriptor(
-            className: NSStringFromClass(type), // 自动获取正确的类名
+            serviceClass: type,
             priority: priority,
             retentionPolicy: retention,
             args: args
@@ -165,7 +165,7 @@ public final class COrchestrator: @unchecked Sendable {
                         finalReturnValue = r
                         shouldStop = true
                         // 记录显式拦截
-                        COLogger.logIntercept(item.desc.className, event: event)
+                        COLogger.logIntercept(NSStringFromClass(item.desc.serviceClass), event: event)
                     }
                 } else {
                     // Fallback: 如果没有 handler，跳过执行
@@ -182,7 +182,7 @@ public final class COrchestrator: @unchecked Sendable {
             
             // 记录日志
             COLogger.logTask(
-                item.desc.className,
+                NSStringFromClass(item.desc.serviceClass),
                 event: item.effEvent,
                 success: isSuccess,
                 message: message,
@@ -224,14 +224,13 @@ public final class COrchestrator: @unchecked Sendable {
         context: COContext
     ) -> (any COService)? {
         // 优先使用工厂
-        if let factoryName = desc.factoryClassName,
-           let factoryType = NSClassFromString(factoryName) as? COServiceFactory.Type {
+        if let factoryType = desc.factoryClass as? COServiceFactory.Type {
             let factory = factoryType.init()
             return factory.make(context: context, args: desc.args)
         }
         
-        // 反射实例化
-        guard let serviceType = NSClassFromString(desc.className) as? any COService.Type else { return nil }
+        // 直接实例化
+        guard let serviceType = desc.serviceClass as? any COService.Type else { return nil }
         let service = serviceType.init()
         return service
     }
@@ -244,14 +243,14 @@ public final class COrchestrator: @unchecked Sendable {
         var entriesToInsert: [COEvent: [ResolvedServiceEntry]] = [:]
         
         for d in items {
-            // 快速去重检查 (String 比较比 Class 查找快)
-            if registeredClassNames.contains(d.className) { continue }
+            guard let type = d.serviceClass as? any COService.Type else { continue }
+            let typeID = ObjectIdentifier(type)
             
-            // 昂贵的运行时查找
-            guard let type = NSClassFromString(d.className) as? any COService.Type else { continue }
+            // 快速去重检查
+            if registeredServiceIDs.contains(typeID) { continue }
             
             // 标记已注册
-            registeredClassNames.insert(d.className)
+            registeredServiceIDs.insert(typeID)
             
             // 2. 获取 Handlers (带缓存)
             // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
