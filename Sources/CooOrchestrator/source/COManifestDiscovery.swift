@@ -54,8 +54,10 @@ public struct COManifestDiscovery: COServiceSource {
         
         // 2. 扫描 Frameworks 目录 (动态库)
         if let frameworksURL = Bundle.main.privateFrameworksURL,
-           let urls = try? FileManager.default.contentsOfDirectory(at: frameworksURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) {
-            for url in urls {
+           let enumerator = FileManager.default.enumerator(at: frameworksURL,
+                                                           includingPropertiesForKeys: nil,
+                                                           options: [.skipsHiddenFiles, .skipsSubdirectoryDescendants]) {
+            for case let url as URL in enumerator {
                 if url.pathExtension == "framework", let bundle = Bundle(url: url) {
                     targetBundles.append(bundle)
                 }
@@ -63,10 +65,13 @@ public struct COManifestDiscovery: COServiceSource {
         }
         
         // 3. 扫描 Resource Bundles (静态库通常将资源打包为 .bundle 放入主包)
+        // 优化: 使用 enumerator 替代 contentsOfDirectory，避免在文件极多时一次性加载所有 URL 导致的内存峰值。
+        // 指定 .skipsSubdirectoryDescendants 确保只扫描根目录。
         if let resourceURL = Bundle.main.resourceURL,
-           let urls = try? FileManager.default.contentsOfDirectory(at: resourceURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) {
-            for url in urls {
-                // 过滤掉系统可能生成的非资源 bundle (如有必要可加更多过滤条件)
+           let enumerator = FileManager.default.enumerator(at: resourceURL,
+                                                           includingPropertiesForKeys: nil,
+                                                           options: [.skipsHiddenFiles, .skipsSubdirectoryDescendants]) {
+            for case let url as URL in enumerator {
                 if url.pathExtension == "bundle", let bundle = Bundle(url: url) {
                     targetBundles.append(bundle)
                 }
