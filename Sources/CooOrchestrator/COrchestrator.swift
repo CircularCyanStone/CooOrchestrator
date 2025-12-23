@@ -78,12 +78,18 @@ public final class COrchestrator: @unchecked Sendable {
     
     /// 启动引导：扫描并加载所有清单中的服务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
-    public func resolve() {
+    /// - Parameter sources: 服务配置源列表（默认为 Plist 扫描）
+    public func resolve(sources: [COServiceSource] = [COManifestDiscovery()]) {
         let start = CFAbsoluteTimeGetCurrent()
         isolationQueue.sync {
             if !hasBootstrapped {
-                let discovered = COManifestDiscovery.loadAllDescriptors()
-                self.mergeDescriptors(discovered)
+                // 加载所有源
+                var allDescriptors: [COServiceDescriptor] = []
+                for source in sources {
+                    allDescriptors.append(contentsOf: source.load())
+                }
+                
+                self.mergeDescriptors(allDescriptors)
                 self.hasBootstrapped = true
                 
                 let end = CFAbsoluteTimeGetCurrent()
@@ -109,6 +115,7 @@ public final class COrchestrator: @unchecked Sendable {
         // 如果用户忘记调用 resolve()，这里会确保第一次 fire 时进行加载
         isolationQueue.sync {
             if !hasBootstrapped {
+                // 默认仅加载 Manifest
                 let discovered = COManifestDiscovery.loadAllDescriptors()
                 self.mergeDescriptors(discovered)
                 self.hasBootstrapped = true

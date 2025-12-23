@@ -3,6 +3,13 @@
 
 import Foundation
 
+/// 服务配置源协议
+/// - 职责：提供一组待注册的服务描述符
+public protocol COServiceSource {
+    /// 加载服务描述符
+    func load() -> [COServiceDescriptor]
+}
+
 /// 服务描述符（对应 Manifest 中的一条配置）
 public struct COServiceDescriptor: @unchecked Sendable {
     

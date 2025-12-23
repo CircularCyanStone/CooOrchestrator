@@ -16,7 +16,14 @@ enum ManifestKeys {
 
 /// Manifest 解析器
 /// - 职责：从各模块私有清单读取服务配置并转换为统一的 `COServiceDescriptor` 集合。
-enum COManifestDiscovery {
+public struct COManifestDiscovery: COServiceSource {
+    
+    public init() {}
+    
+    public func load() -> [COServiceDescriptor] {
+        return Self.loadAllDescriptors()
+    }
+    
     /// 线程安全的描述符收集器
     private class DescriptorCollector: @unchecked Sendable {
         private var items: [COServiceDescriptor] = []
