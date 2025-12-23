@@ -10,10 +10,10 @@
 		"swift"
 	],
 	"argv": [
-		"/usr/local/bin/xcode-build-server"
+		"/opt/homebrew/bin/xcode-build-server"
 	],
-	"workspace": "/Users/coo/Desktop/CooLibrarys/CooOrchestrator/CooOrchestrator.xcodeproj/project.xcworkspace",
-	"build_root": "/Users/coo/Library/Developer/Xcode/DerivedData/CooOrchestrator-cczyjvblegtwtrbjvlkclbkwfbkz",
+	"workspace": "/Users/coomini/Desktop/swift-modules/CooOrchestrator/CooOrchestrator.xcodeproj/project.xcworkspace",
+	"build_root": "/Users/coomini/Library/Developer/Xcode/DerivedData/CooOrchestrator-guqkjghehhnfbodwomohvvrlnybo",
 	"scheme": "example",
 	"kind": "xcode"
 }

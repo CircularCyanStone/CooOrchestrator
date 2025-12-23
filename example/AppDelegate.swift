@@ -17,9 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        let s = NSStringFromClass(ExampleModule1.self)
-        let s1 = NSStringFromClass(DModule2.self)
-        
         // 1. 显式启动解析（推荐）
         COrchestrator.shared.resolve()
         

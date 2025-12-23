@@ -78,8 +78,8 @@ public final class COrchestrator: @unchecked Sendable {
     
     /// 启动引导：扫描并加载所有清单中的服务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
-    /// - Parameter sources: 服务配置源列表（默认为 Plist 扫描）
-    public func resolve(sources: [COServiceSource] = [COManifestDiscovery()]) {
+    /// - Parameter sources: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
+    public func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery()]) {
         let start = CFAbsoluteTimeGetCurrent()
         isolationQueue.sync {
             if !hasBootstrapped {
