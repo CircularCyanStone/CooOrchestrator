@@ -52,7 +52,7 @@ public struct COManifestDiscovery: COServiceSource {
         let findBundleStart = CFAbsoluteTimeGetCurrent()
         var targetBundles = [Bundle.main]
         
-        // 扫描 Frameworks 目录
+        // 2. 扫描 Frameworks 目录 (动态库)
         if let frameworksURL = Bundle.main.privateFrameworksURL,
            let urls = try? FileManager.default.contentsOfDirectory(at: frameworksURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) {
             for url in urls {
@@ -61,9 +61,21 @@ public struct COManifestDiscovery: COServiceSource {
                 }
             }
         }
+        
+        // 3. 扫描 Resource Bundles (静态库通常将资源打包为 .bundle 放入主包)
+        if let resourceURL = Bundle.main.resourceURL,
+           let urls = try? FileManager.default.contentsOfDirectory(at: resourceURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) {
+            for url in urls {
+                // 过滤掉系统可能生成的非资源 bundle (如有必要可加更多过滤条件)
+                if url.pathExtension == "bundle", let bundle = Bundle(url: url) {
+                    targetBundles.append(bundle)
+                }
+            }
+        }
+        
         let findBundleCost = CFAbsoluteTimeGetCurrent() - findBundleStart
         
-        // 2. 扫描 Bundles (并发优化)
+        // 4. 扫描 Bundles (并发优化)
         let scanStart = CFAbsoluteTimeGetCurrent()
         
         // 使用 Collector 封装锁与状态，规避闭包捕获 var 的检查

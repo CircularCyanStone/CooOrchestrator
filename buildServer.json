@@ -12,8 +12,8 @@
 	"argv": [
 		"/usr/local/bin/xcode-build-server"
 	],
-	"workspace": "/Users/coo/Desktop/SiKu/subs/CooAppStartupTask/CooOrchestrator.xcodeproj/project.xcworkspace",
-	"build_root": "/Users/coo/Library/Developer/Xcode/DerivedData/CooOrchestrator-bfouzhokcxntfvfbpayagjqamnjn",
+	"workspace": "/Users/coo/Desktop/CooLibrarys/CooOrchestrator/CooOrchestrator.xcodeproj/project.xcworkspace",
+	"build_root": "/Users/coo/Library/Developer/Xcode/DerivedData/CooOrchestrator-cczyjvblegtwtrbjvlkclbkwfbkz",
 	"scheme": "example",
 	"kind": "xcode"
 }
