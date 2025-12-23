@@ -9,21 +9,22 @@ import Foundation
 import CooOrchestrator
 import UIKit
 
-final class DynamicModule2: NSObject, COService, COApplicationObserver, COSceneObserver {
+public final class DModule2: NSObject, COService, COApplicationObserver, COSceneObserver {
 
-    static func register(in registry: CooOrchestrator.CORegistry<DynamicModule2>) {
+    public static func register(in registry: CooOrchestrator.CORegistry<DModule2>) {
+        print("DynamicModule2正在加载")
         addScene(.sceneWillConnect, in: registry)
         addApplication(.didFinishLaunching, in: registry)
     }
 
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> COResult {
-        print("====")
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> COResult {
+        print("DynamicModule2 didFinishLaunchingWithOptions")
         return .continue()
     }
     
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult {
-        print("====")
+    public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult {
+        print("DynamicModule2 willConnectTo")
         return .continue()
     }
     

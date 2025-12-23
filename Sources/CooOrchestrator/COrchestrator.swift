@@ -230,14 +230,22 @@ public final class COrchestrator: @unchecked Sendable {
         from desc: COServiceDescriptor,
         context: COContext
     ) -> (any COService)? {
+        let className = NSStringFromClass(desc.serviceClass)
+        
         // 优先使用工厂
         if let factoryType = desc.factoryClass as? COServiceFactory.Type {
+            COLogger.log("Instantiate: Creating \(className) using factory \(NSStringFromClass(factoryType))")
             let factory = factoryType.init()
             return factory.make(context: context, args: desc.args)
         }
         
         // 直接实例化
-        guard let serviceType = desc.serviceClass as? any COService.Type else { return nil }
+        guard let serviceType = desc.serviceClass as? any COService.Type else {
+            COLogger.log("Warning: className \(desc.serviceClass) not implement COService")
+            return nil
+        }
+        
+        COLogger.log("Instantiate: Creating \(className) via init()")
         let service = serviceType.init()
         return service
     }
@@ -249,12 +257,22 @@ public final class COrchestrator: @unchecked Sendable {
         
         var entriesToInsert: [COEvent: [ResolvedServiceEntry]] = [:]
         
+        // [Debug Log] 输出当前批次扫描到的所有类名
+        let classNames = items.map { NSStringFromClass($0.serviceClass) }
+        COLogger.log("MergeDescriptors: Received \(items.count) descriptors: \(classNames)")
+        
         for d in items {
-            guard let type = d.serviceClass as? any COService.Type else { continue }
+            guard let type = d.serviceClass as? any COService.Type else { 
+                COLogger.log("MergeDescriptors: Warning - \(NSStringFromClass(d.serviceClass)) does not conform to COService")
+                continue 
+            }
             let typeID = ObjectIdentifier(type)
             
             // 快速去重检查
-            if registeredServiceIDs.contains(typeID) { continue }
+            if registeredServiceIDs.contains(typeID) { 
+                COLogger.log("MergeDescriptors: Skipped duplicate service \(NSStringFromClass(type))")
+                continue 
+            }
             
             // 标记已注册
             registeredServiceIDs.insert(typeID)
@@ -262,7 +280,10 @@ public final class COrchestrator: @unchecked Sendable {
             // 2. 获取 Handlers (带缓存)
             // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
             let handlers = self.resolveHandlers(for: type)
-            if handlers.isEmpty { continue }
+            if handlers.isEmpty { 
+                COLogger.log("MergeDescriptors: Warning - \(NSStringFromClass(type)) has no handlers registered")
+                continue 
+            }
             
             // 3. 内存聚合，而非直接操作 cacheByEvent (减少锁内临界区时间，虽然目前是在 sync 块里)
             for (event, handler) in handlers {

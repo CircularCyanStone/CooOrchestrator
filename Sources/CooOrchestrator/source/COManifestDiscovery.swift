@@ -162,7 +162,10 @@ public struct COManifestDiscovery: COServiceSource {
     private static func parse(array: [[String: Sendable]]) -> [COServiceDescriptor] {
         var list: [COServiceDescriptor] = []
         for item in array {
-            guard let className = item[ManifestKeys.className] as? String else { continue }
+            guard let className = item[ManifestKeys.className] as? String else {
+                COLogger.log("Warning: className not exsit in manifest.")
+                continue
+            }
             
             // 立即转换为 Class，如果转换失败则跳过
             guard let serviceClass = NSClassFromString(className) else {

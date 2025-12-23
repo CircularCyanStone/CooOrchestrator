@@ -9,21 +9,22 @@ import Foundation
 import CooOrchestrator
 import UIKit
 
-final class ExampleModule1: NSObject, COService, COApplicationObserver, COSceneObserver {
+public final class ExampleModule1: NSObject, COService, COApplicationObserver, COSceneObserver {
 
-    static func register(in registry: CooOrchestrator.CORegistry<ExampleModule1>) {
+    public static func register(in registry: CooOrchestrator.CORegistry<ExampleModule1>) {
+        print("ExampleModule1正在加载")
         addScene(.sceneWillConnect, in: registry)
         addApplication(.didFinishLaunching, in: registry)
     }
 
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> COResult {
-        print("====")
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> COResult {
+        print("ExampleModule1 didFinishLaunchingWithOptions")
         return .continue()
     }
     
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult {
-        print("====")
+    public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> COResult {
+        print("ExampleModule1 willConnectTo")
         return .continue()
     }
     

@@ -4,7 +4,7 @@
 <array>
 	<dict>
 		<key>class</key>
-		<string>DynamicModule2.DModule2</string>
+		<string>exampleModule1.ExampleModule1</string>
 		<key>priority</key>
 		<integer>200</integer>
 		<key>retention</key>
