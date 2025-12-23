@@ -108,19 +108,16 @@ enum COManifestDiscovery {
         if let url = bundle.url(forResource: "COServices", withExtension: "plist") {
             let ioStart = CFAbsoluteTimeGetCurrent()
             // 细分IO：Data读取 vs Plist反序列化
-            if let data = try? Data(contentsOf: url) {
-                if let obj = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-                   let arr = obj as? [[String: Sendable]] {
-                    // IO部分结束（含反序列化）
-                    resIOCost = CFAbsoluteTimeGetCurrent() - ioStart
-                    
-                    // Parse部分
-                    let parseStart = CFAbsoluteTimeGetCurrent()
-                    let parsed = parse(array: arr)
-                    resParseCost = CFAbsoluteTimeGetCurrent() - parseStart
-                    
-                    descs.append(contentsOf: parsed)
-                }
+            if let arr = NSArray(contentsOf: url) as? [[String: Sendable]] {
+                // IO部分结束（含反序列化）
+                resIOCost = CFAbsoluteTimeGetCurrent() - ioStart
+                
+                // Parse部分
+                let parseStart = CFAbsoluteTimeGetCurrent()
+                let parsed = parse(array: arr)
+                resParseCost = CFAbsoluteTimeGetCurrent() - parseStart
+                
+                descs.append(contentsOf: parsed)
             }
         }
         let afterRes = CFAbsoluteTimeGetCurrent()
