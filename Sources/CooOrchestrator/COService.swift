@@ -15,7 +15,7 @@ public final class CORegistry<T: COService>: @unchecked Sendable {
         let handler: (any COService, COContext) throws -> COResult
     }
     
-    var entries: [Entry] = []
+    private(set) var entries: [Entry] = []
     
     public init() {}
     

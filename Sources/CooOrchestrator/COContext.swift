@@ -91,7 +91,8 @@ public final class COContext: @unchecked Sendable {
     public let userInfo: UserInfo
     
     /// 上下文构造器
-    public init(event: COEvent,
+    /// - Note: 仅限框架内部使用，外部无需手动创建 Context
+    init(event: COEvent,
                 args: [String: Sendable] = [:],
                 parameters: [COParameterKey: Any] = [:],
                 userInfo: UserInfo = .init()) {
