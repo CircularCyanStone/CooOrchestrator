@@ -1,7 +1,11 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：服务编排调度器，支持多线程安全分发，管理服务生命周期与日志。
 // 类型功能描述：COrchestrator 作为单例管理器，维护服务注册表、常驻服务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
-
+/**
+ 多线程方案选定策略：
+ - 为了保证fire方法在传递事件时能保留原方法的执行环境，所以选择了了传统的使用锁来保护多线程的访问安全。
+而使用Concurrency必然面临隔离域切换，一旦切换了就无法感知之前的执行环境了。
+ */
 import Foundation
 
 /// 服务编排调度器 (COrchestrator)
@@ -338,7 +342,7 @@ extension COrchestrator {
     /// 启动引导：扫描并加载所有清单中的服务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
     /// - Parameter sources: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
-    public static func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery()]) {
+    public static func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery(), COSectionDiscovery()]) {
         shared.resolve(sources: sources)
     }
     

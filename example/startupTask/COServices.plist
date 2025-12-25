@@ -18,13 +18,5 @@
 		<key>retention</key>
 		<string>destroy</string>
 	</dict>
-	<dict>
-		<key>class</key>
-		<string>example.UpgradePromptTask</string>
-		<key>priority</key>
-		<integer>150</integer>
-		<key>retention</key>
-		<string>destroy</string>
-	</dict>
 </array>
 </plist>
