@@ -21,7 +21,7 @@ public struct COManifestDiscovery: COServiceSource {
     public init() {}
     
     public func load() -> [COServiceDefinition] {
-        return Self.loadAllDescriptors()
+        return Self.loadAllDefinitions()
     }
     
     /// 线程安全的描述符收集器
@@ -44,7 +44,7 @@ public struct COManifestDiscovery: COServiceSource {
 
     /// 加载主应用与所有已加载框架的清单并合并
     /// - Returns: 解析得到的服务描述符数组
-    static func loadAllDescriptors() -> [COServiceDefinition] {
+    static func loadAllDefinitions() -> [COServiceDefinition] {
         let start = CFAbsoluteTimeGetCurrent()
         var result: [COServiceDefinition] = []
         
@@ -89,7 +89,7 @@ public struct COManifestDiscovery: COServiceSource {
         
         DispatchQueue.concurrentPerform(iterations: bundlesToScan.count) { index in
             let bundle = bundlesToScan[index]
-            let descriptors = loadDescriptors(in: bundle)
+            let descriptors = loadDefinitions(in: bundle)
             if !descriptors.isEmpty {
                 collector.append(descriptors)
             }
@@ -113,7 +113,7 @@ public struct COManifestDiscovery: COServiceSource {
     /// 加载指定 `bundle` 内的清单
     /// - Parameter bundle: 目标模块的 bundle
     /// - Returns: 解析结果数组；若未配置清单则返回空数组
-    static func loadDescriptors(in bundle: Bundle) -> [COServiceDefinition] {
+    static func loadDefinitions(in bundle: Bundle) -> [COServiceDefinition] {
         var descs: [COServiceDefinition] = []
         let start = CFAbsoluteTimeGetCurrent()
         

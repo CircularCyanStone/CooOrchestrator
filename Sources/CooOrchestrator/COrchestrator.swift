@@ -22,7 +22,7 @@ public final class COrchestrator: @unchecked Sendable {
     }
     
     /// 单例实例
-    public static let shared = COrchestrator()
+    private static let shared = COrchestrator()
     
     /// 内部串行队列，用于保护 descriptors, residentServices, cacheByPhase 等状态
     private let isolationQueue = DispatchQueue(label: "com.coo.orchestrator", qos: .userInitiated)
@@ -44,52 +44,26 @@ public final class COrchestrator: @unchecked Sendable {
     /// 分组缓存
     private var cacheByEvent: [COEvent: [ResolvedServiceEntry]] = [:]
     
-    // MARK: - Public API
+    // MARK: - Private / Internal Implementation
     
-    /// 注册一批服务描述符
-    /// - Parameter newDescriptors: 新增的服务描述符数组
-    public func register(_ newDescriptors: [COServiceDefinition]) {
-        if newDescriptors.isEmpty { return }
+    private func register(_ newDefinitions: [COServiceDefinition]) {
+        if newDefinitions.isEmpty { return }
         isolationQueue.async {
-            self.mergeDescriptors(newDescriptors)
+            self.mergeDefinitions(newDefinitions)
         }
     }
     
-    /// 便捷注册服务（类型安全）
-    /// - Parameters:
-    ///   - type: 服务类型
-    ///   - priority: 覆盖默认优先级（可选）
-    ///   - retention: 覆盖默认驻留策略（可选）
-    ///   - args: 静态参数（可选）
-    public func register<T: COService>(
-        service type: T.Type,
-        priority: COPriority? = nil,
-        retention: CORetentionPolicy? = nil,
-        args: [String: Sendable] = [:]
-    ) {
-        let desc = COServiceDefinition(
-            serviceClass: type,
-            priority: priority,
-            retentionPolicy: retention,
-            args: args
-        )
-        self.register([desc])
-    }
-    
-    /// 启动引导：扫描并加载所有清单中的服务
-    /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
-    /// - Parameter sources: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
-    public func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery()]) {
+    private func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery()]) {
         let start = CFAbsoluteTimeGetCurrent()
         isolationQueue.sync {
             if !hasBootstrapped {
                 // 加载所有源
-                var allDescriptors: [COServiceDefinition] = []
+                var allDefinitions: [COServiceDefinition] = []
                 for source in sources {
-                    allDescriptors.append(contentsOf: source.load())
+                    allDefinitions.append(contentsOf: source.load())
                 }
                 
-                self.mergeDescriptors(allDescriptors)
+                self.mergeDefinitions(allDefinitions)
                 self.hasBootstrapped = true
                 
                 let end = CFAbsoluteTimeGetCurrent()
@@ -98,14 +72,8 @@ public final class COrchestrator: @unchecked Sendable {
         }
     }
     
-    /// 触发指定时机的服务执行
-    /// - Parameters:
-    ///   - event: 执行时机
-    ///   - parameters: 动态事件参数（如 application, launchOptions 等）
-    ///   - environment: 运行环境对象
-    /// - Returns: 最终的执行结果（如果被中断，则返回中断时的值；否则返回 .void）
     @discardableResult
-    public func fire(
+    private func fire(
         _ event: COEvent,
         parameters: [COParameterKey: Any] = [:]
     ) -> COReturnValue {
@@ -116,8 +84,8 @@ public final class COrchestrator: @unchecked Sendable {
         isolationQueue.sync {
             if !hasBootstrapped {
                 // 默认仅加载 Manifest
-                let discovered = COManifestDiscovery.loadAllDescriptors()
-                self.mergeDescriptors(discovered)
+                let discovered = COManifestDiscovery.loadAllDefinitions()
+                self.mergeDefinitions(discovered)
                 self.hasBootstrapped = true
             }
         }
@@ -213,17 +181,6 @@ public final class COrchestrator: @unchecked Sendable {
         return finalReturnValue
     }
     
-    /// 触发服务执行并获取泛型返回值
-    /// - Note: 这是 fire(_:environment:) 的便捷泛型封装
-    @discardableResult
-    public func fire<T>(
-        _ event: COEvent,
-        parameters: [COParameterKey: Any] = [:],
-    ) -> T? {
-        let ret = fire(event, parameters: parameters)
-        return ret.value()
-    }
-    
     // MARK: - Private Helper
     
     private func instantiateService(
@@ -250,7 +207,7 @@ public final class COrchestrator: @unchecked Sendable {
         return service
     }
     
-    private func mergeDescriptors(_ items: [COServiceDefinition]) {
+    private func mergeDefinitions(_ items: [COServiceDefinition]) {
         let start = CFAbsoluteTimeGetCurrent()
         // 1. 批量解析类型，避免在循环中多次调用 NSClassFromString
         // 同时过滤掉已经注册过的类（假设类维度去重是业务需求）
@@ -259,19 +216,19 @@ public final class COrchestrator: @unchecked Sendable {
         
         // [Debug Log] 输出当前批次扫描到的所有类名
         let classNames = items.map { NSStringFromClass($0.serviceClass) }
-        COLogger.log("MergeDescriptors: Received \(items.count) descriptors: \(classNames)")
+        COLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(classNames)")
         
         for d in items {
             guard let type = d.serviceClass as? any COService.Type else { 
-                COLogger.log("MergeDescriptors: Warning - \(NSStringFromClass(d.serviceClass)) does not conform to COService")
-                continue 
+                COLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(d.serviceClass)) does not conform to COService")
+                continue
             }
             let typeID = ObjectIdentifier(type)
             
             // 快速去重检查
             if registeredServiceIDs.contains(typeID) { 
-                COLogger.log("MergeDescriptors: Skipped duplicate service \(NSStringFromClass(type))")
-                continue 
+                COLogger.log("MergeDefinitions: Skipped duplicate service \(NSStringFromClass(type))")
+                continue
             }
             
             // 标记已注册
@@ -281,8 +238,8 @@ public final class COrchestrator: @unchecked Sendable {
             // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
             let handlers = self.resolveHandlers(for: type)
             if handlers.isEmpty { 
-                COLogger.log("MergeDescriptors: Warning - \(NSStringFromClass(type)) has no handlers registered")
-                continue 
+                COLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(type)) has no handlers registered")
+                continue
             }
             
             // 3. 内存聚合，而非直接操作 cacheByEvent (减少锁内临界区时间，虽然目前是在 sync 块里)
@@ -309,7 +266,7 @@ public final class COrchestrator: @unchecked Sendable {
         }
         
         let end = CFAbsoluteTimeGetCurrent()
-        COLogger.logPerf("MergeDescriptors: Processed \(items.count) items, Inserted \(entriesToInsert.count) groups. Cost: \(String(format: "%.4fs", end - start))")
+        COLogger.logPerf("MergeDefinitions: Processed \(items.count) items, Inserted \(entriesToInsert.count) groups. Cost: \(String(format: "%.4fs", end - start))")
     }
     
     // 提取辅助方法，逻辑更清晰
@@ -345,5 +302,68 @@ public final class COrchestrator: @unchecked Sendable {
         return registry.entries.map { entry in
             (entry.event, entry.handler)
         }
+    }
+}
+
+extension COrchestrator {
+    // MARK: - Public API
+    
+    /// 注册一批服务项
+    /// - Parameter newDefinitions: 新增的服务描述符数组
+    public static func register(_ newDefinitions: [COServiceDefinition]) {
+        shared.register(newDefinitions)
+    }
+    
+    /// 便捷注册服务（类型安全）
+    /// - Parameters:
+    ///   - type: 服务类型
+    ///   - priority: 覆盖默认优先级（可选）
+    ///   - retention: 覆盖默认驻留策略（可选）
+    ///   - args: 静态参数（可选）
+    public static func register<T: COService>(
+        service type: T.Type,
+        priority: COPriority? = nil,
+        retention: CORetentionPolicy? = nil,
+        args: [String: Sendable] = [:]
+    ) {
+        let desc = COServiceDefinition(
+            serviceClass: type,
+            priority: priority,
+            retentionPolicy: retention,
+            args: args
+        )
+        shared.register([desc])
+    }
+    
+    /// 启动引导：扫描并加载所有清单中的服务
+    /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
+    /// - Parameter sources: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
+    public static func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery()]) {
+        shared.resolve(sources: sources)
+    }
+    
+    /// 触发指定时机的服务执行
+    /// - Parameters:
+    ///   - event: 执行时机
+    ///   - parameters: 动态事件参数（如 application, launchOptions 等）
+    ///   - environment: 运行环境对象
+    /// - Returns: 最终的执行结果（如果被中断，则返回中断时的值；否则返回 .void）
+    @discardableResult
+    public static func fire(
+        _ event: COEvent,
+        parameters: [COParameterKey: Any] = [:]
+    ) -> COReturnValue {
+        return shared.fire(event, parameters: parameters)
+    }
+    
+    /// 触发服务执行并获取泛型返回值
+    /// - Note: 这是 fire(_:environment:) 的便捷泛型封装
+    @discardableResult
+    public static func fire<T>(
+        _ event: COEvent,
+        parameters: [COParameterKey: Any] = [:],
+    ) -> T? {
+        let ret = shared.fire(event, parameters: parameters)
+        return ret.value()
     }
 }

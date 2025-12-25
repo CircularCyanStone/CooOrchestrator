@@ -18,22 +18,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 //        let s1 = NSStringFromClass(ExampleModule1.self)
         // 1. 显式启动解析（推荐）
-        COrchestrator.shared.resolve()
+        COrchestrator.resolve()
         
         // 2. 触发启动事件
-        COrchestrator.shared.fire(
+        COrchestrator.fire(
             .didFinishLaunching,
             parameters: [
                 .application: application,
                 .launchOptions: launchOptions as Any
             ]
         )
-        COrchestrator.shared.fire(.didFinishLaunchBegin, parameters: [
+        COrchestrator.fire(.didFinishLaunchBegin, parameters: [
             .application: application,
             .launchOptions : launchOptions as Any
         ])
         
-        COrchestrator.shared.fire(.didFinishLaunchEnd, parameters: [
+        COrchestrator.fire(.didFinishLaunchEnd, parameters: [
             .application: application,
             .launchOptions : launchOptions as Any
         ])

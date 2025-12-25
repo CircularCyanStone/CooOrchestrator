@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
         
-        COrchestrator.shared.fire(.sceneWillConnect, parameters: [
+        COrchestrator.fire(.sceneWillConnect, parameters: [
             .scene: scene,
             .session: session,
             .connectionOptions : connectionOptions
@@ -31,7 +31,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This occurs shortly after the scene enters the background, or when its session is discarded.
         // Release any resources associated with this scene that can be re-created the next time the scene connects.
         // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
-        COrchestrator.shared.fire(.sceneDidDisconnect, parameters: [
+        COrchestrator.fire(.sceneDidDisconnect, parameters: [
             .scene: scene
         ])
     }
@@ -39,7 +39,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-        COrchestrator.shared.fire(.sceneDidBecomeActive, parameters: [
+        COrchestrator.fire(.sceneDidBecomeActive, parameters: [
             .scene: scene
         ])
     }
@@ -48,7 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
         
-        COrchestrator.shared.fire(.sceneWillResignActive, parameters: [
+        COrchestrator.fire(.sceneWillResignActive, parameters: [
             .scene: scene
         ])
     }
@@ -56,7 +56,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
-        COrchestrator.shared.fire(.sceneWillEnterForeground, parameters: [
+        COrchestrator.fire(.sceneWillEnterForeground, parameters: [
             .scene: scene
         ])
     }
@@ -65,7 +65,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
-        COrchestrator.shared.fire(.sceneDidEnterBackground, parameters: [
+        COrchestrator.fire(.sceneDidEnterBackground, parameters: [
             .scene: scene
         ])
     }
