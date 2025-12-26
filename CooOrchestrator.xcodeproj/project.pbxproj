@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FB15F5062EF592A000E1DA93 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
+		FB1CC03C2EFEA10D00FCA6AB /* CooOrchestrator in Frameworks */ = {isa = PBXBuildFile; productRef = FB1CC03B2EFEA10D00FCA6AB /* CooOrchestrator */; };
 		FB7DF8B22EFA720B00AB2476 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
 		FB7DF8D72EFA7AB100AB2476 /* DynamicModule2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; };
 		FB7DF8D82EFA7AB100AB2476 /* DynamicModule2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -48,6 +49,7 @@
 
 /* Begin PBXFileReference section */
 		FB15F2752EF58F7200E1DA93 /* example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = example.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB1CC0252EFEA09100FCA6AB /* SPMExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPMExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = exampleModule1.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DynamicModule2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CooOrchestrator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,6 +63,13 @@
 				Info.plist,
 			);
 			target = FB15F2742EF58F7200E1DA93 /* example */;
+		};
+		FB1CC0382EFEA09300FCA6AB /* Exceptions for "SPMExample" folder in "SPMExample" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FB1CC0242EFEA09100FCA6AB /* SPMExample */;
 		};
 		FB7D1F402EFD31DD00AB2476 /* Exceptions for "Sources" folder in "CooOrchestrator" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -89,6 +98,14 @@
 				FB15F2882EF58F7400E1DA93 /* Exceptions for "example" folder in "example" target */,
 			);
 			path = example;
+			sourceTree = "<group>";
+		};
+		FB1CC0262EFEA09100FCA6AB /* SPMExample */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FB1CC0382EFEA09300FCA6AB /* Exceptions for "SPMExample" folder in "SPMExample" target */,
+			);
+			path = SPMExample;
 			sourceTree = "<group>";
 		};
 		FB7DF8A52EFA71BE00AB2476 /* exampleModule1 */ = {
@@ -122,6 +139,14 @@
 				FB7DF8E62EFA868B00AB2476 /* exampleModule1.framework in Frameworks */,
 				FB15F5062EF592A000E1DA93 /* CooOrchestrator.framework in Frameworks */,
 				FB7DF8D72EFA7AB100AB2476 /* DynamicModule2.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB1CC0222EFEA09100FCA6AB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB1CC03C2EFEA10D00FCA6AB /* CooOrchestrator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +190,7 @@
 				FB15F2762EF58F7200E1DA93 /* example */,
 				FB7DF8A52EFA71BE00AB2476 /* exampleModule1 */,
 				FB7DF8B92EFA72D300AB2476 /* DynamicModule2 */,
+				FB1CC0262EFEA09100FCA6AB /* SPMExample */,
 				FB15F5052EF592A000E1DA93 /* Frameworks */,
 				FBD17C8C2EF3D61900C9CDB2 /* Products */,
 			);
@@ -177,6 +203,7 @@
 				FB15F2752EF58F7200E1DA93 /* example.app */,
 				FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */,
 				FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */,
+				FB1CC0252EFEA09100FCA6AB /* SPMExample.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -231,6 +258,29 @@
 			);
 			productName = example;
 			productReference = FB15F2752EF58F7200E1DA93 /* example.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FB1CC0242EFEA09100FCA6AB /* SPMExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB1CC0392EFEA09300FCA6AB /* Build configuration list for PBXNativeTarget "SPMExample" */;
+			buildPhases = (
+				FB1CC0212EFEA09100FCA6AB /* Sources */,
+				FB1CC0222EFEA09100FCA6AB /* Frameworks */,
+				FB1CC0232EFEA09100FCA6AB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FB1CC0262EFEA09100FCA6AB /* SPMExample */,
+			);
+			name = SPMExample;
+			packageProductDependencies = (
+				FB1CC03B2EFEA10D00FCA6AB /* CooOrchestrator */,
+			);
+			productName = SPMExample;
+			productReference = FB1CC0252EFEA09100FCA6AB /* SPMExample.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FB7DF8A32EFA71BE00AB2476 /* exampleModule1 */ = {
@@ -316,6 +366,9 @@
 						CreatedOnToolsVersion = 16.3;
 						LastSwiftMigration = 1630;
 					};
+					FB1CC0242EFEA09100FCA6AB = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					FB7DF8A32EFA71BE00AB2476 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -336,6 +389,9 @@
 			);
 			mainGroup = FBD17C812EF3D61900C9CDB2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FB1CC03A2EFEA10D00FCA6AB /* XCLocalSwiftPackageReference "../CooOrchestrator" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FBD17C8C2EF3D61900C9CDB2 /* Products */;
 			projectDirPath = "";
@@ -345,12 +401,20 @@
 				FB15F2742EF58F7200E1DA93 /* example */,
 				FB7DF8A32EFA71BE00AB2476 /* exampleModule1 */,
 				FB7DF8B72EFA72D300AB2476 /* DynamicModule2 */,
+				FB1CC0242EFEA09100FCA6AB /* SPMExample */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FB15F2732EF58F7200E1DA93 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB1CC0232EFEA09100FCA6AB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -382,6 +446,13 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		FB15F2712EF58F7200E1DA93 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB1CC0212EFEA09100FCA6AB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -487,6 +558,62 @@
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.coo.example;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FB1CC0362EFEA09300FCA6AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UQ35W3765Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SPMExample/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coo.SPMExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FB1CC0372EFEA09300FCA6AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UQ35W3765Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SPMExample/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coo.SPMExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -845,6 +972,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		FB1CC0392EFEA09300FCA6AB /* Build configuration list for PBXNativeTarget "SPMExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB1CC0362EFEA09300FCA6AB /* Debug */,
+				FB1CC0372EFEA09300FCA6AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FB7DF8AE2EFA71BE00AB2476 /* Build configuration list for PBXNativeTarget "exampleModule1" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -882,6 +1018,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		FB1CC03A2EFEA10D00FCA6AB /* XCLocalSwiftPackageReference "../CooOrchestrator" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../CooOrchestrator;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FB1CC03B2EFEA10D00FCA6AB /* CooOrchestrator */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CooOrchestrator;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FBD17C822EF3D61900C9CDB2 /* Project object */;
 }
