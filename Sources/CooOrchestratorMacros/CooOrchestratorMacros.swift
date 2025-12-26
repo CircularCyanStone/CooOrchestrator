@@ -60,11 +60,11 @@ enum MacroHelper {
 
 // MARK: - Macros
 
-/// 注册模块宏 (Peer Macro)
-public struct CORegisterModuleMacro: PeerMacro {
+/// 注册模块宏 (Member Macro)
+public struct CORegisterModuleMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
-        providingPeersOf declaration: some DeclSyntaxProtocol,
+        providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         
@@ -88,19 +88,19 @@ public struct CORegisterModuleMacro: PeerMacro {
             """
             @_used
             @_section("__DATA,__coo_mod")
-            static let _coo_mod_entry: UnsafePointer<CChar> = {
-                "\(raw: finalName)".withCString { $0 }
-            }()
+            static let _coo_mod_entry: (StaticString) = (
+                "\(raw: finalName)"
+            )
             """
         ]
     }
 }
 
-/// 注册服务宏 (Peer Macro)
-public struct CORegisterServiceMacro: PeerMacro {
+/// 注册服务宏 (Member Macro)
+public struct CORegisterServiceMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
-        providingPeersOf declaration: some DeclSyntaxProtocol,
+        providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         
@@ -123,9 +123,9 @@ public struct CORegisterServiceMacro: PeerMacro {
             """
             @_used
             @_section("__DATA,__coo_svc")
-            static let _coo_svc_entry: UnsafePointer<CChar> = {
-                "\(raw: finalName)".withCString { $0 }
-            }()
+            static let _coo_svc_entry: (StaticString) = (
+                "\(raw: finalName)"
+            )
             """
         ]
     }

@@ -57,7 +57,7 @@ public final class COrchestrator: @unchecked Sendable {
         }
     }
     
-    private func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery()]) {
+    private func resolve(sources: [COServiceSource]) {
         let start = CFAbsoluteTimeGetCurrent()
         isolationQueue.sync {
             if !hasBootstrapped {

@@ -13,8 +13,6 @@ import DynamicModule2
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 //        let s1 = NSStringFromClass(ExampleModule1.self)
         // 1. 显式启动解析（推荐）

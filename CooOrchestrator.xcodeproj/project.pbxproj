@@ -7,13 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FB15F5062EF592A000E1DA93 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
-		FB1CC03C2EFEA10D00FCA6AB /* CooOrchestrator in Frameworks */ = {isa = PBXBuildFile; productRef = FB1CC03B2EFEA10D00FCA6AB /* CooOrchestrator */; };
-		FB7DF8B22EFA720B00AB2476 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
 		FB7DF8D72EFA7AB100AB2476 /* DynamicModule2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; };
 		FB7DF8D82EFA7AB100AB2476 /* DynamicModule2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB7DF8E62EFA868B00AB2476 /* exampleModule1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */; };
-		FB7DF9BD2EFA99A200AB2476 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
+		FB858A452EFEBE9C00AEAA27 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
+		FB858A462EFEBE9C00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FB858A482EFEBEAF00AEAA27 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
+		FB858A492EFEBEAF00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FB858A4B2EFEBEC500AEAA27 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
+		FB858A4C2EFEBEC500AEAA27 /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,13 +36,46 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		FB1CC0B12EFEA1C200FCA6AB /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB7DF8B12EFA71BE00AB2476 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				FB858A4C2EFEBEC500AEAA27 /* CooOrchestrator.framework in Embed Frameworks */,
 				FB7DF8D82EFA7AB100AB2476 /* DynamicModule2.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB858A472EFEBE9C00AEAA27 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FB858A462EFEBE9C00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB858A4A2EFEBEAF00AEAA27 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FB858A492EFEBEAF00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,7 +172,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB7DF8E62EFA868B00AB2476 /* exampleModule1.framework in Frameworks */,
-				FB15F5062EF592A000E1DA93 /* CooOrchestrator.framework in Frameworks */,
+				FB858A4B2EFEBEC500AEAA27 /* CooOrchestrator.framework in Frameworks */,
 				FB7DF8D72EFA7AB100AB2476 /* DynamicModule2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -146,7 +181,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB1CC03C2EFEA10D00FCA6AB /* CooOrchestrator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,7 +188,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB7DF8B22EFA720B00AB2476 /* CooOrchestrator.framework in Frameworks */,
+				FB858A482EFEBEAF00AEAA27 /* CooOrchestrator.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,7 +196,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB7DF9BD2EFA99A200AB2476 /* CooOrchestrator.framework in Frameworks */,
+				FB858A452EFEBE9C00AEAA27 /* CooOrchestrator.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,6 +301,7 @@
 				FB1CC0212EFEA09100FCA6AB /* Sources */,
 				FB1CC0222EFEA09100FCA6AB /* Frameworks */,
 				FB1CC0232EFEA09100FCA6AB /* Resources */,
+				FB1CC0B12EFEA1C200FCA6AB /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -277,7 +312,6 @@
 			);
 			name = SPMExample;
 			packageProductDependencies = (
-				FB1CC03B2EFEA10D00FCA6AB /* CooOrchestrator */,
 			);
 			productName = SPMExample;
 			productReference = FB1CC0252EFEA09100FCA6AB /* SPMExample.app */;
@@ -291,6 +325,7 @@
 				FB7DF8A02EFA71BE00AB2476 /* Sources */,
 				FB7DF8A12EFA71BE00AB2476 /* Frameworks */,
 				FB7DF8A22EFA71BE00AB2476 /* Resources */,
+				FB858A4A2EFEBEAF00AEAA27 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -314,6 +349,7 @@
 				FB7DF8B42EFA72D300AB2476 /* Sources */,
 				FB7DF8B52EFA72D300AB2476 /* Frameworks */,
 				FB7DF8B62EFA72D300AB2476 /* Resources */,
+				FB858A472EFEBE9C00AEAA27 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -390,7 +426,7 @@
 			mainGroup = FBD17C812EF3D61900C9CDB2;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				FB1CC03A2EFEA10D00FCA6AB /* XCLocalSwiftPackageReference "../CooOrchestrator" */,
+				FB1CC1282EFEA4D900FCA6AB /* XCLocalSwiftPackageReference "../CooOrchestrator" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FBD17C8C2EF3D61900C9CDB2 /* Products */;
@@ -585,6 +621,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SymbolLinkageMarkers";
 				PRODUCT_BUNDLE_IDENTIFIER = com.coo.SPMExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -613,6 +650,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SymbolLinkageMarkers";
 				PRODUCT_BUNDLE_IDENTIFIER = com.coo.SPMExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1020,18 +1058,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		FB1CC03A2EFEA10D00FCA6AB /* XCLocalSwiftPackageReference "../CooOrchestrator" */ = {
+		FB1CC1282EFEA4D900FCA6AB /* XCLocalSwiftPackageReference "../CooOrchestrator" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../CooOrchestrator;
 		};
 /* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		FB1CC03B2EFEA10D00FCA6AB /* CooOrchestrator */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = CooOrchestrator;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FBD17C822EF3D61900C9CDB2 /* Project object */;
 }
