@@ -38,7 +38,13 @@ let package = Package(
         ),
         .testTarget(
             name: "CooOrchestratorTests",
-            dependencies: ["CooOrchestrator"]
+            dependencies: [
+                "CooOrchestrator",
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("SymbolLinkageMarkers")
+            ]
         ),
     ]
 )

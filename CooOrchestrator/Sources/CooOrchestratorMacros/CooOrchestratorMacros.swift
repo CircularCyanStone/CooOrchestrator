@@ -109,10 +109,13 @@ public struct CORegisterServiceMacro: MemberMacro {
         var typeName = ""
         
         if let structDecl = declaration.as(StructDeclSyntax.self) {
+            /// 判断当前声明的目标对象的类型，这里是struct
             typeName = structDecl.name.text
         } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
+            /// 判断当前声明的目标对象的类型，这里是class
             typeName = classDecl.name.text
         } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
+            /// 判断当前声明的目标对象的类型，这里是enum
             typeName = enumDecl.name.text
         } else {
             return []
