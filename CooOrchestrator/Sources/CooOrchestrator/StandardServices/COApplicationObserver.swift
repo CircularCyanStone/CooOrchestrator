@@ -1,4 +1,6 @@
-#if os(iOS)
+
+#if canImport(UIKit)
+
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：提供预置系统事件的便捷协议与扩展，简化常用生命周期方法的接入。
 

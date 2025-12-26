@@ -35,9 +35,6 @@ let package = Package(
             name: "CooOrchestrator",
             dependencies: ["CooOrchestratorMacros"],
             swiftSettings: [.enableExperimentalFeature("SymbolLinkageMarkers")],
-            linkerSettings: [
-                .linkedFramework("UIKit")
-            ]
         ),
         .testTarget(
             name: "CooOrchestratorTests",
