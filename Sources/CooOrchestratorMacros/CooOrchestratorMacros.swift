@@ -1,0 +1,140 @@
+// Copyright © 2025 Coo. All rights reserved.
+
+import SwiftCompilerPlugin
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
+import Foundation
+
+// MARK: - Helper
+
+enum MacroHelper {
+    /// 提取模块名称
+    /// 策略：
+    /// 1. 显式传参：@RegisterModule("MyModule")
+    /// 2. 文件路径推断：从 Sources/{Module} 推断
+    static func extractModuleName(
+        from node: AttributeSyntax,
+        in context: some MacroExpansionContext
+    ) -> String {
+        // 1. 尝试从参数获取
+        if let args = node.arguments?.as(LabeledExprListSyntax.self),
+           let first = args.first,
+           let str = first.expression.as(StringLiteralExprSyntax.self) {
+            let name = str.segments.first?.as(StringSegmentSyntax.self)?.content.text ?? ""
+            if !name.isEmpty {
+                return name
+            }
+        }
+        
+        // 2. 尝试从文件路径推断
+        if let filePath = context.location(of: node)?.file.as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text {
+            return extractModuleNameFromPath(filePath)
+        }
+        
+        // 无法推断，返回空字符串（后续可能会导致运行时类查找失败，但编译期不报错）
+        return ""
+    }
+    
+    /// 从文件路径提取模块名
+    private static func extractModuleNameFromPath(_ path: String) -> String {
+        let components = path.split(separator: "/")
+        
+        // 常见模式匹配
+        // Pattern: Sources/{Module}/...
+        if let sourcesIndex = components.firstIndex(of: "Sources"),
+           sourcesIndex + 1 < components.count {
+            return String(components[sourcesIndex + 1])
+        }
+        
+        // Pattern: {Module}/Sources/... (反向结构)
+        if let sourcesIndex = components.firstIndex(of: "Sources"),
+           sourcesIndex > 0 {
+            return String(components[sourcesIndex - 1])
+        }
+        
+        // Fallback: 使用当前目录名
+        return components.last?.replacingOccurrences(of: ".swift", with: "") ?? ""
+    }
+}
+
+// MARK: - Macros
+
+/// 注册模块宏 (Peer Macro)
+public struct CORegisterModuleMacro: PeerMacro {
+    public static func expansion(
+        of node: AttributeSyntax,
+        providingPeersOf declaration: some DeclSyntaxProtocol,
+        in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+        
+        var typeName = ""
+        
+        if let structDecl = declaration.as(StructDeclSyntax.self) {
+            typeName = structDecl.name.text
+        } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
+            typeName = classDecl.name.text
+        } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
+            typeName = enumDecl.name.text
+        } else {
+            return []
+        }
+        let moduleName = MacroHelper.extractModuleName(from: node, in: context)
+        
+        // 如果没有模块名，仅使用类名（运行时可能需要 @objc 配合）
+        let finalName = moduleName.isEmpty ? typeName : "\(moduleName).\(typeName)"
+        
+        return [
+            """
+            @_used
+            @_section("__DATA,__coo_mod")
+            static let _coo_mod_entry: UnsafePointer<CChar> = {
+                "\(raw: finalName)".withCString { $0 }
+            }()
+            """
+        ]
+    }
+}
+
+/// 注册服务宏 (Peer Macro)
+public struct CORegisterServiceMacro: PeerMacro {
+    public static func expansion(
+        of node: AttributeSyntax,
+        providingPeersOf declaration: some DeclSyntaxProtocol,
+        in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+        
+        var typeName = ""
+        
+        if let structDecl = declaration.as(StructDeclSyntax.self) {
+            typeName = structDecl.name.text
+        } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
+            typeName = classDecl.name.text
+        } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
+            typeName = enumDecl.name.text
+        } else {
+            return []
+        }
+        let moduleName = MacroHelper.extractModuleName(from: node, in: context)
+        
+        let finalName = moduleName.isEmpty ? typeName : "\(moduleName).\(typeName)"
+        
+        return [
+            """
+            @_used
+            @_section("__DATA,__coo_svc")
+            static let _coo_svc_entry: UnsafePointer<CChar> = {
+                "\(raw: finalName)".withCString { $0 }
+            }()
+            """
+        ]
+    }
+}
+
+@main
+struct CooOrchestratorPlugin: CompilerPlugin {
+    let providingMacros: [Macro.Type] = [
+        CORegisterModuleMacro.self,
+        CORegisterServiceMacro.self,
+    ]
+}

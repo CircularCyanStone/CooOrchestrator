@@ -1,3 +1,4 @@
+#if os(iOS)
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：提供预置系统事件的便捷协议与扩展，简化常用生命周期方法的接入。
 
@@ -9,7 +10,6 @@ import UIKit
 /// - 所有方法均返回 `COResult`，支持责任链控制（如阻断后续服务）。
 /// - 注意：此协议不继承 `COService`，需显式遵守 `COService` 协议并手动注册感兴趣的事件。
 public protocol COApplicationObserver: Sendable {
-    
     // MARK: - App Life Cycle
     
     /// App 启动完成 (didFinishLaunchingWithOptions)
@@ -219,3 +219,4 @@ public extension COApplicationObserver {
         }
     }
 }
+#endif

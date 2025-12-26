@@ -64,9 +64,12 @@
 		};
 		FB7D1F402EFD31DD00AB2476 /* Exceptions for "Sources" folder in "CooOrchestrator" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CooOrchestratorMacros/CooOrchestratorMacros.swift,
+			);
 			publicHeaders = (
 				CooOrchestrator/CooOrchestrator.h,
-				CooOrchestrator/source/CORegistrationMacros.h,
+				CooOrchestrator/source/ocMacros/CORegistrationMacros.h,
 			);
 			target = FBD17C8A2EF3D61900C9CDB2 /* CooOrchestrator */;
 		};

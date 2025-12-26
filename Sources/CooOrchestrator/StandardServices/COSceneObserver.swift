@@ -1,3 +1,4 @@
+#if os(iOS)
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：提供 UIWindowSceneDelegate 预置事件的便捷协议与扩展。
 
@@ -131,3 +132,4 @@ public extension COSceneObserver {
         }
     }
 }
+#endif
