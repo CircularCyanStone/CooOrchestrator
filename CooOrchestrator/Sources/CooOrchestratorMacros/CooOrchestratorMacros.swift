@@ -36,44 +36,51 @@ enum MacroHelper {
             }
         }
         
-        // 2. 尝试从文件路径推断
-        if let filePath = context.location(of: node)?.file.as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text {
-            // [Debug] 输出真实的文件路径到编译器警告中，方便查看
-            context.diagnose(Diagnostic(
-                node: node,
-                message: DebugDiagnostic(
-                    message: "🔍 [CooDebug] Real FilePath: \(filePath)",
-                    diagnosticID: MessageID(domain: "CooMacros", id: "path_debug"),
-                    severity: .warning
-                )
-            ))
+        // 2. 尝试从 location description 推断
+        if let locationDescription = context.location(of: node)?.file.as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text {
+            // [Debug] 输出真实的 location description 到编译器警告中，方便查看
+//            context.diagnose(Diagnostic(
+//                node: node,
+//                message: DebugDiagnostic(
+//                    message: "🔍 [CooDebug] Real Location Description: \(locationDescription)",
+//                    diagnosticID: MessageID(domain: "CooMacros", id: "path_debug"),
+//                    severity: .warning
+//                )
+//            ))
             
-            return extractModuleNameFromPath(filePath)
+            let inferredName = extractModuleNameFromLocation(locationDescription)
+            if !inferredName.isEmpty {
+                return inferredName
+            }
         }
         
-        // 无法推断，返回空字符串（后续可能会导致运行时类查找失败，但编译期不报错）
+        // 3. 无法推断且未传参，抛出编译错误
+        context.diagnose(Diagnostic(
+            node: node,
+            message: DebugDiagnostic(
+                message: "❌ Unable to infer module name from context. Please specify the module name explicitly: @OrchService(\"YourModuleName\")",
+                diagnosticID: MessageID(domain: "CooMacros", id: "module_inference_failed"),
+                severity: .error
+            )
+        ))
         return ""
     }
     
-    /// 从文件路径提取模块名
-    private static func extractModuleNameFromPath(_ path: String) -> String {
-        let components = path.split(separator: "/")
+    /// 从 location description 提取模块名
+    /// 注意：这里的 path 通常不是文件系统路径，而是编译器提供的 location description (e.g. "ModuleName/FileName.swift")
+    private static func extractModuleNameFromLocation(_ description: String) -> String {
+        let components = description.split(separator: "/")
         
-        // 常见模式匹配
-        // Pattern: Sources/{Module}/...
-        if let sourcesIndex = components.firstIndex(of: "Sources"),
-           sourcesIndex + 1 < components.count {
-            return String(components[sourcesIndex + 1])
+        // 直接使用第一部分作为模块名
+        if let first = components.first, !first.isEmpty {
+            // 如果第一部分是以 .swift 结尾（说明没有目录结构，只有文件名），则无法推断模块名
+            if first.hasSuffix(".swift") {
+                return ""
+            }
+            return String(first)
         }
         
-        // Pattern: {Module}/Sources/... (反向结构)
-        if let sourcesIndex = components.firstIndex(of: "Sources"),
-           sourcesIndex > 0 {
-            return String(components[sourcesIndex - 1])
-        }
-        
-        // Fallback: 使用当前目录名
-        return components.last?.replacingOccurrences(of: ".swift", with: "") ?? ""
+        return ""
     }
 }
 
