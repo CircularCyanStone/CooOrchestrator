@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		65CF2B602EFFE8E100BCEE0F /* CooOrchestrator in Frameworks */ = {isa = PBXBuildFile; productRef = 65CF2B5F2EFFE8E100BCEE0F /* CooOrchestrator */; };
+		65CF2B612EFFE8E900BCEE0F /* CooOrchestrator in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 65CF2B5F2EFFE8E100BCEE0F /* CooOrchestrator */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		FB7DF8D72EFA7AB100AB2476 /* DynamicModule2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; };
 		FB7DF8D82EFA7AB100AB2476 /* DynamicModule2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB7DF8E62EFA868B00AB2476 /* exampleModule1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */; };
@@ -16,8 +18,6 @@
 		FB858A492EFEBEAF00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB858A4B2EFEBEC500AEAA27 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
 		FB858A4C2EFEBEC500AEAA27 /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		FB858B932EFECBA900AEAA27 /* CooOrchestrator in Frameworks */ = {isa = PBXBuildFile; productRef = FB858B922EFECBA900AEAA27 /* CooOrchestrator */; };
-		FB858B962EFECBBF00AEAA27 /* CooOrchestrator in Embed Frameworks */ = {isa = PBXBuildFile; productRef = FB858B922EFECBA900AEAA27 /* CooOrchestrator */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,7 +44,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				FB858B962EFECBBF00AEAA27 /* CooOrchestrator in Embed Frameworks */,
+				65CF2B612EFFE8E900BCEE0F /* CooOrchestrator in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,6 +86,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		65CF82DF2EFFE58800BCEE0F /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
+		65CFAA2C2EFFE61C00BCEE0F /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
+		65CFD17B2EFFE6B600BCEE0F /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
 		FB15F2752EF58F7200E1DA93 /* example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB1CC0252EFEA09100FCA6AB /* SPMExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPMExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = exampleModule1.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -200,7 +203,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB858B932EFECBA900AEAA27 /* CooOrchestrator in Frameworks */,
+				65CF2B602EFFE8E100BCEE0F /* CooOrchestrator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +233,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		65CF90A02EFFE58800BCEE0F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		65CFB7ED2EFFE61C00BCEE0F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		65CFDF3C2EFFE6B600BCEE0F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		FB15F5052EF592A000E1DA93 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -332,7 +356,7 @@
 			);
 			name = SPMExample;
 			packageProductDependencies = (
-				FB858B922EFECBA900AEAA27 /* CooOrchestrator */,
+				65CF2B5F2EFFE8E100BCEE0F /* CooOrchestrator */,
 			);
 			productName = SPMExample;
 			productReference = FB1CC0252EFEA09100FCA6AB /* SPMExample.app */;
@@ -444,11 +468,25 @@
 			mainGroup = FBD17C812EF3D61900C9CDB2;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				FB858B912EFECBA900AEAA27 /* XCLocalSwiftPackageReference "CooOrchestrator" */,
+				65CF2B5E2EFFE8E100BCEE0F /* XCLocalSwiftPackageReference "CooOrchestrator" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FBD17C8C2EF3D61900C9CDB2 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 65CFB7ED2EFFE61C00BCEE0F /* Products */;
+					ProjectRef = 65CFAA2C2EFFE61C00BCEE0F /* SwiftRefactorExtension.xcodeproj */;
+				},
+				{
+					ProductGroup = 65CF90A02EFFE58800BCEE0F /* Products */;
+					ProjectRef = 65CF82DF2EFFE58800BCEE0F /* SwiftRefactorExtension.xcodeproj */;
+				},
+				{
+					ProductGroup = 65CFDF3C2EFFE6B600BCEE0F /* Products */;
+					ProjectRef = 65CFD17B2EFFE6B600BCEE0F /* SwiftRefactorExtension.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				FBD17C8A2EF3D61900C9CDB2 /* CooOrchestrator */,
@@ -1076,14 +1114,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		FB858B912EFECBA900AEAA27 /* XCLocalSwiftPackageReference "CooOrchestrator" */ = {
+		65CF2B5E2EFFE8E100BCEE0F /* XCLocalSwiftPackageReference "CooOrchestrator" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = CooOrchestrator;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		FB858B922EFECBA900AEAA27 /* CooOrchestrator */ = {
+		65CF2B5F2EFFE8E100BCEE0F /* CooOrchestrator */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CooOrchestrator;
 		};

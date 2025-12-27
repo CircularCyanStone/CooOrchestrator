@@ -4,7 +4,16 @@ import SwiftCompilerPlugin
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import SwiftDiagnostics
 import Foundation
+
+// MARK: - Debug Helper
+// 用于在编译期输出日志，方便调试路径问题
+struct DebugDiagnostic: DiagnosticMessage {
+    let message: String
+    let diagnosticID: MessageID
+    let severity: DiagnosticSeverity
+}
 
 // MARK: - Helper
 
@@ -29,6 +38,16 @@ enum MacroHelper {
         
         // 2. 尝试从文件路径推断
         if let filePath = context.location(of: node)?.file.as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text {
+            // [Debug] 输出真实的文件路径到编译器警告中，方便查看
+            context.diagnose(Diagnostic(
+                node: node,
+                message: DebugDiagnostic(
+                    message: "🔍 [CooDebug] Real FilePath: \(filePath)",
+                    diagnosticID: MessageID(domain: "CooMacros", id: "path_debug"),
+                    severity: .warning
+                )
+            ))
+            
             return extractModuleNameFromPath(filePath)
         }
         
