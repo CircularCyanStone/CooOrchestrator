@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		65CF98DA2F00016300BCEE0F /* CooOrchestrator in Frameworks */ = {isa = PBXBuildFile; productRef = 65CF98D92F00016300BCEE0F /* CooOrchestrator */; };
-		65CF98DB2F00016900BCEE0F /* CooOrchestrator in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 65CF98D92F00016300BCEE0F /* CooOrchestrator */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		650156312F0013ED00455D57 /* CooOrchestrator in Frameworks */ = {isa = PBXBuildFile; productRef = 650156302F0013ED00455D57 /* CooOrchestrator */; };
+		650156322F0013F400455D57 /* CooOrchestrator in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 650156302F0013ED00455D57 /* CooOrchestrator */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		FB7DF8D72EFA7AB100AB2476 /* DynamicModule2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; };
 		FB7DF8D82EFA7AB100AB2476 /* DynamicModule2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB7DF8E62EFA868B00AB2476 /* exampleModule1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */; };
@@ -44,7 +44,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				65CF98DB2F00016900BCEE0F /* CooOrchestrator in Embed Frameworks */,
+				650156322F0013F400455D57 /* CooOrchestrator in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -119,33 +119,6 @@
 			);
 			target = FB15F2742EF58F7200E1DA93 /* example */;
 		};
-		FB858BAD2EFECC8800AEAA27 /* Exceptions for "CooOrchestrator" folder in "CooOrchestrator" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Sources/CooOrchestrator/COContext.swift,
-				Sources/CooOrchestrator/COLogger.swift,
-				Sources/CooOrchestrator/CooOrchestrator.docc,
-				Sources/CooOrchestrator/CooOrchestrator.h,
-				Sources/CooOrchestrator/COrchestrator.swift,
-				Sources/CooOrchestrator/COResult.swift,
-				Sources/CooOrchestrator/COService.swift,
-				Sources/CooOrchestrator/COServiceDefinition.swift,
-				Sources/CooOrchestrator/COServiceFactory.swift,
-				Sources/CooOrchestrator/COTypes.swift,
-				Sources/CooOrchestrator/source/COManifestDiscovery.swift,
-				Sources/CooOrchestrator/source/COModuleDiscovery.swift,
-				Sources/CooOrchestrator/source/COSectionDiscovery.swift,
-				Sources/CooOrchestrator/source/ocMacros/CORegistrationMacros.h,
-				Sources/CooOrchestrator/StandardServices/COApplicationObserver.swift,
-				Sources/CooOrchestrator/StandardServices/COSceneObserver.swift,
-				Sources/CooOrchestrator/StandardServices/COStandardEvents.swift,
-			);
-			publicHeaders = (
-				Sources/CooOrchestrator/CooOrchestrator.h,
-				Sources/CooOrchestrator/source/ocMacros/CORegistrationMacros.h,
-			);
-			target = FBD17C8A2EF3D61900C9CDB2 /* CooOrchestrator */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -178,14 +151,6 @@
 			path = DynamicModule2;
 			sourceTree = "<group>";
 		};
-		FB858B0C2EFECB5A00AEAA27 /* CooOrchestrator */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				FB858BAD2EFECC8800AEAA27 /* Exceptions for "CooOrchestrator" folder in "CooOrchestrator" target */,
-			);
-			path = CooOrchestrator;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,7 +168,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				65CF98DA2F00016300BCEE0F /* CooOrchestrator in Frameworks */,
+				650156312F0013ED00455D57 /* CooOrchestrator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,7 +229,6 @@
 		FBD17C812EF3D61900C9CDB2 = {
 			isa = PBXGroup;
 			children = (
-				FB858B0C2EFECB5A00AEAA27 /* CooOrchestrator */,
 				FB15F2762EF58F7200E1DA93 /* example */,
 				FB7DF8A52EFA71BE00AB2476 /* exampleModule1 */,
 				FB7DF8B92EFA72D300AB2476 /* DynamicModule2 */,
@@ -356,7 +320,7 @@
 			);
 			name = SPMExample;
 			packageProductDependencies = (
-				65CF98D92F00016300BCEE0F /* CooOrchestrator */,
+				650156302F0013ED00455D57 /* CooOrchestrator */,
 			);
 			productName = SPMExample;
 			productReference = FB1CC0252EFEA09100FCA6AB /* SPMExample.app */;
@@ -468,7 +432,7 @@
 			mainGroup = FBD17C812EF3D61900C9CDB2;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				65CF98D82F00016300BCEE0F /* XCLocalSwiftPackageReference "CooOrchestrator" */,
+				6501562F2F0013ED00455D57 /* XCLocalSwiftPackageReference "Orchestrator" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FBD17C8C2EF3D61900C9CDB2 /* Products */;
@@ -1118,14 +1082,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		65CF98D82F00016300BCEE0F /* XCLocalSwiftPackageReference "CooOrchestrator" */ = {
+		6501562F2F0013ED00455D57 /* XCLocalSwiftPackageReference "Orchestrator" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = CooOrchestrator;
+			relativePath = Orchestrator;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		65CF98D92F00016300BCEE0F /* CooOrchestrator */ = {
+		650156302F0013ED00455D57 /* CooOrchestrator */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CooOrchestrator;
 		};

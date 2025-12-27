@@ -21,6 +21,7 @@ final class TestServiceA: COService {
 }
 
 // 服务 B
+@OrchService()
 final class TestServiceB: COService {
     required init() {}
     
@@ -35,7 +36,7 @@ final class TestServiceB: COService {
 // MARK: - 测试模块 (使用 @OrchModule 注册)
 
 // 这个模块负责加载 ServiceA 和 ServiceB
-@OrchModule
+@OrchModule()
 final class TestModuleSource: COServiceSource {
     required init() {}
     
@@ -50,7 +51,7 @@ final class TestModuleSource: COServiceSource {
 // MARK: - 独立服务 (使用 @OrchService 直接注册)
 
 // 服务 C
-@OrchService
+@OrchModule()
 final class TestServiceC: COService {
     required init() {}
     

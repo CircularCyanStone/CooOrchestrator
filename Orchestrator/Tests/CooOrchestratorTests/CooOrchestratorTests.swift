@@ -86,3 +86,12 @@ final class CooOrchestratorTests: XCTestCase {
         )
     }
 }
+
+@OrchModule()
+final class TModule: COServiceSource {
+    func load() -> [CooOrchestrator.COServiceDefinition] {
+        []
+    }
+    
+    
+}
