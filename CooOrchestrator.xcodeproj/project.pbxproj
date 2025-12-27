@@ -7,13 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		65A3A7DF2F0019A300C6103C /* CooOrchestrator in Frameworks */ = {isa = PBXBuildFile; productRef = 65A3A7DE2F0019A300C6103C /* CooOrchestrator */; };
-		65A3A7E02F0019AB00C6103C /* CooOrchestrator in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 65A3A7DE2F0019A300C6103C /* CooOrchestrator */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		65A3A8CD2F001A7B00C6103C /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
+		65A3A8CE2F001A7B00C6103C /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB7DF8D72EFA7AB100AB2476 /* DynamicModule2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; };
 		FB7DF8D82EFA7AB100AB2476 /* DynamicModule2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB7DF8E62EFA868B00AB2476 /* exampleModule1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */; };
-		FB858A452EFEBE9C00AEAA27 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
-		FB858A462EFEBE9C00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB858A482EFEBEAF00AEAA27 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
 		FB858A492EFEBEAF00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB858A4B2EFEBEC500AEAA27 /* CooOrchestrator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */; };
@@ -21,6 +19,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		65A3A8CF2F001A7B00C6103C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FBD17C822EF3D61900C9CDB2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FBD17C8A2EF3D61900C9CDB2;
+			remoteInfo = CooOrchestrator;
+		};
 		FB7DF8AA2EFA71BE00AB2476 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FBD17C822EF3D61900C9CDB2 /* Project object */;
@@ -38,13 +43,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		FB1CC0B12EFEA1C200FCA6AB /* Embed Frameworks */ = {
+		65A3A8D12F001A7B00C6103C /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				65A3A7E02F0019AB00C6103C /* CooOrchestrator in Embed Frameworks */,
+				65A3A8CE2F001A7B00C6103C /* CooOrchestrator.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -57,17 +62,6 @@
 			files = (
 				FB858A4C2EFEBEC500AEAA27 /* CooOrchestrator.framework in Embed Frameworks */,
 				FB7DF8D82EFA7AB100AB2476 /* DynamicModule2.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FB858A472EFEBE9C00AEAA27 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				FB858A462EFEBE9C00AEAA27 /* CooOrchestrator.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,33 +84,17 @@
 		65CFAA2C2EFFE61C00BCEE0F /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
 		65CFD17B2EFFE6B600BCEE0F /* SwiftRefactorExtension.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SwiftRefactorExtension.xcodeproj; sourceTree = "<group>"; };
 		FB15F2752EF58F7200E1DA93 /* example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = example.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FB1CC0252EFEA09100FCA6AB /* SPMExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPMExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = exampleModule1.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DynamicModule2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBD17C8B2EF3D61900C9CDB2 /* CooOrchestrator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CooOrchestrator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		65A3A7CC2F00195D00C6103C /* Exceptions for "Sources" folder in "CooOrchestrator" target */ = {
+		656FE39E2F002422000B7AD2 /* Exceptions for "Sources" folder in "CooOrchestrator" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CooOrchestrator/COContext.swift,
-				CooOrchestrator/COLogger.swift,
-				CooOrchestrator/CooOrchestrator.docc,
-				CooOrchestrator/CooOrchestrator.h,
-				CooOrchestrator/COrchestrator.swift,
-				CooOrchestrator/COResult.swift,
-				CooOrchestrator/COService.swift,
-				CooOrchestrator/COServiceDefinition.swift,
-				CooOrchestrator/COServiceFactory.swift,
-				CooOrchestrator/COTypes.swift,
-				CooOrchestrator/source/COManifestDiscovery.swift,
-				CooOrchestrator/source/COModuleDiscovery.swift,
-				CooOrchestrator/source/COSectionDiscovery.swift,
-				CooOrchestrator/source/ocMacros/CORegistrationMacros.h,
-				CooOrchestrator/StandardServices/COApplicationObserver.swift,
-				CooOrchestrator/StandardServices/COSceneObserver.swift,
-				CooOrchestrator/StandardServices/COStandardEvents.swift,
+				CooOrchestrator/Macros/Macros.swift,
+				CooOrchestratorMacros/CooOrchestratorMacros.swift,
 			);
 			publicHeaders = (
 				CooOrchestrator/CooOrchestrator.h,
@@ -132,13 +110,6 @@
 			);
 			target = FB15F2742EF58F7200E1DA93 /* example */;
 		};
-		FB1CC0382EFEA09300FCA6AB /* Exceptions for "SPMExample" folder in "SPMExample" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = FB1CC0242EFEA09100FCA6AB /* SPMExample */;
-		};
 		FB7DF8E82EFA86A300AB2476 /* Exceptions for "exampleModule1" folder in "example" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -149,10 +120,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		65A3A7C82F00195300C6103C /* Sources */ = {
+		656FE3892F0023E1000B7AD2 /* Sources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				65A3A7CC2F00195D00C6103C /* Exceptions for "Sources" folder in "CooOrchestrator" target */,
+				656FE39E2F002422000B7AD2 /* Exceptions for "Sources" folder in "CooOrchestrator" target */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -163,14 +134,6 @@
 				FB15F2882EF58F7400E1DA93 /* Exceptions for "example" folder in "example" target */,
 			);
 			path = example;
-			sourceTree = "<group>";
-		};
-		FB1CC0262EFEA09100FCA6AB /* SPMExample */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				FB1CC0382EFEA09300FCA6AB /* Exceptions for "SPMExample" folder in "SPMExample" target */,
-			);
-			path = SPMExample;
 			sourceTree = "<group>";
 		};
 		FB7DF8A52EFA71BE00AB2476 /* exampleModule1 */ = {
@@ -199,14 +162,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		FB1CC0222EFEA09100FCA6AB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				65A3A7DF2F0019A300C6103C /* CooOrchestrator in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FB7DF8A12EFA71BE00AB2476 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -219,7 +174,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB858A452EFEBE9C00AEAA27 /* CooOrchestrator.framework in Frameworks */,
+				65A3A8CD2F001A7B00C6103C /* CooOrchestrator.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,11 +219,10 @@
 		FBD17C812EF3D61900C9CDB2 = {
 			isa = PBXGroup;
 			children = (
-				65A3A7C82F00195300C6103C /* Sources */,
+				656FE3892F0023E1000B7AD2 /* Sources */,
 				FB15F2762EF58F7200E1DA93 /* example */,
 				FB7DF8A52EFA71BE00AB2476 /* exampleModule1 */,
 				FB7DF8B92EFA72D300AB2476 /* DynamicModule2 */,
-				FB1CC0262EFEA09100FCA6AB /* SPMExample */,
 				FB15F5052EF592A000E1DA93 /* Frameworks */,
 				FBD17C8C2EF3D61900C9CDB2 /* Products */,
 			);
@@ -281,7 +235,6 @@
 				FB15F2752EF58F7200E1DA93 /* example.app */,
 				FB7DF8A42EFA71BE00AB2476 /* exampleModule1.framework */,
 				FB7DF8B82EFA72D300AB2476 /* DynamicModule2.framework */,
-				FB1CC0252EFEA09100FCA6AB /* SPMExample.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -338,30 +291,6 @@
 			productReference = FB15F2752EF58F7200E1DA93 /* example.app */;
 			productType = "com.apple.product-type.application";
 		};
-		FB1CC0242EFEA09100FCA6AB /* SPMExample */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = FB1CC0392EFEA09300FCA6AB /* Build configuration list for PBXNativeTarget "SPMExample" */;
-			buildPhases = (
-				FB1CC0212EFEA09100FCA6AB /* Sources */,
-				FB1CC0222EFEA09100FCA6AB /* Frameworks */,
-				FB1CC0232EFEA09100FCA6AB /* Resources */,
-				FB1CC0B12EFEA1C200FCA6AB /* Embed Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				FB1CC0262EFEA09100FCA6AB /* SPMExample */,
-			);
-			name = SPMExample;
-			packageProductDependencies = (
-				65A3A7DE2F0019A300C6103C /* CooOrchestrator */,
-			);
-			productName = SPMExample;
-			productReference = FB1CC0252EFEA09100FCA6AB /* SPMExample.app */;
-			productType = "com.apple.product-type.application";
-		};
 		FB7DF8A32EFA71BE00AB2476 /* exampleModule1 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB7DF8AE2EFA71BE00AB2476 /* Build configuration list for PBXNativeTarget "exampleModule1" */;
@@ -394,11 +323,12 @@
 				FB7DF8B42EFA72D300AB2476 /* Sources */,
 				FB7DF8B52EFA72D300AB2476 /* Frameworks */,
 				FB7DF8B62EFA72D300AB2476 /* Resources */,
-				FB858A472EFEBE9C00AEAA27 /* Embed Frameworks */,
+				65A3A8D12F001A7B00C6103C /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				65A3A8D02F001A7B00C6103C /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				FB7DF8B92EFA72D300AB2476 /* DynamicModule2 */,
@@ -423,6 +353,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				656FE3892F0023E1000B7AD2 /* Sources */,
+			);
 			name = CooOrchestrator;
 			packageProductDependencies = (
 			);
@@ -443,9 +376,6 @@
 					FB15F2742EF58F7200E1DA93 = {
 						CreatedOnToolsVersion = 16.3;
 						LastSwiftMigration = 1630;
-					};
-					FB1CC0242EFEA09100FCA6AB = {
-						CreatedOnToolsVersion = 16.3;
 					};
 					FB7DF8A32EFA71BE00AB2476 = {
 						CreatedOnToolsVersion = 16.3;
@@ -468,7 +398,6 @@
 			mainGroup = FBD17C812EF3D61900C9CDB2;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				65A3A7DD2F0019A300C6103C /* XCLocalSwiftPackageReference "../CooOrchestrator" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FBD17C8C2EF3D61900C9CDB2 /* Products */;
@@ -493,20 +422,12 @@
 				FB15F2742EF58F7200E1DA93 /* example */,
 				FB7DF8A32EFA71BE00AB2476 /* exampleModule1 */,
 				FB7DF8B72EFA72D300AB2476 /* DynamicModule2 */,
-				FB1CC0242EFEA09100FCA6AB /* SPMExample */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FB15F2732EF58F7200E1DA93 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FB1CC0232EFEA09100FCA6AB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -544,13 +465,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		FB1CC0212EFEA09100FCA6AB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FB7DF8A02EFA71BE00AB2476 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -575,6 +489,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		65A3A8D02F001A7B00C6103C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FBD17C8A2EF3D61900C9CDB2 /* CooOrchestrator */;
+			targetProxy = 65A3A8CF2F001A7B00C6103C /* PBXContainerItemProxy */;
+		};
 		FB7DF8AB2EFA71BE00AB2476 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = FB7DF8A32EFA71BE00AB2476 /* exampleModule1 */;
@@ -650,64 +569,6 @@
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.coo.example;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		FB1CC0362EFEA09300FCA6AB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UQ35W3765Z;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SPMExample/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SymbolLinkageMarkers";
-				PRODUCT_BUNDLE_IDENTIFIER = com.coo.SPMExample;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		FB1CC0372EFEA09300FCA6AB /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UQ35W3765Z;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SPMExample/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SymbolLinkageMarkers";
-				PRODUCT_BUNDLE_IDENTIFIER = com.coo.SPMExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1070,15 +931,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FB1CC0392EFEA09300FCA6AB /* Build configuration list for PBXNativeTarget "SPMExample" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				FB1CC0362EFEA09300FCA6AB /* Debug */,
-				FB1CC0372EFEA09300FCA6AB /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		FB7DF8AE2EFA71BE00AB2476 /* Build configuration list for PBXNativeTarget "exampleModule1" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1116,20 +968,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		65A3A7DD2F0019A300C6103C /* XCLocalSwiftPackageReference "../CooOrchestrator" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../CooOrchestrator;
-		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		65A3A7DE2F0019A300C6103C /* CooOrchestrator */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = CooOrchestrator;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FBD17C822EF3D61900C9CDB2 /* Project object */;
 }
