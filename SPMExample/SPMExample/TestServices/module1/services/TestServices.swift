@@ -17,7 +17,7 @@ final class TestServiceA: OhService {
     
     static func register(in registry: OhRegistry<TestServiceA>) {
         // 注册一些事件...
-        OhLogger.log("TestServiceA registered")
+        print("TestServiceA registered")
     }
 }
 
@@ -28,7 +28,7 @@ final class TestServiceB: OhService {
     
     
     static func register(in registry: OhRegistry<TestServiceB>) {
-        OhLogger.log("TestServiceB registered")
+        print("TestServiceB registered")
     }
     
     
@@ -52,12 +52,12 @@ final class TestModuleSource: OhServiceSource {
 // MARK: - 独立服务 (使用 @OrchService 直接注册)
 
 // 服务 C
-@OrchModule()
+@OrchService()
 final class TestServiceC: OhService {
     required init() {}
     
     static func register(in registry: OhRegistry<TestServiceC>) {
-        OhLogger.log("TestServiceC registered via Macro")
+        print("TestServiceC registered via Macro")
     }
 }
 
@@ -67,6 +67,6 @@ final class TestServiceD: OhService {
     required init() {}
     
     static func register(in registry: OhRegistry<TestServiceD>) {
-        OhLogger.log("TestServiceD registered via Macro")
+        print("TestServiceD registered via Macro")
     }
 }

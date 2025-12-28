@@ -17,11 +17,11 @@ public struct OhModuleDiscovery: OhServiceSource {
         // 读取主 Bundle 下的 OhModules.plist
         guard let modulesURL = Bundle.main.url(forResource: "OhModules", withExtension: "plist"),
               let moduleNames = NSArray(contentsOf: modulesURL) as? [String] else {
-            OhLogger.log("OhModuleDiscovery: OhModules.plist not found or invalid.")
+            OhLogger.log("OhModuleDiscovery: OhModules.plist not found or invalid.", level: .warning)
             return []
         }
         
-        OhLogger.log("OhModuleDiscovery: Found \(moduleNames.count) modules in config.")
+        OhLogger.log("OhModuleDiscovery: Found \(moduleNames.count) modules in config.", level: .info)
         
         for className in moduleNames {
             // 实例化模块入口 (必须遵循 OhServiceSource)
@@ -29,9 +29,9 @@ public struct OhModuleDiscovery: OhServiceSource {
                 let module = moduleClass.init()
                 let descriptors = module.load()
                 result.append(contentsOf: descriptors)
-                OhLogger.log("OhModuleDiscovery: Loaded \(descriptors.count) services from \(className)")
+                OhLogger.log("OhModuleDiscovery: Loaded \(descriptors.count) services from \(className)", level: .info)
             } else {
-                OhLogger.log("OhModuleDiscovery: Warning - Class '\(className)' not found or invalid.")
+                OhLogger.log("OhModuleDiscovery: Class '\(className)' not found or invalid.", level: .warning)
             }
         }
         

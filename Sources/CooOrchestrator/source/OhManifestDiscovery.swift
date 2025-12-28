@@ -177,13 +177,13 @@ public struct OhManifestDiscovery: OhServiceSource {
         var list: [OhServiceDefinition] = []
         for item in array {
             guard let className = item[ManifestKeys.className] as? String else {
-                OhLogger.log("Warning: className not exsit in manifest.")
+                OhLogger.log("className not exsit in manifest.", level: .warning)
                 continue
             }
             
             // 立即转换为 Class，如果转换失败则跳过
             guard let serviceClass = NSClassFromString(className) else {
-                OhLogger.log("Warning: Failed to resolve class '\(className)' from manifest.")
+                OhLogger.log("Failed to resolve class '\(className)' from manifest.", level: .warning)
                 continue
             }
             
@@ -196,7 +196,7 @@ public struct OhManifestDiscovery: OhServiceSource {
             if let fName = factoryName {
                 factoryClass = NSClassFromString(fName)
                 if factoryClass == nil {
-                     OhLogger.log("Warning: Failed to resolve factory class '\(fName)' for service '\(className)'.")
+                     OhLogger.log("Failed to resolve factory class '\(fName)' for service '\(className)'.", level: .warning)
                 }
             }
             

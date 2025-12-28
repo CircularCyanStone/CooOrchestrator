@@ -45,9 +45,9 @@ public struct OhSectionDiscovery: OhServiceSource {
                 let instance = type.init()
                 let moduleServices = instance.load()
                 results.append(contentsOf: moduleServices)
-                OhLogger.log("OhSectionDiscovery: Loaded module '\(className)' with \(moduleServices.count) services.")
+                OhLogger.log("OhSectionDiscovery: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
             } else {
-                OhLogger.log("OhSectionDiscovery: Warning - Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceSource.")
+                OhLogger.log("OhSectionDiscovery: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceSource.", level: .warning)
             }
         }
         
@@ -60,7 +60,7 @@ public struct OhSectionDiscovery: OhServiceSource {
                 let def = OhServiceDefinition.service(type)
                 results.append(def)
             } else {
-                OhLogger.log("OhSectionDiscovery: Warning - Class '\(className)' in \(Self.sectionService) is not a valid OhService.")
+                OhLogger.log("OhSectionDiscovery: Class '\(className)' in \(Self.sectionService) is not a valid OhService.", level: .warning)
             }
         }
         

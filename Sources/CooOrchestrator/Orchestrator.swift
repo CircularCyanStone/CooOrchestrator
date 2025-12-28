@@ -195,18 +195,18 @@ public final class Orchestrator: @unchecked Sendable {
         
         // 优先使用工厂
         if let factoryType = desc.factoryClass as? OhServiceFactory.Type {
-            OhLogger.log("Instantiate: Creating \(className) using factory \(NSStringFromClass(factoryType))")
+            OhLogger.log("Instantiate: Creating \(className) using factory \(NSStringFromClass(factoryType))", level: .debug)
             let factory = factoryType.init()
             return factory.make(context: context, args: desc.args)
         }
         
         // 直接实例化
         guard let serviceType = desc.serviceClass as? any OhService.Type else {
-            OhLogger.log("Warning: className \(desc.serviceClass) not implement OhService")
+            OhLogger.log("className \(desc.serviceClass) not implement OhService", level: .warning)
             return nil
         }
         
-        OhLogger.log("Instantiate: Creating \(className) via init()")
+        OhLogger.log("Instantiate: Creating \(className) via init()", level: .debug)
         let service = serviceType.init()
         return service
     }
@@ -220,18 +220,18 @@ public final class Orchestrator: @unchecked Sendable {
         
         // [Debug Log] 输出当前批次扫描到的所有类名
         let classNames = items.map { NSStringFromClass($0.serviceClass) }
-        OhLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(classNames)")
+        OhLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(classNames)", level: .debug)
         
         for d in items {
             guard let type = d.serviceClass as? any OhService.Type else { 
-                OhLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(d.serviceClass)) does not conform to OhService")
+                OhLogger.log("MergeDefinitions: \(NSStringFromClass(d.serviceClass)) does not conform to OhService", level: .warning)
                 continue
             }
             let typeID = ObjectIdentifier(type)
             
             // 快速去重检查
             if registeredServiceIDs.contains(typeID) { 
-                OhLogger.log("MergeDefinitions: Skipped duplicate service \(NSStringFromClass(type))")
+                OhLogger.log("MergeDefinitions: Skipped duplicate service \(NSStringFromClass(type))", level: .debug)
                 continue
             }
             
@@ -242,7 +242,7 @@ public final class Orchestrator: @unchecked Sendable {
             // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
             let handlers = self.resolveHandlers(for: type)
             if handlers.isEmpty { 
-                OhLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(type)) has no handlers registered")
+                OhLogger.log("MergeDefinitions: \(NSStringFromClass(type)) has no handlers registered", level: .warning)
                 continue
             }
             
