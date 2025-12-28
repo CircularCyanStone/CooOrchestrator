@@ -4,7 +4,7 @@
 /**
  多线程方案选定策略：
  - 为了保证fire方法在传递事件时能保留原方法的执行环境，所以选择了了传统的使用锁来保护多线程的访问安全。
-而使用Concurrency必然面临隔离域切换，一旦切换了就无法感知之前的执行环境了。
+ 而使用Concurrency必然面临隔离域切换，一旦切换了就无法感知之前的执行环境了。
  */
 import Foundation
 
@@ -30,10 +30,6 @@ public final class Orchestrator: @unchecked Sendable {
     
     /// 内部串行队列，用于保护 descriptors, residentServices, cacheByPhase 等状态
     private let isolationQueue = DispatchQueue(label: "com.coo.orchestrator", qos: .userInitiated)
-    
-    /// 服务注册表缓存（Type ID -> Handlers）
-    /// 存储每个 Service 类注册的所有事件处理闭包
-    private var serviceHandlers: [String: [(OhEvent, (any OhService, OhContext) throws -> OhResult)]] = [:]
     
     private init() {}
     
@@ -73,6 +69,14 @@ public final class Orchestrator: @unchecked Sendable {
                 let end = CFAbsoluteTimeGetCurrent()
                 OhLogger.logPerf("Resolve: Bootstrap completed. Total Cost: \(String(format: "%.4fs", end - start))")
             }
+        }
+    }
+    
+    private func getService<T: OhService>(of type: T.Type) -> T? {
+        isolationQueue.sync {
+            // 目前仅支持查找已存在的常驻服务
+            // 为了安全起见，我们应该通过协议访问 id。
+            return self.residentServices[type.id] as? T
         }
     }
     
@@ -237,9 +241,8 @@ public final class Orchestrator: @unchecked Sendable {
             // 标记已注册
             registeredServiceIDs.insert(typeID)
             
-            // 2. 获取 Handlers (带缓存)
-            // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
-            let handlers = self.resolveHandlers(for: type)
+            // 2. 获取 Handlers
+            let handlers = self.collectHandlers(for: type)
             if handlers.isEmpty { 
                 OhLogger.log("MergeDefinitions: \(NSStringFromClass(type)) has no handlers registered", level: .debug)
                 continue
@@ -272,30 +275,9 @@ public final class Orchestrator: @unchecked Sendable {
         OhLogger.logPerf("MergeDefinitions: Processed \(items.count) items, Inserted \(entriesToInsert.count) groups. Cost: \(String(format: "%.4fs", end - start))")
     }
     
-    // 提取辅助方法，逻辑更清晰
-    private func resolveHandlers(for type: any OhService.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
-        if let cached = serviceHandlers[type.id] {
-            return cached
-        }
-        let handlers = collectHandlers(for: type)
-        serviceHandlers[type.id] = handlers
-        return handlers
-    }
-    
     // 辅助：调用泛型静态方法 register
     private func collectHandlers(for type: any OhService.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
-        // 利用 Swift 的运行时特性或辅助协议来调用泛型方法
-        // 这里我们需要一个技巧：让 OhService 遵守一个辅助协议，该协议暴露非泛型的 register 入口，或者我们通过反射
-        
-        // 实际上，最简单的办法是实例化一个 Registry，然后传入。
-        // 但 Registry 是泛型的 OhRegistry<Service>。
-        // 我们需要构造一个闭包，让 Service 自己去推断类型。
-        
-        func openExistential<T: OhService>(_ type: T.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
-            return invokeRegister(type)
-        }
-        
-        return openExistential(type)
+        return invokeRegister(type)
     }
     
     private func invokeRegister<T: OhService>(_ type: T.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
@@ -368,5 +350,12 @@ extension Orchestrator {
     ) -> T? {
         let ret = shared.fire(event, parameters: parameters)
         return ret.value()
+    }
+    
+    /// 获取常驻服务实例
+    /// - Parameter type: 服务类型
+    /// - Returns: 如果该服务已被加载且策略为常驻 (.hold)，则返回实例；否则返回 nil
+    public static func service<T: OhService>(of type: T.Type) -> T? {
+        return shared.getService(of: type)
     }
 }
