@@ -1,10 +1,10 @@
 import Foundation
 import CooOrchestrator
 
-public final class EnvironmentDemoTask: NSObject, COService {
+public final class EnvironmentDemoTask: NSObject, OhService {
     public static let id: String = "env.demo"
-    public static let priority: COPriority = .init(rawValue: 50)
-    public static let retention: CORetentionPolicy = .destroy
+    public static let priority: OhPriority = .init(rawValue: 50)
+    public static let retention: OhRetentionPolicy = .destroy
     
     // 协议变更：init 必须无参
     public required override init() {
@@ -12,7 +12,7 @@ public final class EnvironmentDemoTask: NSObject, COService {
     }
 
     // 协议变更：注册事件处理
-    public static func register(in registry: CORegistry<EnvironmentDemoTask>) {
+    public static func register(in registry: OhRegistry<EnvironmentDemoTask>) {
         registry.add(.didFinishLaunching) { service, context in
             // 直接使用 Bundle.main，或根据需要使用其他 Bundle
             let bundle = Bundle.main
@@ -38,7 +38,7 @@ public final class EnvironmentDemoTask: NSObject, COService {
             }
 
             // 依然可以调用 Logging，但实际上 Manager 也会记录一次
-            COLogger.logTask(
+            OhLogger.logTask(
                 "EnvironmentDemoTask",
                 event: context.event,
                 success: true,

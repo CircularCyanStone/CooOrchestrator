@@ -5,7 +5,7 @@ import Foundation
 import os.log
 
 /// 日志管理器
-public enum COLogger: Sendable {
+public enum OhLogger: Sendable {
     /// 全局开关（线程安全）
     public static var isEnabled: Bool {
         get { 
@@ -23,7 +23,7 @@ public enum COLogger: Sendable {
     private static let lock = NSLock()
     
     /// 日志子系统标识，默认取主 bundle 标识
-    static let subsystem = Bundle.main.bundleIdentifier ?? "COrchestrator"
+    static let subsystem = Bundle.main.bundleIdentifier ?? "Orchestrator"
     
     /// 记录服务执行日志
     /// - Parameters:
@@ -33,7 +33,7 @@ public enum COLogger: Sendable {
     ///   - message: 附加信息
     ///   - cost: 耗时（秒）
     public static func logTask(_ className: String,
-                        event: COEvent,
+                        event: OhEvent,
                         success: Bool,
                         message: String? = nil,
                         cost: TimeInterval = 0) {
@@ -45,7 +45,7 @@ public enum COLogger: Sendable {
     }
     
     /// 记录拦截日志
-    static func logIntercept(_ className: String, event: COEvent) {
+    static func logIntercept(_ className: String, event: OhEvent) {
         guard isEnabled else { return }
         print("[Lifecycle] [\(event.rawValue)] 🛑 Intercepted by \(className)")
     }

@@ -6,10 +6,10 @@ import Foundation
 import CooOrchestrator
 import UIKit
 
-public final class PushNotificationInitTask: NSObject, COService, COApplicationObserver {
+public final class PushNotificationInitTask: NSObject, OhService, OhApplicationObserver {
     public static let id: String = "push.init"
-    public static let priority: COPriority = .init(rawValue: 200)
-    public static let retention: CORetentionPolicy = .hold
+    public static let priority: OhPriority = .init(rawValue: 200)
+    public static let retention: OhRetentionPolicy = .hold
     
     // 协议变更：init 必须无参
     public required override init() {
@@ -17,7 +17,7 @@ public final class PushNotificationInitTask: NSObject, COService, COApplicationO
     }
 
     // 协议变更：注册事件处理
-    public static func register(in registry: CORegistry<PushNotificationInitTask>) {
+    public static func register(in registry: OhRegistry<PushNotificationInitTask>) {
         // 注册启动事件 (委托给 dispatchApplicationEvent)
         addApplication(.didFinishLaunching, in: registry)
         addApplication(.didRegisterForRemoteNotifications, in: registry)
@@ -30,14 +30,14 @@ public final class PushNotificationInitTask: NSObject, COService, COApplicationO
         }
     }
     
-    // MARK: - COApplicationObserver
+    // MARK: - OhApplicationObserver
     
-    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> COResult {
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> OhResult {
         print("PushNotificationInitTask: Initializing SDK...")
         return .continue()
     }
     
-    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) -> COResult {
+    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) -> OhResult {
         print("PushNotificationInitTask: Registered token: \(deviceToken)")
         return .continue()
     }

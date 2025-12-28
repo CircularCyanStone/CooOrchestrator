@@ -1,6 +1,6 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：定义应用服务的基础协议，包括唯一标识、优先级、驻留策略及注册入口。
-// 类型功能描述：COService 是所有业务模块对接生命周期的入口协议；Registry 用于收集服务的回调闭包。
+// 类型功能描述：OhService 是所有业务模块对接生命周期的入口协议；Registry 用于收集服务的回调闭包。
 
 import Foundation
 
@@ -8,11 +8,11 @@ import Foundation
 /// 服务注册表（泛型容器）
 /// - 职责：收集特定服务类型的所有事件处理闭包。
 /// - 设计：使用泛型 T 确保注册时的类型安全，避免强制转换。
-public final class CORegistry<T: COService>: @unchecked Sendable {
+public final class OhRegistry<T: OhService>: @unchecked Sendable {
     // 存储注册项：事件 -> 闭包
     struct Entry {
-        let event: COEvent
-        let handler: (any COService, COContext) throws -> COResult
+        let event: OhEvent
+        let handler: (any OhService, OhContext) throws -> OhResult
     }
     
     private(set) var entries: [Entry] = []
@@ -23,10 +23,10 @@ public final class CORegistry<T: COService>: @unchecked Sendable {
     /// - Parameters:
     ///   - event: 监听的生命周期事件
     ///   - handler: 处理闭包，传入具体的服务实例与上下文
-    public func add(_ event: COEvent, handler: @escaping (T, COContext) throws -> COResult) {
-        let typeErasedHandler: (any COService, COContext) throws -> COResult = { service, context in
+    public func add(_ event: OhEvent, handler: @escaping (T, OhContext) throws -> OhResult) {
+        let typeErasedHandler: (any OhService, OhContext) throws -> OhResult = { service, context in
             guard let s = service as? T else {
-                throw NSError(domain: "COOrchestrator", code: -1, userInfo: [NSLocalizedDescriptionKey: "Type mismatch"])
+                throw NSError(domain: "Orchestrator", code: -1, userInfo: [NSLocalizedDescriptionKey: "Type mismatch"])
             }
             return try handler(s, context)
         }
@@ -37,7 +37,7 @@ public final class CORegistry<T: COService>: @unchecked Sendable {
     /// - Parameters:
     ///   - event: 监听的生命周期事件
     ///   - handler: 处理闭包（无返回值，默认继续）
-    public func add(_ event: COEvent, handler: @escaping (T, COContext) throws -> Void) {
+    public func add(_ event: OhEvent, handler: @escaping (T, OhContext) throws -> Void) {
         add(event) { service, context in
             try handler(service, context)
             return .continue()
@@ -47,25 +47,25 @@ public final class CORegistry<T: COService>: @unchecked Sendable {
 
 /// 应用服务协议（原 AppLifecycleTask）
 /// - 模块/服务需遵守此协议以接收生命周期事件
-public protocol COService: AnyObject, Sendable {
+public protocol OhService: AnyObject, Sendable {
     /// 服务唯一标识（默认为类名）
     static var id: String { get }
     /// 默认优先级（默认为 .medium）
-    static var priority: COPriority { get }
+    static var priority: OhPriority { get }
     /// 默认驻留策略（默认为 .destroy，即用完即毁）
-    static var retention: CORetentionPolicy { get }
+    static var retention: OhRetentionPolicy { get }
     
     /// 必须提供无参构造器（用于反射或工厂创建）
     init()
     
     /// 注册服务感兴趣的事件
     /// - Parameter registry: 注册表容器
-    static func register(in registry: CORegistry<Self>)
+    static func register(in registry: OhRegistry<Self>)
 }
 
 // MARK: - Default Implementation
-public extension COService {
+public extension OhService {
     static var id: String { String(describing: self) }
-    static var priority: COPriority { .medium }
-    static var retention: CORetentionPolicy { .destroy }
+    static var priority: OhPriority { .medium }
+    static var retention: OhRetentionPolicy { .destroy }
 }

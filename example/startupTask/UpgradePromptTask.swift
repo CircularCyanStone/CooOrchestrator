@@ -5,16 +5,16 @@
 import Foundation
 import CooOrchestrator
 
-public final class UpgradePromptTask: NSObject, COService {
+public final class UpgradePromptTask: NSObject, OhService {
     public static let id: String = "upgrade.prompt"
-    public static let priority: COPriority = .init(rawValue: 150)
-    public static let retention: CORetentionPolicy = .destroy
+    public static let priority: OhPriority = .init(rawValue: 150)
+    public static let retention: OhRetentionPolicy = .destroy
 
     public required override init() {
         super.init()
     }
 
-    public static func register(in registry: CORegistry<UpgradePromptTask>) {
+    public static func register(in registry: OhRegistry<UpgradePromptTask>) {
         registry.add(.didFinishLaunching) { s, c in
             // 检查更新...
             return .continue()

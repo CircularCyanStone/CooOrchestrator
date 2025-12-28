@@ -1,6 +1,6 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：基于 Mach-O Section 注入的自动发现方案。
-// 类型功能描述：COSectionDiscovery 扫描二进制段中的注册信息，支持模块级与服务级双重注册模式。
+// 类型功能描述：OhSectionDiscovery 扫描二进制段中的注册信息，支持模块级与服务级双重注册模式。
 
 import Foundation
 import MachO // 导入 Mach-O 模块，用于访问 _dyld_* 函数和 mach_header 结构体定义
@@ -14,15 +14,15 @@ import MachO // 导入 Mach-O 模块，用于访问 _dyld_* 函数和 mach_heade
 ///
 /// - 职责：扫描 `__DATA` 段下的自定义 Section，自动发现并加载服务。
 /// - 特点：无中心化配置，编译期注入，运行期直接读取内存。
-public struct COSectionDiscovery: COServiceSource {
+public struct OhSectionDiscovery: OhServiceSource {
     
     // MARK: - Constants
     
-    /// 模块注册段名 (存储遵循 COServiceSource 的类名)
+    /// 模块注册段名 (存储遵循 OhServiceSource 的类名)
     /// 对应 C/OC 中的 section 定义: `__attribute__((section("__DATA, __coo_mod")))`
     private static let sectionModule = "__coo_mod"
     
-    /// 服务注册段名 (存储遵循 COService 的类名)
+    /// 服务注册段名 (存储遵循 OhService 的类名)
     /// 对应 C/OC 中的 section 定义: `__attribute__((section("__DATA, __coo_svc")))`
     private static let sectionService = "__coo_svc"
     
@@ -30,10 +30,10 @@ public struct COSectionDiscovery: COServiceSource {
     
     public init() {}
     
-    // MARK: - COServiceSource
+    // MARK: - OhServiceSource
     
-    public func load() -> [COServiceDefinition] {
-        var results: [COServiceDefinition] = []
+    public func load() -> [OhServiceDefinition] {
+        var results: [OhServiceDefinition] = []
         let start = CFAbsoluteTimeGetCurrent()
         
         // 1. 扫描模块注册段
@@ -41,13 +41,13 @@ public struct COSectionDiscovery: COServiceSource {
         let moduleClasses = scanMachO(sectionName: Self.sectionModule)
         for className in moduleClasses {
             // 动态反射：通过字符串类名将其实例化
-            if let type = NSClassFromString(className) as? COServiceSource.Type {
+            if let type = NSClassFromString(className) as? OhServiceSource.Type {
                 let instance = type.init()
                 let moduleServices = instance.load()
                 results.append(contentsOf: moduleServices)
-                COLogger.log("COSectionDiscovery: Loaded module '\(className)' with \(moduleServices.count) services.")
+                OhLogger.log("OhSectionDiscovery: Loaded module '\(className)' with \(moduleServices.count) services.")
             } else {
-                COLogger.log("COSectionDiscovery: Warning - Class '\(className)' in \(Self.sectionModule) is not a valid COServiceSource.")
+                OhLogger.log("OhSectionDiscovery: Warning - Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceSource.")
             }
         }
         
@@ -55,18 +55,18 @@ public struct COSectionDiscovery: COServiceSource {
         // 原理：查找所有名为 "__coo_svc" 的 Section，里面存的是服务类的类名字符串
         let serviceClasses = scanMachO(sectionName: Self.sectionService)
         for className in serviceClasses {
-            if let type = NSClassFromString(className) as? (any COService.Type) {
+            if let type = NSClassFromString(className) as? (any OhService.Type) {
                 // 直接构造定义，使用协议默认属性
-                let def = COServiceDefinition.service(type)
+                let def = OhServiceDefinition.service(type)
                 results.append(def)
             } else {
-                COLogger.log("COSectionDiscovery: Warning - Class '\(className)' in \(Self.sectionService) is not a valid COService.")
+                OhLogger.log("OhSectionDiscovery: Warning - Class '\(className)' in \(Self.sectionService) is not a valid OhService.")
             }
         }
         
         let cost = CFAbsoluteTimeGetCurrent() - start
         if !results.isEmpty {
-            COLogger.logPerf("COSectionDiscovery: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
+            OhLogger.logPerf("OhSectionDiscovery: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
         }
         
         return results

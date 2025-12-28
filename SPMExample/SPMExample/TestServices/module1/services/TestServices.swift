@@ -6,29 +6,29 @@
 //
 
 import Foundation
-import CooOrchestrator
+import Orchestrator
 
 // MARK: - 模块内服务 (通过 Module 注册)
 
 // 服务 A
 
-final class TestServiceA: COService {
+final class TestServiceA: OhService {
     required init() {}
     
-    static func register(in registry: CORegistry<TestServiceA>) {
+    static func register(in registry: OhRegistry<TestServiceA>) {
         // 注册一些事件...
-        COLogger.log("TestServiceA registered")
+        OhLogger.log("TestServiceA registered")
     }
 }
 
 // 服务 B
 @OrchService()
-final class TestServiceB: COService {
+final class TestServiceB: OhService {
     required init() {}
     
     
-    static func register(in registry: CORegistry<TestServiceB>) {
-        COLogger.log("TestServiceB registered")
+    static func register(in registry: OhRegistry<TestServiceB>) {
+        OhLogger.log("TestServiceB registered")
     }
     
     
@@ -38,10 +38,10 @@ final class TestServiceB: COService {
 
 // 这个模块负责加载 ServiceA 和 ServiceB
 @OrchModule()
-final class TestModuleSource: COServiceSource {
+final class TestModuleSource: OhServiceSource {
     required init() {}
     
-    func load() -> [COServiceDefinition] {
+    func load() -> [OhServiceDefinition] {
         return [
             .service(TestServiceA.self),
             .service(TestServiceB.self)
@@ -53,20 +53,20 @@ final class TestModuleSource: COServiceSource {
 
 // 服务 C
 @OrchModule()
-final class TestServiceC: COService {
+final class TestServiceC: OhService {
     required init() {}
     
-    static func register(in registry: CORegistry<TestServiceC>) {
-        COLogger.log("TestServiceC registered via Macro")
+    static func register(in registry: OhRegistry<TestServiceC>) {
+        OhLogger.log("TestServiceC registered via Macro")
     }
 }
 
 // 服务 D
 @OrchService("SPMExample")
-final class TestServiceD: COService {
+final class TestServiceD: OhService {
     required init() {}
     
-    static func register(in registry: CORegistry<TestServiceD>) {
-        COLogger.log("TestServiceD registered via Macro")
+    static func register(in registry: OhRegistry<TestServiceD>) {
+        OhLogger.log("TestServiceD registered via Macro")
     }
 }

@@ -1,6 +1,6 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：服务编排调度器，支持多线程安全分发，管理服务生命周期与日志。
-// 类型功能描述：COrchestrator 作为单例管理器，维护服务注册表、常驻服务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
+// 类型功能描述：Orchestrator 作为单例管理器，维护服务注册表、常驻服务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
 /**
  多线程方案选定策略：
  - 为了保证fire方法在传递事件时能保留原方法的执行环境，所以选择了了传统的使用锁来保护多线程的访问安全。
@@ -8,32 +8,32 @@
  */
 import Foundation
 
-/// 服务编排调度器 (COrchestrator)
+/// 服务编排调度器 (Orchestrator)
 /// - 职责：统一按“时机 + 优先级”顺序执行服务逻辑；支持责任链分发与流程控制。
 /// - 并发模型：非隔离（Non-isolated），内部使用串行队列保护状态。fire 方法在调用者线程执行，支持同步返回值。
-public final class COrchestrator: @unchecked Sendable {
+public final class Orchestrator: @unchecked Sendable {
     
     // 已经解析的服务条目
     private struct ResolvedServiceEntry: @unchecked Sendable {
-        let desc: COServiceDefinition
-        let type: any COService.Type
-        let effEvent: COEvent
-        let effPriority: COPriority
-        let effResidency: CORetentionPolicy
+        let desc: OhServiceDefinition
+        let type: any OhService.Type
+        let effEvent: OhEvent
+        let effPriority: OhPriority
+        let effResidency: OhRetentionPolicy
         // 绑定的处理器（从 Registry 获取）
         // 移除 @Sendable：因为我们保证在调用者线程执行，且 Manager 内部串行管理
-        let handler: ((any COService, COContext) throws -> COResult)?
+        let handler: ((any OhService, OhContext) throws -> OhResult)?
     }
     
     /// 单例实例
-    private static let shared = COrchestrator()
+    private static let shared = Orchestrator()
     
     /// 内部串行队列，用于保护 descriptors, residentServices, cacheByPhase 等状态
     private let isolationQueue = DispatchQueue(label: "com.coo.orchestrator", qos: .userInitiated)
     
     /// 服务注册表缓存（Type ID -> Handlers）
     /// 存储每个 Service 类注册的所有事件处理闭包
-    private var serviceHandlers: [String: [(COEvent, (any COService, COContext) throws -> COResult)]] = [:]
+    private var serviceHandlers: [String: [(OhEvent, (any OhService, OhContext) throws -> OhResult)]] = [:]
     
     private init() {}
     
@@ -42,27 +42,27 @@ public final class COrchestrator: @unchecked Sendable {
     /// 已注册的服务类 ID 集合（用于去重）
     private var registeredServiceIDs: Set<ObjectIdentifier> = []
     /// 常驻服务实例表
-    private var residentServices: [String: any COService] = [:]
+    private var residentServices: [String: any OhService] = [:]
     /// 是否已完成一次清单引导
     private var hasBootstrapped = false
     /// 分组缓存
-    private var cacheByEvent: [COEvent: [ResolvedServiceEntry]] = [:]
+    private var cacheByEvent: [OhEvent: [ResolvedServiceEntry]] = [:]
     
     // MARK: - Private / Internal Implementation
     
-    private func register(_ newDefinitions: [COServiceDefinition]) {
+    private func register(_ newDefinitions: [OhServiceDefinition]) {
         if newDefinitions.isEmpty { return }
         isolationQueue.async {
             self.mergeDefinitions(newDefinitions)
         }
     }
     
-    private func resolve(sources: [COServiceSource]) {
+    private func resolve(sources: [OhServiceSource]) {
         let start = CFAbsoluteTimeGetCurrent()
         isolationQueue.sync {
             if !hasBootstrapped {
                 // 加载所有源
-                var allDefinitions: [COServiceDefinition] = []
+                var allDefinitions: [OhServiceDefinition] = []
                 for source in sources {
                     allDefinitions.append(contentsOf: source.load())
                 }
@@ -71,16 +71,16 @@ public final class COrchestrator: @unchecked Sendable {
                 self.hasBootstrapped = true
                 
                 let end = CFAbsoluteTimeGetCurrent()
-                COLogger.logPerf("Resolve: Bootstrap completed. Total Cost: \(String(format: "%.4fs", end - start))")
+                OhLogger.logPerf("Resolve: Bootstrap completed. Total Cost: \(String(format: "%.4fs", end - start))")
             }
         }
     }
     
     @discardableResult
     private func fire(
-        _ event: COEvent,
-        parameters: [COParameterKey: Any] = [:]
-    ) -> COReturnValue {
+        _ event: OhEvent,
+        parameters: [OhParameterKey: Any] = [:]
+    ) -> OhReturnValue {
         
         // 1. 引导加载（如果需要）
         // 虽然推荐显式调用 resolve()，但为了健壮性，这里保留懒加载兜底
@@ -88,7 +88,7 @@ public final class COrchestrator: @unchecked Sendable {
         isolationQueue.sync {
             if !hasBootstrapped {
                 // 默认仅加载 Manifest
-                let discovered = COManifestDiscovery.loadAllDefinitions()
+                let discovered = OhManifestDiscovery.loadAllDefinitions()
                 self.mergeDefinitions(discovered)
                 self.hasBootstrapped = true
             }
@@ -99,13 +99,13 @@ public final class COrchestrator: @unchecked Sendable {
         
         // 3. 准备责任链环境
         // 使用 SharedState 来在不同的 Task Context 之间共享数据
-        let sharedUserInfo = COContext.UserInfo()
-        var finalReturnValue: COReturnValue = .void
+        let sharedUserInfo = OhContext.UserInfo()
+        var finalReturnValue: OhReturnValue = .void
         
         // 4. 遍历执行（在调用者线程）
         for item in eventEntries {
             // 构造 Context
-            let context = COContext(
+            let context = OhContext(
                 event: event,
                 args: item.desc.args,
                 parameters: parameters,
@@ -114,7 +114,7 @@ public final class COrchestrator: @unchecked Sendable {
             
             // 实例化或获取常驻服务
             // 注意：需在 isolationQueue 中安全访问 residentServices
-            let serviceOrNil = isolationQueue.sync { () -> (any COService)? in
+            let serviceOrNil = isolationQueue.sync { () -> (any OhService)? in
                 if let resident = self.residentServices[item.type.id] {
                     return resident
                 }
@@ -144,7 +144,7 @@ public final class COrchestrator: @unchecked Sendable {
                         finalReturnValue = r
                         shouldStop = true
                         // 记录显式拦截
-                        COLogger.logIntercept(NSStringFromClass(item.desc.serviceClass), event: event)
+                        OhLogger.logIntercept(NSStringFromClass(item.desc.serviceClass), event: event)
                     }
                 } else {
                     // Fallback: 如果没有 handler，跳过执行
@@ -160,7 +160,7 @@ public final class COrchestrator: @unchecked Sendable {
             let end = CFAbsoluteTimeGetCurrent()
             
             // 记录日志
-            COLogger.logTask(
+            OhLogger.logTask(
                 NSStringFromClass(item.desc.serviceClass),
                 event: item.effEvent,
                 success: isSuccess,
@@ -188,50 +188,50 @@ public final class COrchestrator: @unchecked Sendable {
     // MARK: - Private Helper
     
     private func instantiateService(
-        from desc: COServiceDefinition,
-        context: COContext
-    ) -> (any COService)? {
+        from desc: OhServiceDefinition,
+        context: OhContext
+    ) -> (any OhService)? {
         let className = NSStringFromClass(desc.serviceClass)
         
         // 优先使用工厂
-        if let factoryType = desc.factoryClass as? COServiceFactory.Type {
-            COLogger.log("Instantiate: Creating \(className) using factory \(NSStringFromClass(factoryType))")
+        if let factoryType = desc.factoryClass as? OhServiceFactory.Type {
+            OhLogger.log("Instantiate: Creating \(className) using factory \(NSStringFromClass(factoryType))")
             let factory = factoryType.init()
             return factory.make(context: context, args: desc.args)
         }
         
         // 直接实例化
-        guard let serviceType = desc.serviceClass as? any COService.Type else {
-            COLogger.log("Warning: className \(desc.serviceClass) not implement COService")
+        guard let serviceType = desc.serviceClass as? any OhService.Type else {
+            OhLogger.log("Warning: className \(desc.serviceClass) not implement OhService")
             return nil
         }
         
-        COLogger.log("Instantiate: Creating \(className) via init()")
+        OhLogger.log("Instantiate: Creating \(className) via init()")
         let service = serviceType.init()
         return service
     }
     
-    private func mergeDefinitions(_ items: [COServiceDefinition]) {
+    private func mergeDefinitions(_ items: [OhServiceDefinition]) {
         let start = CFAbsoluteTimeGetCurrent()
         // 1. 批量解析类型，避免在循环中多次调用 NSClassFromString
         // 同时过滤掉已经注册过的类（假设类维度去重是业务需求）
         
-        var entriesToInsert: [COEvent: [ResolvedServiceEntry]] = [:]
+        var entriesToInsert: [OhEvent: [ResolvedServiceEntry]] = [:]
         
         // [Debug Log] 输出当前批次扫描到的所有类名
         let classNames = items.map { NSStringFromClass($0.serviceClass) }
-        COLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(classNames)")
+        OhLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(classNames)")
         
         for d in items {
-            guard let type = d.serviceClass as? any COService.Type else { 
-                COLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(d.serviceClass)) does not conform to COService")
+            guard let type = d.serviceClass as? any OhService.Type else { 
+                OhLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(d.serviceClass)) does not conform to OhService")
                 continue
             }
             let typeID = ObjectIdentifier(type)
             
             // 快速去重检查
             if registeredServiceIDs.contains(typeID) { 
-                COLogger.log("MergeDefinitions: Skipped duplicate service \(NSStringFromClass(type))")
+                OhLogger.log("MergeDefinitions: Skipped duplicate service \(NSStringFromClass(type))")
                 continue
             }
             
@@ -242,7 +242,7 @@ public final class COrchestrator: @unchecked Sendable {
             // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
             let handlers = self.resolveHandlers(for: type)
             if handlers.isEmpty { 
-                COLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(type)) has no handlers registered")
+                OhLogger.log("MergeDefinitions: Warning - \(NSStringFromClass(type)) has no handlers registered")
                 continue
             }
             
@@ -270,11 +270,11 @@ public final class COrchestrator: @unchecked Sendable {
         }
         
         let end = CFAbsoluteTimeGetCurrent()
-        COLogger.logPerf("MergeDefinitions: Processed \(items.count) items, Inserted \(entriesToInsert.count) groups. Cost: \(String(format: "%.4fs", end - start))")
+        OhLogger.logPerf("MergeDefinitions: Processed \(items.count) items, Inserted \(entriesToInsert.count) groups. Cost: \(String(format: "%.4fs", end - start))")
     }
     
     // 提取辅助方法，逻辑更清晰
-    private func resolveHandlers(for type: any COService.Type) -> [(COEvent, (any COService, COContext) throws -> COResult)] {
+    private func resolveHandlers(for type: any OhService.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
         if let cached = serviceHandlers[type.id] {
             return cached
         }
@@ -284,23 +284,23 @@ public final class COrchestrator: @unchecked Sendable {
     }
     
     // 辅助：调用泛型静态方法 register
-    private func collectHandlers(for type: any COService.Type) -> [(COEvent, (any COService, COContext) throws -> COResult)] {
+    private func collectHandlers(for type: any OhService.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
         // 利用 Swift 的运行时特性或辅助协议来调用泛型方法
-        // 这里我们需要一个技巧：让 COService 遵守一个辅助协议，该协议暴露非泛型的 register 入口，或者我们通过反射
+        // 这里我们需要一个技巧：让 OhService 遵守一个辅助协议，该协议暴露非泛型的 register 入口，或者我们通过反射
         
         // 实际上，最简单的办法是实例化一个 Registry，然后传入。
-        // 但 Registry 是泛型的 CORegistry<Service>。
+        // 但 Registry 是泛型的 OhRegistry<Service>。
         // 我们需要构造一个闭包，让 Service 自己去推断类型。
         
-        func openExistential<T: COService>(_ type: T.Type) -> [(COEvent, (any COService, COContext) throws -> COResult)] {
+        func openExistential<T: OhService>(_ type: T.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
             return invokeRegister(type)
         }
         
         return openExistential(type)
     }
     
-    private func invokeRegister<T: COService>(_ type: T.Type) -> [(COEvent, (any COService, COContext) throws -> COResult)] {
-        let registry = CORegistry<T>()
+    private func invokeRegister<T: OhService>(_ type: T.Type) -> [(OhEvent, (any OhService, OhContext) throws -> OhResult)] {
+        let registry = OhRegistry<T>()
         T.register(in: registry)
         
         return registry.entries.map { entry in
@@ -309,12 +309,12 @@ public final class COrchestrator: @unchecked Sendable {
     }
 }
 
-extension COrchestrator {
+extension Orchestrator {
     // MARK: - Public API
     
     /// 注册一批服务项
     /// - Parameter newDefinitions: 新增的服务描述符数组
-    public static func register(_ newDefinitions: [COServiceDefinition]) {
+    public static func register(_ newDefinitions: [OhServiceDefinition]) {
         shared.register(newDefinitions)
     }
     
@@ -324,13 +324,13 @@ extension COrchestrator {
     ///   - priority: 覆盖默认优先级（可选）
     ///   - retention: 覆盖默认驻留策略（可选）
     ///   - args: 静态参数（可选）
-    public static func register<T: COService>(
+    public static func register<T: OhService>(
         service type: T.Type,
-        priority: COPriority? = nil,
-        retention: CORetentionPolicy? = nil,
+        priority: OhPriority? = nil,
+        retention: OhRetentionPolicy? = nil,
         args: [String: Sendable] = [:]
     ) {
-        let desc = COServiceDefinition(
+        let desc = OhServiceDefinition(
             serviceClass: type,
             priority: priority,
             retentionPolicy: retention,
@@ -342,7 +342,7 @@ extension COrchestrator {
     /// 启动引导：扫描并加载所有清单中的服务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
     /// - Parameter sources: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
-    public static func resolve(sources: [COServiceSource] = [COManifestDiscovery(), COModuleDiscovery(), COSectionDiscovery()]) {
+    public static func resolve(sources: [OhServiceSource] = [OhManifestDiscovery(), OhModuleDiscovery(), OhSectionDiscovery()]) {
         shared.resolve(sources: sources)
     }
     
@@ -354,9 +354,9 @@ extension COrchestrator {
     /// - Returns: 最终的执行结果（如果被中断，则返回中断时的值；否则返回 .void）
     @discardableResult
     public static func fire(
-        _ event: COEvent,
-        parameters: [COParameterKey: Any] = [:]
-    ) -> COReturnValue {
+        _ event: OhEvent,
+        parameters: [OhParameterKey: Any] = [:]
+    ) -> OhReturnValue {
         return shared.fire(event, parameters: parameters)
     }
     
@@ -364,8 +364,8 @@ extension COrchestrator {
     /// - Note: 这是 fire(_:environment:) 的便捷泛型封装
     @discardableResult
     public static func fire<T>(
-        _ event: COEvent,
-        parameters: [COParameterKey: Any] = [:],
+        _ event: OhEvent,
+        parameters: [OhParameterKey: Any] = [:],
     ) -> T? {
         let ret = shared.fire(event, parameters: parameters)
         return ret.value()

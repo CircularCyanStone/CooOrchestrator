@@ -5,17 +5,17 @@
 import Foundation
 import CooOrchestrator
 
-public final class ScreenshotTipTask: NSObject, COService {
+public final class ScreenshotTipTask: NSObject, OhService {
     public static let id: String = "screenshot.tip"
-    public static let priority: COPriority = .init(rawValue: 100)
-    public static let retention: CORetentionPolicy = .destroy
+    public static let priority: OhPriority = .init(rawValue: 100)
+    public static let retention: OhRetentionPolicy = .destroy
 
     // 协议变更
     public required override init() {
         super.init()
     }
 
-    public static func register(in registry: CORegistry<ScreenshotTipTask>) {
+    public static func register(in registry: OhRegistry<ScreenshotTipTask>) {
         registry.add(.didFinishLaunchEnd) { s, c in
             // 处理逻辑...
             return .continue()

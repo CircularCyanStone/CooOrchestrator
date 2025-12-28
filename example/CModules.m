@@ -7,4 +7,4 @@
 
 @import CooOrchestrator;
 
-CO_REGISTER_SERVICE(example, UpgradePromptTask)
+OH_REGISTER_SERVICE(example, UpgradePromptTask)

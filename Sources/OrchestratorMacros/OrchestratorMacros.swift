@@ -87,7 +87,7 @@ enum MacroHelper {
 // MARK: - Macros
 
 /// 注册模块宏 (Member Macro)
-public struct CORegisterModuleMacro: MemberMacro {
+public struct OhRegisterModuleMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
@@ -124,7 +124,7 @@ public struct CORegisterModuleMacro: MemberMacro {
 }
 
 /// 注册服务宏 (Member Macro)
-public struct CORegisterServiceMacro: MemberMacro {
+public struct OhRegisterServiceMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
@@ -165,7 +165,7 @@ public struct CORegisterServiceMacro: MemberMacro {
 @main
 struct CooOrchestratorPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        CORegisterModuleMacro.self,
-        CORegisterServiceMacro.self,
+        OhRegisterModuleMacro.self,
+        OhRegisterServiceMacro.self,
     ]
 }
