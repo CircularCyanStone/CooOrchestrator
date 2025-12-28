@@ -2,6 +2,15 @@
 // 文件功能描述：读取各模块私有清单（Info.plist 或资源 COServices.plist），解析为服务描述符集合并提供统一的加载入口。
 // 类型功能描述：COManifestDiscovery 负责从 bundle 中发现并解析清单；ManifestKeys/ValueParser 提供键名与枚举值解析。
 
+/**
+ 注册文件统一命名为COServices.plist
+ 1. 当模块是静态库的framework时，plist注册文件需要手动在主工程里引用，
+    即使将注册文件打包到framework里面也需要手动引用。
+    仅将framework拖拽到项目中，并不会自动引用里面的资源文件。
+    同时为了避免和主项目以及其他模块的注册文件冲突，需自定义xxx.bundle/COServices.plist
+ 2. 动态库因为是一个编译链接的完整产物，所以资源文件直接打包到framework中，在动态链接后可直接从framework中获取到。
+ */
+
 import Foundation
 
 /// 清单键名常量
