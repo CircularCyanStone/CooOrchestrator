@@ -48,13 +48,28 @@ public final class Orchestrator: @unchecked Sendable {
     
     private func register(_ newDefinitions: [OhServiceDefinition]) {
         if newDefinitions.isEmpty { return }
-        isolationQueue.async {
-            self.mergeDefinitions(newDefinitions)
+        
+        var eagerDefs: [OhServiceDefinition] = []
+        
+        // 改为 sync 确保注册即生效
+        // 仅在锁内进行元数据合并，获取需要急切加载的服务列表
+        isolationQueue.sync {
+            eagerDefs = self.mergeDefinitions(newDefinitions)
+        }
+        
+        // 在锁外进行实例化，避免死锁
+        // 因为 instantiateEagerServices 可能会同步等待主线程，
+        // 如果放在 isolationQueue.sync 内部，且 register 本身是在主线程调用的，
+        // 就会导致 主线程等待 isolationQueue，而 isolationQueue 等待主线程 的死锁。
+        if !eagerDefs.isEmpty {
+            self.instantiateEagerServices(eagerDefs)
         }
     }
     
     private func resolve(sources: [OhServiceSource]) {
         let start = CFAbsoluteTimeGetCurrent()
+        var eagerDefs: [OhServiceDefinition] = []
+        
         isolationQueue.sync {
             if !hasBootstrapped {
                 // 加载所有源
@@ -63,12 +78,16 @@ public final class Orchestrator: @unchecked Sendable {
                     allDefinitions.append(contentsOf: source.load())
                 }
                 
-                self.mergeDefinitions(allDefinitions)
+                eagerDefs = self.mergeDefinitions(allDefinitions)
                 self.hasBootstrapped = true
                 
                 let end = CFAbsoluteTimeGetCurrent()
                 OhLogger.logPerf("Resolve: Bootstrap completed. Total Cost: \(String(format: "%.4fs", end - start))")
             }
+        }
+        
+        if !eagerDefs.isEmpty {
+            self.instantiateEagerServices(eagerDefs)
         }
     }
     
@@ -86,20 +105,23 @@ public final class Orchestrator: @unchecked Sendable {
         parameters: [OhParameterKey: Any] = [:]
     ) -> OhReturnValue {
         
-        // 1. 引导加载（如果需要）
-        // 虽然推荐显式调用 resolve()，但为了健壮性，这里保留懒加载兜底
-        // 如果用户忘记调用 resolve()，这里会确保第一次 fire 时进行加载
-        isolationQueue.sync {
+        // 1. 引导加载与读取服务列表
+        // 优化：将 Bootstrap 检查与任务预加载合并在一个 sync 锁中，减少锁切换开销
+        let tasks: [(entry: ResolvedServiceEntry, service: (any OhService)?)] = isolationQueue.sync {
+            // 1.1 Lazy Bootstrap Check
             if !hasBootstrapped {
                 // 默认仅加载 Manifest
                 let discovered = OhManifestDiscovery.loadAllDefinitions()
-                self.mergeDefinitions(discovered)
+                _ = self.mergeDefinitions(discovered)
                 self.hasBootstrapped = true
             }
+            
+            // 1.2 Snapshot & Preload
+            let entries = cacheByEvent[event] ?? []
+            return entries.map { entry in
+                (entry, self.residentServices[entry.type.id])
+            }
         }
-        
-        // 2. 读取对应事件的服务列表（Snapshot）
-        let eventEntries = isolationQueue.sync { cacheByEvent[event] ?? [] }
         
         // 3. 准备责任链环境
         // 使用 SharedState 来在不同的 Task Context 之间共享数据
@@ -107,7 +129,7 @@ public final class Orchestrator: @unchecked Sendable {
         var finalReturnValue: OhReturnValue = .void
         
         // 4. 遍历执行（在调用者线程）
-        for item in eventEntries {
+        for (item, preloadedService) in tasks {
             // 构造 Context
             let context = OhContext(
                 event: event,
@@ -117,15 +139,41 @@ public final class Orchestrator: @unchecked Sendable {
             )
             
             // 实例化或获取常驻服务
-            // 注意：需在 isolationQueue 中安全访问 residentServices
-            let serviceOrNil = isolationQueue.sync { () -> (any OhService)? in
-                if let resident = self.residentServices[item.type.id] {
-                    return resident
+            var service = preloadedService
+            
+            // 如果预加载为空（懒加载服务或尚未初始化的常驻服务），则进行实例化
+            if service == nil {
+                // Double-Check 逻辑：
+                // 虽然我们刚才在锁内读了一次是 nil，但在我们执行到这里之前，可能其他线程已经创建了。
+                // 所以我们再次检查（这次是在锁内检查，确保原子性）
+                
+                // 1. Fast path: 再次尝试从缓存读取 (Double Check)
+                service = isolationQueue.sync {
+                    return self.residentServices[item.type.id]
                 }
-                return self.instantiateService(from: item.desc, context: context)
+                
+                // 2. Slow path: 依然没有，则在锁外创建
+                if service == nil {
+                    // 强制在主线程实例化
+                    if let created = self.instantiateService(from: item.desc, context: context) {
+                        // 3. 写入 (Write Back)
+                        if case .hold = item.effResidency {
+                            isolationQueue.sync {
+                                if let existing = self.residentServices[item.type.id] {
+                                    service = existing
+                                } else {
+                                    self.residentServices[item.type.id] = created
+                                    service = created
+                                }
+                            }
+                        } else {
+                            service = created
+                        }
+                    }
+                }
             }
             
-            guard let service = serviceOrNil else { continue }
+            guard let validService = service else { continue }
             
             let start = CFAbsoluteTimeGetCurrent()
             var isSuccess = true
@@ -137,7 +185,7 @@ public final class Orchestrator: @unchecked Sendable {
                 // 如果有绑定的 Handler，直接调用
                 // 如果没有，说明可能是在 Registry 迁移过渡期，或者逻辑错误
                 if let handler = item.handler {
-                    let result = try handler(service, context)
+                    let result = try handler(validService, context)
                     switch result {
                     case .continue(let s, let m):
                         isSuccess = s
@@ -173,13 +221,9 @@ public final class Orchestrator: @unchecked Sendable {
             )
             
             // 处理常驻 (如果是新实例且策略为 hold)
-            if case .hold = item.effResidency {
-                isolationQueue.async {
-                    if self.residentServices[item.type.id] == nil {
-                        self.residentServices[item.type.id] = service
-                    }
-                }
-            }
+            // 注意：已经在实例化阶段处理了 hold 逻辑，这里只需处理那些
+            // 在 fire 过程中动态变为 hold 的情况（极少见，或由 handler 内部触发保持）
+            // 现在的逻辑已在上面 Double-Check 中处理了写入，这里可以简化
             
             if shouldStop {
                 break
@@ -191,36 +235,86 @@ public final class Orchestrator: @unchecked Sendable {
     
     // MARK: - Private Helper
     
+    /// 实例化急切加载的服务
+    /// - Note: 此方法内部保证在主线程执行实例化，并批量写入常驻服务表
+    /// - Warning: **严禁在 isolationQueue.sync 闭包中调用此方法！**
+    ///   因为此方法内部会调用 `instantiateService`，后者可能会触发 `DispatchQueue.main.sync`。
+    ///   如果在持有 `isolationQueue` 锁的情况下等待主线程，而主线程恰好也在等待 `isolationQueue`（例如正在调用 register），
+    ///   将直接导致 **死锁**。
+    private func instantiateEagerServices(_ defs: [OhServiceDefinition]) {
+        var createdServices: [String: any OhService] = [:]
+        
+        for def in defs {
+            // Context for eager load (no specific event)
+            let context = OhContext(event: OhEvent(rawValue: "Orchestrator.EagerLoad"), args: def.args)
+            
+            // instantiateService 内部已处理主线程调度
+            if let service = self.instantiateService(from: def, context: context) {
+                if let serviceType = def.serviceClass as? any OhService.Type {
+                    createdServices[serviceType.id] = service
+                }
+            }
+        }
+        
+        if !createdServices.isEmpty {
+            // 批量写入，减少锁粒度
+            // 使用 sync 确保写入即生效，消除时序不一致
+            // 安全性：因为 instantiateEagerServices 必须在锁外调用，所以此处 sync 是安全的
+            isolationQueue.sync {
+                for (id, service) in createdServices {
+                    if self.residentServices[id] == nil {
+                        self.residentServices[id] = service
+                    }
+                }
+            }
+        }
+    }
+    
+    /// 实例化单个服务
+    /// - Warning: **严禁在 isolationQueue.sync 闭包中调用此方法！**
+    ///   此方法包含强制主线程执行的逻辑 (`DispatchQueue.main.sync`)。
+    ///   如果在持有内部锁时同步等待主线程，极易引发死锁。
     private func instantiateService(
         from desc: OhServiceDefinition,
         context: OhContext
     ) -> (any OhService)? {
+        // 强制主线程执行，确保 init 和 serviceDidResolve 在主线程
+        if !Thread.isMainThread {
+            return DispatchQueue.main.sync {
+                self.instantiateService(from: desc, context: context)
+            }
+        }
+        
         let className = NSStringFromClass(desc.serviceClass)
+        var service: (any OhService)?
         
         // 优先使用工厂
         if let factoryType = desc.factoryClass as? OhServiceFactory.Type {
             OhLogger.log("Instantiate: Creating \(className) using factory \(NSStringFromClass(factoryType))", level: .debug)
             let factory = factoryType.init()
-            return factory.make(context: context, args: desc.args)
-        }
-        
-        // 直接实例化
-        guard let serviceType = desc.serviceClass as? any OhService.Type else {
+            service = factory.make(context: context, args: desc.args)
+        } else if let serviceType = desc.serviceClass as? any OhService.Type {
+            // 直接实例化
+            OhLogger.log("Instantiate: Creating \(className) via init()", level: .debug)
+            service = serviceType.init()
+        } else {
             OhLogger.log("className \(desc.serviceClass) not implement OhService", level: .warning)
             return nil
         }
         
-        OhLogger.log("Instantiate: Creating \(className) via init()", level: .debug)
-        let service = serviceType.init()
+        // 触发初始化后回调
+        service?.serviceDidResolve()
+        
         return service
     }
     
-    private func mergeDefinitions(_ items: [OhServiceDefinition]) {
+    private func mergeDefinitions(_ items: [OhServiceDefinition]) -> [OhServiceDefinition] {
         let start = CFAbsoluteTimeGetCurrent()
         // 1. 批量解析类型，避免在循环中多次调用 NSClassFromString
         // 同时过滤掉已经注册过的类（假设类维度去重是业务需求）
         
         var entriesToInsert: [OhEvent: [ResolvedServiceEntry]] = [:]
+        var eagerDefinitions: [OhServiceDefinition] = []
         
         // [Debug Log] 输出当前批次扫描到的所有类名
         OhLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(items.map { NSStringFromClass($0.serviceClass) })", level: .debug)
@@ -241,7 +335,18 @@ public final class Orchestrator: @unchecked Sendable {
             // 标记已注册
             registeredServiceIDs.insert(typeID)
             
-            // 2. 获取 Handlers
+            // Check Eager Loading
+            // 只有当 isLazy == false 且 retention == .hold 时才进行急切加载
+            let effectiveRetention = d.retentionPolicy ?? type.retention
+            if !type.isLazy {
+                if effectiveRetention == .hold {
+                    eagerDefinitions.append(d)
+                } else {
+                    OhLogger.log("MergeDefinitions: Service \(NSStringFromClass(type)) is marked !isLazy but retention is .destroy. Fallback to lazy.", level: .warning)
+                }
+            }
+            
+            // 2. 收集服务里注册的事件和事件的Handlers
             let handlers = self.collectHandlers(for: type)
             if handlers.isEmpty { 
                 OhLogger.log("MergeDefinitions: \(NSStringFromClass(type)) has no handlers registered", level: .debug)
@@ -255,7 +360,7 @@ public final class Orchestrator: @unchecked Sendable {
                     type: type,
                     effEvent: event,
                     effPriority: d.priority ?? type.priority,
-                    effResidency: d.retentionPolicy ?? type.retention,
+                    effResidency: effectiveRetention,
                     handler: handler
                 )
                 entriesToInsert[event, default: []].append(entry)
@@ -263,16 +368,18 @@ public final class Orchestrator: @unchecked Sendable {
         }
         
         // 4. 批量合并到主缓存并排序
-        if entriesToInsert.isEmpty { return }
-        
-        for (event, newEntries) in entriesToInsert {
-            cacheByEvent[event, default: []].append(contentsOf: newEntries)
-            // 原地排序，只对受影响的列表排序
-            cacheByEvent[event]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
+        if !entriesToInsert.isEmpty {
+            for (event, newEntries) in entriesToInsert {
+                cacheByEvent[event, default: []].append(contentsOf: newEntries)
+                // 原地排序，只对受影响的列表排序
+                cacheByEvent[event]?.sort { $0.effPriority.rawValue > $1.effPriority.rawValue }
+            }
         }
         
         let end = CFAbsoluteTimeGetCurrent()
         OhLogger.logPerf("MergeDefinitions: Processed \(items.count) items, Inserted \(entriesToInsert.count) groups. Cost: \(String(format: "%.4fs", end - start))")
+        
+        return eagerDefinitions
     }
     
     // 辅助：调用泛型静态方法 register

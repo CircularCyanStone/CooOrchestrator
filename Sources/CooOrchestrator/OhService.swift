@@ -55,12 +55,22 @@ public protocol OhService: AnyObject, Sendable {
     /// 默认驻留策略（默认为 .destroy，即用完即毁）
     static var retention: OhRetentionPolicy { get }
     
+    /// 是否为懒加载服务
+    /// - true (默认): 仅在第一次处理事件时创建实例
+    /// - false: 在 Orchestrator.resolve() 阶段立即创建实例 (仅当 retention 为 .hold 时有效)
+    static var isLazy: Bool { get }
+    
     /// 必须提供无参构造器（用于反射或工厂创建）
     init()
     
     /// 注册服务感兴趣的事件
     /// - Parameter registry: 注册表容器
     static func register(in registry: OhRegistry<Self>)
+    
+    /// 服务实例创建完成后的回调
+    /// - 用于执行初始化逻辑，替代在 didFinishLaunching 中写逻辑
+    /// - 注意：此方法执行时，服务实例已创建但尚未处理任何事件
+    func serviceDidResolve()
 }
 
 // MARK: - Default Implementation
@@ -68,4 +78,6 @@ public extension OhService {
     static var id: String { String(describing: self) }
     static var priority: OhPriority { .medium }
     static var retention: OhRetentionPolicy { .destroy }
+    static var isLazy: Bool { true }
+    func serviceDidResolve() {}
 }
