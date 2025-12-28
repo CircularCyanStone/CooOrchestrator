@@ -15,7 +15,7 @@ let package = Package(
         .library(
             name: "CooOrchestrator",
             type: .dynamic,
-            targets: ["Orchestrator"]),
+            targets: ["CooOrchestrator"]),
     ],
     dependencies: [
         // Depend on the latest Swift 5.9 syntax
@@ -25,21 +25,21 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .macro(
-            name: "OrchestratorMacros",
+            name: "CooOrchestratorMacros",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
             ]
         ),
         .target(
-            name: "Orchestrator",
-            dependencies: ["OrchestratorMacros"],
+            name: "CooOrchestrator",
+            dependencies: ["CooOrchestratorMacros"],
             swiftSettings: [.enableExperimentalFeature("SymbolLinkageMarkers")],
         ),
         .testTarget(
-            name: "OrchestratorTests",
+            name: "CooOrchestratorTests",
             dependencies: [
-                "Orchestrator",
+                "CooOrchestrator",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ],
             swiftSettings: [

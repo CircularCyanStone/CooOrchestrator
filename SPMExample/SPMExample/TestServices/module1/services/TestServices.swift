@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Orchestrator
+import CooOrchestrator
 
 // MARK: - 模块内服务 (通过 Module 注册)
 

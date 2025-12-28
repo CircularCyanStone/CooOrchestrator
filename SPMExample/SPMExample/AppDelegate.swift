@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import Orchestrator
+import CooOrchestrator
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
