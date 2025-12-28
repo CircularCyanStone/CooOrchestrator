@@ -94,7 +94,7 @@ public final class Orchestrator: @unchecked Sendable {
             }
         }
         
-        // 2. 读取对应阶段的服务列表（Snapshot）
+        // 2. 读取对应事件的服务列表（Snapshot）
         let eventEntries = isolationQueue.sync { cacheByEvent[event] ?? [] }
         
         // 3. 准备责任链环境
@@ -219,8 +219,7 @@ public final class Orchestrator: @unchecked Sendable {
         var entriesToInsert: [OhEvent: [ResolvedServiceEntry]] = [:]
         
         // [Debug Log] 输出当前批次扫描到的所有类名
-        let classNames = items.map { NSStringFromClass($0.serviceClass) }
-        OhLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(classNames)", level: .debug)
+        OhLogger.log("MergeDefinitions: Received \(items.count) descriptors: \(items.map { NSStringFromClass($0.serviceClass) })", level: .debug)
         
         for d in items {
             guard let type = d.serviceClass as? any OhService.Type else { 
@@ -242,7 +241,7 @@ public final class Orchestrator: @unchecked Sendable {
             // 这里的逻辑已经有了缓存，无需大改，但可以提取出来让逻辑更清晰
             let handlers = self.resolveHandlers(for: type)
             if handlers.isEmpty { 
-                OhLogger.log("MergeDefinitions: \(NSStringFromClass(type)) has no handlers registered", level: .warning)
+                OhLogger.log("MergeDefinitions: \(NSStringFromClass(type)) has no handlers registered", level: .debug)
                 continue
             }
             

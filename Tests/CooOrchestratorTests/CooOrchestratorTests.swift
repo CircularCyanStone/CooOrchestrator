@@ -18,7 +18,7 @@ final class CooOrchestratorTests: XCTestCase {
     func testExpansionLogic() throws {
         // 这里定义的 testMacros 是关键，它把宏名字映射到你的实现类
         let testMacros: [String: Macro.Type] = [
-            "OrchService": CORegisterServiceMacro.self
+            "OrchService": OhRegisterServiceMacro.self
         ]
         #if canImport(CooOrchestratorMacros)
             // 调用此函数会触发 CORegisterServiceMacro.expansion
@@ -29,7 +29,6 @@ final class CooOrchestratorTests: XCTestCase {
                     static func register(in registry: CooOrchestrator.CORegistry<TestServiceA>) {
                         print("模块执行了\(type(of: self))")
                     }
-                    init() {}
                 }
                 """,
                 expandedSource:
@@ -58,14 +57,16 @@ final class CooOrchestratorTests: XCTestCase {
     
     func testModule() throws {
         let testMacros: [String: Macro.Type] = [
-            "OrchService": CORegisterModuleMacro.self
+            "OrchModule": OhRegisterModuleMacro.self
         ]
 
         assertMacroExpansion(
             """
-            @OrchService
-            final class TestModuleA: COServiceSource {
+            @OrchModule
+            final class TestModuleA {
                 init() {}
+            }
+            extension TestModuleA: OhServiceSource {
                 func load() -> [COServiceDefinition] {[]}
             }
             """,
@@ -88,10 +89,11 @@ final class CooOrchestratorTests: XCTestCase {
 }
 
 @OrchModule()
-final class TModule: COServiceSource {
-    func load() -> [CooOrchestrator.COServiceDefinition] {
+final class TModule {
+    
+}
+extension TModule: OhServiceSource {
+    func load() -> [CooOrchestrator.OhServiceDefinition] {
         []
     }
-    
-    
 }

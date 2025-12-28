@@ -70,3 +70,18 @@ final class TestServiceD: OhService {
         print("TestServiceD registered via Macro")
     }
 }
+
+
+@OrchModule()
+final class TestServiceF {
+    required init() {}
+}
+
+extension TestServiceF: OhServiceSource {
+    func load() -> [CooOrchestrator.OhServiceDefinition] {
+        return [
+            .service(TestServiceA.self),
+            .service(TestServiceB.self)
+        ]
+    }
+}
