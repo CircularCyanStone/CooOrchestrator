@@ -1,6 +1,6 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：读取各模块私有清单（Info.plist 或资源 OhServices.plist），解析为服务描述符集合并提供统一的加载入口。
-// 类型功能描述：OhManifestDiscovery 负责从 bundle 中发现并解析清单；ManifestKeys/ValueParser 提供键名与枚举值解析。
+// 类型功能描述：OhManifestScanner 负责从 bundle 中发现并解析清单；ManifestKeys/ValueParser 提供键名与枚举值解析。
 
 /**
  注册文件统一命名为OhServices.plist
@@ -25,7 +25,7 @@ enum ManifestKeys {
 
 /// Manifest 解析器
 /// - 职责：从各模块私有清单读取服务配置并转换为统一的 `OhServiceDefinition` 集合。
-public struct OhManifestDiscovery: OhServiceSource {
+public struct OhManifestScanner: OhServiceSource {
     
     public init() {}
     
@@ -110,7 +110,7 @@ public struct OhManifestDiscovery: OhServiceSource {
         let end = CFAbsoluteTimeGetCurrent()
         
         let totalCost = end - start
-        var logMsg = "OhManifestDiscovery: Scanned \(targetBundles.count) bundles, found \(result.count) services. Cost: \(String(format: "%.4fs", totalCost))\n"
+        var logMsg = "OhManifestScanner: Scanned \(targetBundles.count) bundles, found \(result.count) services. Cost: \(String(format: "%.4fs", totalCost))\n"
         logMsg += " - Find Bundles   : \(String(format: "%.4fs", findBundleCost))\n"
         logMsg += " - Scan Bundles   : \(String(format: "%.4fs", scanCost))"
         

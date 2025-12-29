@@ -1,6 +1,6 @@
 // Copyright © 2025 Coo. All rights reserved.
 // 文件功能描述：基于 Mach-O Section 注入的自动发现方案。
-// 类型功能描述：OhSectionDiscovery 扫描二进制段中的注册信息，支持模块级与服务级双重注册模式。
+// 类型功能描述：OhSectionScanner 扫描二进制段中的注册信息，支持模块级与服务级双重注册模式。
 
 import Foundation
 import MachO // 导入 Mach-O 模块，用于访问 _dyld_* 函数和 mach_header 结构体定义
@@ -14,7 +14,7 @@ import MachO // 导入 Mach-O 模块，用于访问 _dyld_* 函数和 mach_heade
 ///
 /// - 职责：扫描 `__DATA` 段下的自定义 Section，自动发现并加载服务。
 /// - 特点：无中心化配置，编译期注入，运行期直接读取内存。
-public struct OhSectionDiscovery: OhServiceSource {
+public struct OhSectionScanner: OhServiceSource {
     
     // MARK: - Constants
     
@@ -45,9 +45,9 @@ public struct OhSectionDiscovery: OhServiceSource {
                 let instance = type.init()
                 let moduleServices = instance.load()
                 results.append(contentsOf: moduleServices)
-                OhLogger.log("OhSectionDiscovery: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
+                OhLogger.log("OhSectionScanner: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
             } else {
-                OhLogger.log("OhSectionDiscovery: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceSource.", level: .warning)
+                OhLogger.log("OhSectionScanner: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceSource.", level: .warning)
             }
         }
         
@@ -60,13 +60,13 @@ public struct OhSectionDiscovery: OhServiceSource {
                 let def = OhServiceDefinition.service(type)
                 results.append(def)
             } else {
-                OhLogger.log("OhSectionDiscovery: Class '\(className)' in \(Self.sectionService) is not a valid OhService.", level: .warning)
+                OhLogger.log("OhSectionScanner: Class '\(className)' in \(Self.sectionService) is not a valid OhService.", level: .warning)
             }
         }
         
         let cost = CFAbsoluteTimeGetCurrent() - start
         if !results.isEmpty {
-            OhLogger.logPerf("OhSectionDiscovery: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
+            OhLogger.logPerf("OhSectionScanner: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
         }
         
         return results
