@@ -55,7 +55,69 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "CC1DE6CA-6CE9-4C3D-8EAB-F7ECFC56E87A"
+            uuid = "97803DC0-B3A8-404E-8325-828D14F27B47"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "example/CModules.m"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "10"
+            endingLineNumber = "10"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D13452D0-279F-4583-A7AB-B68C4EE132D5"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "example/startupTask/UpgradePromptTask.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "23"
+            endingLineNumber = "23"
+            landmarkName = "register(in:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "D13452D0-279F-4583-A7AB-B68C4EE132D5 - 46ece2e39b02df29"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static example.UpgradePromptTask.register(in: CooOrchestrator.OhRegistry&lt;example.UpgradePromptTask&gt;) -&gt; ()"
+                  moduleName = "example.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/coo/Desktop/CooLibrarys/CooOrchestrator/example/startupTask/UpgradePromptTask.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "23"
+                  endingLineNumber = "23">
+               </Location>
+               <Location
+                  uuid = "D13452D0-279F-4583-A7AB-B68C4EE132D5 - 4639470c0fa78bb5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (example.UpgradePromptTask, CooOrchestrator.OhContext) -&gt; () in static example.UpgradePromptTask.register(in: CooOrchestrator.OhRegistry&lt;example.UpgradePromptTask&gt;) -&gt; ()"
+                  moduleName = "example.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/coo/Desktop/CooLibrarys/CooOrchestrator/example/startupTask/UpgradePromptTask.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "24"
+                  endingLineNumber = "24">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2907541F-431E-4B68-BF4D-B3A4D4177049"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -66,52 +128,6 @@
             endingLineNumber = "24"
             landmarkName = "register(in:)"
             landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "025445BE-07C9-487D-91B5-E2C2BB0B5DD6"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "example/startupTask/UpgradePromptTask.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "18"
-            endingLineNumber = "18"
-            landmarkName = "register(in:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "025445BE-07C9-487D-91B5-E2C2BB0B5DD6 - 46ece2e39b02dec6"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static example.UpgradePromptTask.register(in: CooOrchestrator.OhRegistry&lt;example.UpgradePromptTask&gt;) -&gt; ()"
-                  moduleName = "example.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/coo/Desktop/CooLibrarys/CooOrchestrator/example/startupTask/UpgradePromptTask.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "18"
-                  endingLineNumber = "18">
-               </Location>
-               <Location
-                  uuid = "025445BE-07C9-487D-91B5-E2C2BB0B5DD6 - 663adec8985fc0e6"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (example.UpgradePromptTask, CooOrchestrator.OhContext) -&gt; CooOrchestrator.OhResult in static example.UpgradePromptTask.register(in: CooOrchestrator.OhRegistry&lt;example.UpgradePromptTask&gt;) -&gt; ()"
-                  moduleName = "example.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/coo/Desktop/CooLibrarys/CooOrchestrator/example/startupTask/UpgradePromptTask.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "20"
-                  endingLineNumber = "20">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

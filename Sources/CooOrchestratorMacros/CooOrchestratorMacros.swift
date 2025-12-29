@@ -114,7 +114,7 @@ public struct OhRegisterModuleMacro: MemberMacro {
         return [
             """
             @_used
-            @_section("__DATA,__coo_mod")
+            @_section("__DATA,__coo_sw_mod")
             static let _coo_mod_entry: (StaticString) = (
                 "\(raw: finalName)"
             )
@@ -153,7 +153,7 @@ public struct OhRegisterServiceMacro: MemberMacro {
         return [
             """
             @_used
-            @_section("__DATA,__coo_svc")
+            @_section("__DATA,__coo_sw_svc")
             static let _coo_svc_entry: (StaticString) = (
                 "\(raw: finalName)"
             )

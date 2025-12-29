@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // 1. 启动服务编排
-        Orchestrator.resolve(sources: [OhSectionScanner()])
+        Orchestrator.resolve(sources: [OhObjcSectionScanner(), OhSwiftSectionScanner()])
         
         let params: [OhParameterKey: Any] = [
             .application: application,

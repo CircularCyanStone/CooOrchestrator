@@ -1,103 +1,14 @@
 // Copyright © 2025 Coo. All rights reserved.
-// 文件功能描述：基于 Mach-O Section 注入的自动发现方案。
-// 类型功能描述：OhSectionScanner 扫描二进制段中的注册信息，支持模块级与服务级双重注册模式。
+// 文件功能描述：封装 Mach-O Section 读取的底层通用逻辑。
+// 类型功能描述：提供泛型方法 `read<T>`，从所有加载的 Image 中读取指定 Section 的数据。
 
 import Foundation
-import MachO // 导入 Mach-O 模块，用于访问 _dyld_* 函数和 mach_header 结构体定义
-
-/// Mach-O Section 发现器
-///
-/// **核心原理：**
-/// iOS/macOS 的可执行文件格式是 Mach-O。它由多个 Segment（段）组成，每个 Segment 又包含多个 Section（节）。
-/// 我们利用 Clang 的 `__attribute__((section("__DATA, __coo_svc")))` 特性，在编译期将数据（如类名字符串）写入到特定的 Section 中。
-/// 在运行时，通过读取内存中这些 Section 的数据，就可以获取所有注册的类名，从而实现“无配置自动发现”。
-///
-/// - 职责：扫描 `__DATA` 段下的自定义 Section，自动发现并加载服务。
-/// - 特点：无中心化配置，编译期注入，运行期直接读取内存。
-public struct OhSectionScanner: OhServiceSource {
-    
-    // MARK: - Constants
-    
-    /// 模块注册段名 (存储遵循 OhServiceSource 的类名)
-    /// 对应 C/OC 中的 section 定义: `__attribute__((section("__DATA, __coo_mod")))`
-    private static let sectionModule = "__coo_mod"
-    
-    /// 服务注册段名 (存储遵循 OhService 的类名)
-    /// 对应 C/OC 中的 section 定义: `__attribute__((section("__DATA, __coo_svc")))`
-    private static let sectionService = "__coo_svc"
-    
-    // MARK: - Init
-    
-    public init() {}
-    
-    // MARK: - OhServiceSource
-    
-    public func load() -> [OhServiceDefinition] {
-        var results: [OhServiceDefinition] = []
-        let start = CFAbsoluteTimeGetCurrent()
-        
-        // 1. 扫描模块注册段
-        // 原理：查找所有名为 "__coo_mod" 的 Section，里面存的是模块类的类名字符串
-        let moduleClasses = scanMachO(sectionName: Self.sectionModule)
-        for className in moduleClasses {
-            // 动态反射：通过字符串类名将其实例化
-            if let type = NSClassFromString(className) as? OhServiceSource.Type {
-                let instance = type.init()
-                let moduleServices = instance.load()
-                results.append(contentsOf: moduleServices)
-                OhLogger.log("OhSectionScanner: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
-            } else {
-                OhLogger.log("OhSectionScanner: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceSource.", level: .warning)
-            }
-        }
-        
-        // 2. 扫描服务注册段
-        // 原理：查找所有名为 "__coo_svc" 的 Section，里面存的是服务类的类名字符串
-        let serviceClasses = scanMachO(sectionName: Self.sectionService)
-        for className in serviceClasses {
-            if let type = NSClassFromString(className) as? (any OhService.Type) {
-                // 直接构造定义，使用协议默认属性
-                let def = OhServiceDefinition.service(type)
-                results.append(def)
-            } else {
-                OhLogger.log("OhSectionScanner: Class '\(className)' in \(Self.sectionService) is not a valid OhService.", level: .warning)
-            }
-        }
-        
-        let cost = CFAbsoluteTimeGetCurrent() - start
-        if !results.isEmpty {
-            OhLogger.logPerf("OhSectionScanner: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
-        }
-        
-        return results
-    }
-    
-    // MARK: - Mach-O Scanning
-    
-    /// 扫描所有 Image 的指定 Section
-    /// - Parameter sectionName: 要查找的 section 名字，例如 "__coo_svc"
-    /// - Returns: 唯一的类名集合
-    private func scanMachO(sectionName: String) -> Set<String> {
-        // 使用泛型 Reader 读取 StaticString 数组
-        // 这里假设存入 Section 的数据结构是 StaticString (在 Swift 中通常表现为指向 C 字符串的指针)
-        let entries = SectionReader.read(StaticString.self, section: sectionName)
-        
-        var classNames = Set<String>()
-        for staticStr in entries {
-            // "\(staticStr)" 会读取 StaticString 指向的内存并转为 Swift String
-            let str = "\(staticStr)"
-            if !str.isEmpty {
-                classNames.insert(str)
-            }
-        }
-        return classNames
-    }
-}
-
-// MARK: - Section Reader Helper
+import MachO
 
 /// 封装 Mach-O 读取逻辑的辅助类型
-fileprivate enum SectionReader {
+/// - 职责：遍历所有 Mach-O Image，定位指定 Section，并将其内存映射为 Swift 类型数组。
+enum SectionReader {
+    
     /// 从指定的 Mach-O Section 读取连续的 T 类型元素数组
     ///
     /// - Parameters:

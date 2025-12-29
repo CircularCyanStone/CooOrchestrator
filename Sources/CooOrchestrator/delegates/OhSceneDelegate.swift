@@ -10,6 +10,7 @@ import UIKit
 /// 默认的 SceneDelegate 实现，提供标准 Scene 生命周期事件的转发。
 /// - 开发者可以继承此类，并根据需要重写相关方法。
 /// - 注意：此类仅转发 `OhSceneDelegateEvents` 中定义的标准系统事件。
+/// - Important: 子类重写方法时，**必须调用 super** 以确保生命周期事件正确分发。
 open class OhSceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     open var window: UIWindow?

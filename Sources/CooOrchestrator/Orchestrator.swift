@@ -430,7 +430,7 @@ extension Orchestrator {
     /// 启动引导：扫描并加载所有清单中的服务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
     /// - Parameter sources: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
-    public static func resolve(sources: [OhServiceSource] = [OhManifestScanner(), OhModuleScanner(), OhSectionScanner()]) {
+    public static func resolve(sources: [OhServiceSource] = [OhManifestScanner(), OhModuleScanner()]) {
         shared.resolve(sources: sources)
     }
     
