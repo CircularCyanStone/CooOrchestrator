@@ -12,13 +12,19 @@ import exampleModule1
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+    var window: UIWindow? {
+        willSet {
+            print("====")
+        }
+        didSet {
+            print("====")
+        }
+    }
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication
             .LaunchOptionsKey: Any]?
     ) -> Bool {
-        
         // 1. 显式启动解析（推荐）
         Orchestrator.resolve()
 

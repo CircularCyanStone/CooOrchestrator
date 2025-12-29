@@ -33,6 +33,11 @@ public struct OhPriority: RawRepresentable, Comparable, Sendable {
     public static let medium = OhPriority(rawValue: 500)
     public static let high = OhPriority(rawValue: 750)
     public static let critical = OhPriority(rawValue: 1000)
+    /// 引导级别（最高优先级）
+    /// - 适用于日志、Crash 监控等必须最早初始化的服务
+    /// - 建议保持唯一性或极少量使用
+    /// - 整个 App 应仅保留 1-2 个 Boot 级服务，且它们之间不应有依赖
+    public static let boot = OhPriority(rawValue: Int.max)
 }
 
 /// 服务执行后的持有策略（字符串原始值，便于清单直接映射）

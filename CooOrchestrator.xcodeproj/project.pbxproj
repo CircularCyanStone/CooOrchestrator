@@ -93,7 +93,7 @@
 		656FE39E2F002422000B7AD2 /* Exceptions for "Sources" folder in "CooOrchestrator" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CooOrchestrator/Macros/Macros.swift,
+				CooOrchestrator/macros/Macros.swift,
 				CooOrchestratorMacros/CooOrchestratorMacros.swift,
 			);
 			publicHeaders = (

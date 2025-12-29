@@ -51,6 +51,7 @@ public protocol OhService: AnyObject, Sendable {
     /// 服务唯一标识（默认为类名）
     static var id: String { get }
     /// 默认优先级（默认为 .medium）
+    /// - Note: 数值越大，优先级越高，越先执行。
     static var priority: OhPriority { get }
     /// 默认驻留策略（默认为 .destroy，即用完即毁）
     static var retention: OhRetentionPolicy { get }
