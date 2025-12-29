@@ -14,8 +14,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // 1. 启动服务编排
         Orchestrator.resolve(sources: [OhSectionScanner()])
+        
+        let params: [OhParameterKey: Any] = [
+            .application: application,
+            .launchOptions: launchOptions ?? [:]
+        ]
+        
+        // 2. 触发启动开始
+        Orchestrator.fire(.appStart, parameters: params)
+        
+        // 3. 触发核心启动逻辑 (RootWindow, 核心SDK等 - 对应 OhApplicationObserver)
+        Orchestrator.fire(.didFinishLaunching, parameters: params)
+        
+        // 4. 触发启动结束
+        Orchestrator.fire(.appReady, parameters: params)
+        
         return true
     }
 

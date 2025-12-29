@@ -16,7 +16,7 @@ public final class ScreenshotTipTask: NSObject, OhService {
     }
 
     public static func register(in registry: OhRegistry<ScreenshotTipTask>) {
-        registry.add(.didFinishLaunchEnd) { s, c in
+        registry.add(.appReady) { s, c in
             // 处理逻辑...
             return .continue()
         }

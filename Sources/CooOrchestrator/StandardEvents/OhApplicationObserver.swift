@@ -133,7 +133,7 @@ public extension OhApplicationObserver {
         }
         
         switch context.event {
-        case .didFinishLaunchBegin, .didFinishLaunchEnd, .didFinishLaunching:
+        case .didFinishLaunching:
             let options = context.parameters[.launchOptions] as? [UIApplication.LaunchOptionsKey: Any]
             return application(app, didFinishLaunchingWithOptions: options)
             
