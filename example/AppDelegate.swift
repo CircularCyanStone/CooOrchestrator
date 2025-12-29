@@ -12,14 +12,7 @@ import exampleModule1
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow? {
-        willSet {
-            print("====")
-        }
-        didSet {
-            print("====")
-        }
-    }
+    
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication
@@ -32,15 +25,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .application: application,
             .launchOptions: launchOptions ?? [:],
         ]
-        // 2. 触发启动开始 (Crash监控, 日志等)
-        Orchestrator.fire(.appStart, parameters: params)
-
         // 3. 触发核心启动逻辑 (RootWindow, 核心SDK等 - 对应 OhApplicationObserver)
         Orchestrator.fire(.didFinishLaunching, parameters: params)
-
-        // 4. 触发启动结束 (异步预加载, 非核心业务等)
-        Orchestrator.fire(.appReady, parameters: params)
-
         return true
     }
 

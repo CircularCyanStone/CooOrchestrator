@@ -19,5 +19,9 @@ public final class UpgradePromptTask: NSObject, OhService {
             // 检查更新...
             return .continue()
         }
+        
+        registry.add(.appReady) { s, c in
+            print("app启动已准备好")
+        }
     }
 }
