@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .LaunchOptionsKey: Any]?
     ) -> Bool {
         // 1. 显式启动解析（推荐）
-        Orchestrator.resolve()
+        Orchestrator.resolve(sources: [OhManifestScanner(), OhModuleScanner(), OhObjcSectionScanner()])
 
         let params: [OhParameterKey: Any] = [
             .application: application,

@@ -10,9 +10,13 @@ import CooOrchestrator
 
 class SceneDelegate: OhSceneDelegate {
 
-    override func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        super.scene(scene, willConnectTo: session, options: connectionOptions)
-        print("====")
+    override func scene(_ scene: UIScene, didConnectingTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = scene as? UIWindowScene else {
+            return
+        }
+        window = UIWindow(windowScene: windowScene)
+        window?.rootViewController = ViewController()
+        window?.makeKeyAndVisible()
     }
 
 }
