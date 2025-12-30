@@ -23,13 +23,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ]
         
         // 2. 触发启动开始
-        Orchestrator.fire(.appStart, parameters: params)
+        Orchestrator.fire(.appStart, source: self, parameters: params)
         
         // 3. 触发核心启动逻辑 (RootWindow, 核心SDK等 - 对应 OhApplicationObserver)
-        Orchestrator.fire(.didFinishLaunching, parameters: params)
+        Orchestrator.fire(.didFinishLaunching, source: self, parameters: params)
         
         // 4. 触发启动结束
-        Orchestrator.fire(.appReady, parameters: params)
+        Orchestrator.fire(.appReady, source: self, parameters: params)
         
         return true
     }

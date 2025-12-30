@@ -15,71 +15,71 @@ public protocol OhApplicationObserver: Sendable {
     // MARK: - App Life Cycle
     
     /// App 启动完成 (didFinishLaunchingWithOptions)
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> OhResult
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?, context: OhContext) -> OhResult
     
     /// App 进入活动状态 (didBecomeActive)
-    func applicationDidBecomeActive(_ application: UIApplication) -> OhResult
+    func applicationDidBecomeActive(_ application: UIApplication, context: OhContext) -> OhResult
     
     /// App 将要取消活动状态 (willResignActive)
-    func applicationWillResignActive(_ application: UIApplication) -> OhResult
+    func applicationWillResignActive(_ application: UIApplication, context: OhContext) -> OhResult
     
     /// App 进入后台 (didEnterBackground)
-    func applicationDidEnterBackground(_ application: UIApplication) -> OhResult
+    func applicationDidEnterBackground(_ application: UIApplication, context: OhContext) -> OhResult
     
     /// App 将要进入前台 (willEnterForeground)
-    func applicationWillEnterForeground(_ application: UIApplication) -> OhResult
+    func applicationWillEnterForeground(_ application: UIApplication, context: OhContext) -> OhResult
     
     /// App 将要终止 (willTerminate)
-    func applicationWillTerminate(_ application: UIApplication) -> OhResult
+    func applicationWillTerminate(_ application: UIApplication, context: OhContext) -> OhResult
     
     // MARK: - System Events (Memory, Time)
     
     /// 收到内存警告 (didReceiveMemoryWarning)
-    func applicationDidReceiveMemoryWarning(_ application: UIApplication) -> OhResult
+    func applicationDidReceiveMemoryWarning(_ application: UIApplication, context: OhContext) -> OhResult
     
     /// 系统时间发生显著改变 (significantTimeChange)
-    func applicationSignificantTimeChange(_ application: UIApplication) -> OhResult
+    func applicationSignificantTimeChange(_ application: UIApplication, context: OhContext) -> OhResult
     
     // MARK: - Open URL & User Activity
     
     /// 打开 URL (open url)
-    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> OhResult
+    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any], context: OhContext) -> OhResult
     
     /// 继续用户活动 (continue userActivity)
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> OhResult
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void, context: OhContext) -> OhResult
     
     /// 用户活动更新 (didUpdate userActivity)
-    func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity) -> OhResult
+    func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity, context: OhContext) -> OhResult
     
     /// 用户活动获取失败 (didFailToContinueUserActivity)
-    func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> OhResult
+    func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error, context: OhContext) -> OhResult
     
     // MARK: - Background Tasks & Fetch
     
     /// 后台应用刷新 (performFetchWithCompletionHandler)
-    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> OhResult
+    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void, context: OhContext) -> OhResult
     
     /// 后台 URL Session 事件 (handleEventsForBackgroundURLSession)
-    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) -> OhResult
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void, context: OhContext) -> OhResult
     
     // MARK: - Notifications
     
     /// 注册远程推送成功 (didRegisterForRemoteNotificationsWithDeviceToken)
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) -> OhResult
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data, context: OhContext) -> OhResult
     
     /// 注册远程推送失败 (didFailToRegisterForRemoteNotificationsWithError)
-    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) -> OhResult
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error, context: OhContext) -> OhResult
     
     /// 收到远程推送 (didReceiveRemoteNotification)
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> OhResult
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void, context: OhContext) -> OhResult
     
     // MARK: - Scene
     
     /// 配置新场景 (configurationForConnecting)
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> OhResult
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions, context: OhContext) -> OhResult
     
     /// 丢弃场景 (didDiscardSceneSessions)
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) -> OhResult
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>, context: OhContext) -> OhResult
 }
 
 // MARK: - Default Implementation & Routing
@@ -93,30 +93,30 @@ public extension OhApplicationObserver {
         }
     }
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> OhResult { .continue() }
-    func applicationDidBecomeActive(_ application: UIApplication) -> OhResult { .continue() }
-    func applicationWillResignActive(_ application: UIApplication) -> OhResult { .continue() }
-    func applicationDidEnterBackground(_ application: UIApplication) -> OhResult { .continue() }
-    func applicationWillEnterForeground(_ application: UIApplication) -> OhResult { .continue() }
-    func applicationWillTerminate(_ application: UIApplication) -> OhResult { .continue() }
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?, context: OhContext) -> OhResult { .continue() }
+    func applicationDidBecomeActive(_ application: UIApplication, context: OhContext) -> OhResult { .continue() }
+    func applicationWillResignActive(_ application: UIApplication, context: OhContext) -> OhResult { .continue() }
+    func applicationDidEnterBackground(_ application: UIApplication, context: OhContext) -> OhResult { .continue() }
+    func applicationWillEnterForeground(_ application: UIApplication, context: OhContext) -> OhResult { .continue() }
+    func applicationWillTerminate(_ application: UIApplication, context: OhContext) -> OhResult { .continue() }
     
-    func applicationDidReceiveMemoryWarning(_ application: UIApplication) -> OhResult { .continue() }
-    func applicationSignificantTimeChange(_ application: UIApplication) -> OhResult { .continue() }
+    func applicationDidReceiveMemoryWarning(_ application: UIApplication, context: OhContext) -> OhResult { .continue() }
+    func applicationSignificantTimeChange(_ application: UIApplication, context: OhContext) -> OhResult { .continue() }
     
-    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> OhResult { .continue() }
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> OhResult { .continue() }
-    func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity) -> OhResult { .continue() }
-    func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> OhResult { .continue() }
+    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any], context: OhContext) -> OhResult { .continue() }
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void, context: OhContext) -> OhResult { .continue() }
+    func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity, context: OhContext) -> OhResult { .continue() }
+    func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error, context: OhContext) -> OhResult { .continue() }
     
-    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> OhResult { .continue() }
-    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) -> OhResult { .continue() }
+    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void, context: OhContext) -> OhResult { .continue() }
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void, context: OhContext) -> OhResult { .continue() }
     
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) -> OhResult { .continue() }
-    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) -> OhResult { .continue() }
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> OhResult { .continue() }
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data, context: OhContext) -> OhResult { .continue() }
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error, context: OhContext) -> OhResult { .continue() }
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void, context: OhContext) -> OhResult { .continue() }
     
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> OhResult { .continue() }
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) -> OhResult { .continue() }
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions, context: OhContext) -> OhResult { .continue() }
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>, context: OhContext) -> OhResult { .continue() }
     
     // MARK: - Internal Dispatcher
     
@@ -135,86 +135,86 @@ public extension OhApplicationObserver {
         switch context.event {
         case .didFinishLaunching:
             let options = context.parameters[.launchOptions] as? [UIApplication.LaunchOptionsKey: Any]
-            return application(app, didFinishLaunchingWithOptions: options)
+            return application(app, didFinishLaunchingWithOptions: options, context: context)
             
         case .didBecomeActive:
-            return applicationDidBecomeActive(app)
+            return applicationDidBecomeActive(app, context: context)
             
         case .willResignActive:
-            return applicationWillResignActive(app)
+            return applicationWillResignActive(app, context: context)
             
         case .didEnterBackground:
-            return applicationDidEnterBackground(app)
+            return applicationDidEnterBackground(app, context: context)
             
         case .willEnterForeground:
-            return applicationWillEnterForeground(app)
+            return applicationWillEnterForeground(app, context: context)
             
         case .willTerminate:
-            return applicationWillTerminate(app)
+            return applicationWillTerminate(app, context: context)
             
         case .didReceiveMemoryWarning:
-            return applicationDidReceiveMemoryWarning(app)
+            return applicationDidReceiveMemoryWarning(app, context: context)
             
         case .significantTimeChange:
-            return applicationSignificantTimeChange(app)
+            return applicationSignificantTimeChange(app, context: context)
             
         case .openURL:
             guard let url = context.parameters[.url] as? URL,
                   let options = context.parameters[.options] as? [UIApplication.OpenURLOptionsKey : Any] else {
                 return .continue()
             }
-            return application(app, open: url, options: options)
+            return application(app, open: url, options: options, context: context)
             
         case .continueUserActivity:
             guard let activity = context.parameters[.userActivity] as? NSUserActivity,
                   let handler = context.parameters[.restorationHandler] as? ([UIUserActivityRestoring]?) -> Void else {
                 return .continue()
             }
-            return application(app, continue: activity, restorationHandler: handler)
+            return application(app, continue: activity, restorationHandler: handler, context: context)
             
         case .didUpdateUserActivity:
             guard let activity = context.parameters[.userActivity] as? NSUserActivity else { return .continue() }
-            return application(app, didUpdate: activity)
+            return application(app, didUpdate: activity, context: context)
             
         case .didFailToContinueUserActivity:
             guard let type = context.parameters[.activityType] as? String,
                   let error = context.parameters[.error] as? Error else { return .continue() }
-            return application(app, didFailToContinueUserActivityWithType: type, error: error)
+            return application(app, didFailToContinueUserActivityWithType: type, error: error, context: context)
             
         case .performFetch:
             guard let handler = context.parameters[.completionHandler] as? (UIBackgroundFetchResult) -> Void else { return .continue() }
-            return application(app, performFetchWithCompletionHandler: handler)
+            return application(app, performFetchWithCompletionHandler: handler, context: context)
             
         case .handleEventsForBackgroundURLSession:
             guard let identifier = context.parameters[.identifier] as? String,
                   let handler = context.parameters[.completionHandler] as? () -> Void else { return .continue() }
-            return application(app, handleEventsForBackgroundURLSession: identifier, completionHandler: handler)
+            return application(app, handleEventsForBackgroundURLSession: identifier, completionHandler: handler, context: context)
             
         case .didRegisterForRemoteNotifications:
             guard let token = context.parameters[.deviceToken] as? Data else { return .continue() }
-            return application(app, didRegisterForRemoteNotificationsWithDeviceToken: token)
+            return application(app, didRegisterForRemoteNotificationsWithDeviceToken: token, context: context)
             
         case .didFailToRegisterForRemoteNotifications:
             guard let error = context.parameters[.error] as? Error else { return .continue() }
-            return application(app, didFailToRegisterForRemoteNotificationsWithError: error)
+            return application(app, didFailToRegisterForRemoteNotificationsWithError: error, context: context)
             
         case .didReceiveRemoteNotification:
             guard let userInfo = context.parameters[.userInfo] as? [AnyHashable : Any],
                   let handler = context.parameters[.completionHandler] as? (UIBackgroundFetchResult) -> Void else {
                 return .continue()
             }
-            return application(app, didReceiveRemoteNotification: userInfo, fetchCompletionHandler: handler)
+            return application(app, didReceiveRemoteNotification: userInfo, fetchCompletionHandler: handler, context: context)
             
         case .configurationForConnecting:
             guard let session = context.parameters[.connectingSceneSession] as? UISceneSession,
                   let options = context.parameters[.sceneConnectionOptions] as? UIScene.ConnectionOptions else {
                 return .continue()
             }
-            return application(app, configurationForConnecting: session, options: options)
+            return application(app, configurationForConnecting: session, options: options, context: context)
             
         case .didDiscardSceneSessions:
             guard let sessions = context.parameters[.sceneSessions] as? Set<UISceneSession> else { return .continue() }
-            return application(app, didDiscardSceneSessions: sessions)
+            return application(app, didDiscardSceneSessions: sessions, context: context)
             
         default:
             return .continue()

@@ -90,13 +90,28 @@ public final class OhContext: @unchecked Sendable {
     /// 动态共享数据（线程安全）
     public let userInfo: UserInfo
     
+    /// 事件源对象（可选）
+    /// - 表示触发该事件的对象实例（如 AppDelegate, SceneDelegate, UIViewController 等）
+    /// - 对于引用类型（Class），服务可以直接修改其属性
+    /// - 对于值类型（Struct），服务只能读取，修改不会回写
+    public let source: Any?
+    
+    /// 获取指定类型的事件源对象
+    /// - Parameter type: 期望转换的类型 (如 OhAppDelegate.self)
+    /// - Returns: 转换后的对象，如果 source 为 nil 或类型不匹配则返回 nil
+    public func source<T>(as type: T.Type) -> T? {
+        return source as? T
+    }
+    
     /// 上下文构造器
     /// - Note: 仅限框架内部使用，外部无需手动创建 Context
     init(event: OhEvent,
-                args: [String: Sendable] = [:],
-                parameters: [OhParameterKey: Any] = [:],
-                userInfo: UserInfo = .init()) {
+         source: Any? = nil,
+         args: [String: Sendable] = [:],
+         parameters: [OhParameterKey: Any] = [:],
+         userInfo: UserInfo = .init()) {
         self.event = event
+        self.source = source
         self.args = args
         self.parameters = parameters
         self.userInfo = userInfo

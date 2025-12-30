@@ -7,4 +7,5 @@
 
 @import CooOrchestrator;
 
+OH_REGISTER_SERVICE(example, ExBootService)
 OH_REGISTER_SERVICE(example, UpgradePromptTask)

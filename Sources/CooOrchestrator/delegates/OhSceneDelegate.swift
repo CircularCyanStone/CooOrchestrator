@@ -21,7 +21,7 @@ open class OhSceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// - Important: 子类重写此方法时，**必须调用 super** 以确保生命周期事件正确分发。
     /// - Note: 此方法内部会自动触发 `.appStart` (如果 window 为 nil) -> `.sceneWillConnect` -> `.appReady` (如果 window 为 nil)。
     // @requires_super // Swift 中没有官方的 requires_super 属性，通常通过文档或 NSRequiresSuper (OC) 约束
-    public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    open func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // 判断是否是“主窗口启动”场景
         // 如果 window 还没创建，我们视为一次完整的冷启动或新窗口创建流程，触发 Start/Ready 语义
         // 如果 window 已经存在（Storyboard 自动加载），则这只是系统回调的一个中间态，依然触发事件，但语义上 window 已经 ready 了
@@ -35,16 +35,16 @@ open class OhSceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         // 1. 启动开始（仅在 Window 未创建时触发，作为纯代码启动的最早时机）
         if isColdStart {
-            Orchestrator.fire(.appStart, parameters: params)
+            Orchestrator.fire(.appStart, source: self, parameters: params)
         }
         
         // 2. 标准生命周期回调
         self.scene(scene, didConnectingTo: session, options: connectionOptions)
-        Orchestrator.fire(.sceneWillConnect, parameters: params)
+        Orchestrator.fire(.sceneWillConnect, source: self, parameters: params)
         
         // 3. 启动就绪（仅在 Window 未创建时触发，意味着 sceneWillConnect 内部应该已经完成了 Window 创建）
         if isColdStart {
-            Orchestrator.fire(.appReady, parameters: params)
+            Orchestrator.fire(.appReady, source: self, parameters: params)
         }
     }
     

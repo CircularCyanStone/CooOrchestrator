@@ -102,6 +102,7 @@ public final class Orchestrator: @unchecked Sendable {
     @discardableResult
     private func fire(
         _ event: OhEvent,
+        source: Any? = nil,
         parameters: [OhParameterKey: Any] = [:]
     ) -> OhReturnValue {
         
@@ -133,6 +134,7 @@ public final class Orchestrator: @unchecked Sendable {
             // 构造 Context
             let context = OhContext(
                 event: event,
+                source: source,
                 args: item.desc.args,
                 parameters: parameters,
                 userInfo: sharedUserInfo
@@ -437,15 +439,16 @@ extension Orchestrator {
     /// 触发指定时机的服务执行
     /// - Parameters:
     ///   - event: 执行时机
+    ///   - source: 触发事件的源对象（如 AppDelegate, SceneDelegate），服务可尝试转型后修改其属性
     ///   - parameters: 动态事件参数（如 application, launchOptions 等）
-    ///   - environment: 运行环境对象
     /// - Returns: 最终的执行结果（如果被中断，则返回中断时的值；否则返回 .void）
     @discardableResult
     public static func fire(
         _ event: OhEvent,
+        source: Any? = nil,
         parameters: [OhParameterKey: Any] = [:]
     ) -> OhReturnValue {
-        return shared.fire(event, parameters: parameters)
+        return shared.fire(event, source: source, parameters: parameters)
     }
     
     /// 触发服务执行并获取泛型返回值
@@ -453,9 +456,10 @@ extension Orchestrator {
     @discardableResult
     public static func fire<T>(
         _ event: OhEvent,
+        source: Any? = nil,
         parameters: [OhParameterKey: Any] = [:],
     ) -> T? {
-        let ret = shared.fire(event, parameters: parameters)
+        let ret = shared.fire(event, source: source, parameters: parameters)
         return ret.value()
     }
     

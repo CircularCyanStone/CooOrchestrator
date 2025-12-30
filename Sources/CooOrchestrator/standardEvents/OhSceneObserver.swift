@@ -14,39 +14,39 @@ public protocol OhSceneObserver: Sendable {
     // MARK: - Scene Life Cycle
     
     /// Scene 连接 (scene:willConnectTo:options:)
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> OhResult
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions, context: OhContext) -> OhResult
     
     /// Scene 断开 (sceneDidDisconnect)
-    func sceneDidDisconnect(_ scene: UIScene) -> OhResult
+    func sceneDidDisconnect(_ scene: UIScene, context: OhContext) -> OhResult
     
     /// Scene 激活 (sceneDidBecomeActive)
-    func sceneDidBecomeActive(_ scene: UIScene) -> OhResult
+    func sceneDidBecomeActive(_ scene: UIScene, context: OhContext) -> OhResult
     
     /// Scene 取消激活 (sceneWillResignActive)
-    func sceneWillResignActive(_ scene: UIScene) -> OhResult
+    func sceneWillResignActive(_ scene: UIScene, context: OhContext) -> OhResult
     
     /// Scene 进入前台 (sceneWillEnterForeground)
-    func sceneWillEnterForeground(_ scene: UIScene) -> OhResult
+    func sceneWillEnterForeground(_ scene: UIScene, context: OhContext) -> OhResult
     
     /// Scene 进入后台 (sceneDidEnterBackground)
-    func sceneDidEnterBackground(_ scene: UIScene) -> OhResult
+    func sceneDidEnterBackground(_ scene: UIScene, context: OhContext) -> OhResult
     
     // MARK: - Scene Events
     
     /// 打开 URL 上下文 (scene:openURLContexts:)
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> OhResult
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>, context: OhContext) -> OhResult
     
     /// 继续用户活动 (scene:continue:)
-    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> OhResult
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity, context: OhContext) -> OhResult
     
     /// 更新用户活动 (scene:didUpdate:)
-    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity) -> OhResult
+    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity, context: OhContext) -> OhResult
     
     /// 用户活动失败 (scene:didFailToContinueUserActivity:error:)
-    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> OhResult
+    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error, context: OhContext) -> OhResult
     
     /// 状态恢复 (stateRestorationActivity(for:))
-    func stateRestorationActivity(for scene: UIScene) -> OhResult
+    func stateRestorationActivity(for scene: UIScene, context: OhContext) -> OhResult
 }
 
 // MARK: - Default Implementation & Routing
@@ -60,18 +60,18 @@ public extension OhSceneObserver {
         }
     }
     
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> OhResult { .continue() }
-    func sceneDidDisconnect(_ scene: UIScene) -> OhResult { .continue() }
-    func sceneDidBecomeActive(_ scene: UIScene) -> OhResult { .continue() }
-    func sceneWillResignActive(_ scene: UIScene) -> OhResult { .continue() }
-    func sceneWillEnterForeground(_ scene: UIScene) -> OhResult { .continue() }
-    func sceneDidEnterBackground(_ scene: UIScene) -> OhResult { .continue() }
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions, context: OhContext) -> OhResult { .continue() }
+    func sceneDidDisconnect(_ scene: UIScene, context: OhContext) -> OhResult { .continue() }
+    func sceneDidBecomeActive(_ scene: UIScene, context: OhContext) -> OhResult { .continue() }
+    func sceneWillResignActive(_ scene: UIScene, context: OhContext) -> OhResult { .continue() }
+    func sceneWillEnterForeground(_ scene: UIScene, context: OhContext) -> OhResult { .continue() }
+    func sceneDidEnterBackground(_ scene: UIScene, context: OhContext) -> OhResult { .continue() }
     
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> OhResult { .continue() }
-    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> OhResult { .continue() }
-    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity) -> OhResult { .continue() }
-    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) -> OhResult { .continue() }
-    func stateRestorationActivity(for scene: UIScene) -> OhResult { .continue() }
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>, context: OhContext) -> OhResult { .continue() }
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity, context: OhContext) -> OhResult { .continue() }
+    func scene(_ scene: UIScene, didUpdate userActivity: NSUserActivity, context: OhContext) -> OhResult { .continue() }
+    func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error, context: OhContext) -> OhResult { .continue() }
+    func stateRestorationActivity(for scene: UIScene, context: OhContext) -> OhResult { .continue() }
     
     // MARK: - Internal Dispatcher
     
@@ -90,42 +90,42 @@ public extension OhSceneObserver {
                   let options = context.parameters[.connectionOptions] as? UIScene.ConnectionOptions else {
                 return .continue()
             }
-            return self.scene(scene, willConnectTo: session, options: options)
+            return self.scene(scene, willConnectTo: session, options: options, context: context)
             
         case .sceneDidDisconnect:
-            return sceneDidDisconnect(scene)
+            return sceneDidDisconnect(scene, context: context)
             
         case .sceneDidBecomeActive:
-            return sceneDidBecomeActive(scene)
+            return sceneDidBecomeActive(scene, context: context)
             
         case .sceneWillResignActive:
-            return sceneWillResignActive(scene)
+            return sceneWillResignActive(scene, context: context)
             
         case .sceneWillEnterForeground:
-            return sceneWillEnterForeground(scene)
+            return sceneWillEnterForeground(scene, context: context)
             
         case .sceneDidEnterBackground:
-            return sceneDidEnterBackground(scene)
+            return sceneDidEnterBackground(scene, context: context)
             
         case .sceneOpenURLContexts:
             guard let contexts = context.parameters[.urlContexts] as? Set<UIOpenURLContext> else { return .continue() }
-            return self.scene(scene, openURLContexts: contexts)
+            return self.scene(scene, openURLContexts: contexts, context: context)
             
         case .sceneContinueUserActivity:
             guard let activity = context.parameters[.userActivity] as? NSUserActivity else { return .continue() }
-            return self.scene(scene, continue: activity)
+            return self.scene(scene, continue: activity, context: context)
             
         case .sceneDidUpdateUserActivity:
             guard let activity = context.parameters[.userActivity] as? NSUserActivity else { return .continue() }
-            return self.scene(scene, didUpdate: activity)
+            return self.scene(scene, didUpdate: activity, context: context)
             
         case .sceneDidFailToContinueUserActivity:
             guard let type = context.parameters[.activityType] as? String,
                   let error = context.parameters[.error] as? Error else { return .continue() }
-            return self.scene(scene, didFailToContinueUserActivityWithType: type, error: error)
+            return self.scene(scene, didFailToContinueUserActivityWithType: type, error: error, context: context)
             
         case .sceneStateRestorationActivity:
-            return stateRestorationActivity(for: scene)
+            return stateRestorationActivity(for: scene, context: context)
             
         default:
             return .continue()
