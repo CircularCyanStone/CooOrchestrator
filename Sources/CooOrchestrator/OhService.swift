@@ -47,7 +47,7 @@ public final class OhRegistry<T: OhService>: @unchecked Sendable {
 
 /// 应用服务协议（原 AppLifecycleTask）
 /// - 模块/服务需遵守此协议以接收生命周期事件
-public protocol OhService: AnyObject, Sendable {
+public protocol OhService: AnyObject,Sendable {
     /// 服务唯一标识（默认为类名）
     static var id: String { get }
     /// 默认优先级（默认为 .medium）
@@ -68,7 +68,7 @@ public protocol OhService: AnyObject, Sendable {
     /// - Parameter registry: 注册表容器
     static func register(in registry: OhRegistry<Self>)
     
-    /// 服务实例创建完成后的回调
+    /// 服务实例创建完成后的回调，主线程回调
     /// - 用于执行初始化逻辑，替代在 didFinishLaunching 中写逻辑
     /// - 注意：此方法执行时，服务实例已创建但尚未处理任何事件
     func serviceDidResolve()

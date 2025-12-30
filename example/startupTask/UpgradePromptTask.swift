@@ -17,6 +17,7 @@ public final class UpgradePromptTask: NSObject, OhService {
     public static func register(in registry: OhRegistry<UpgradePromptTask>) {
         registry.add(.didFinishLaunching) { s, c in
             // 检查更新...
+            print("didFinishLaunching ok")
             return .continue()
         }
         
