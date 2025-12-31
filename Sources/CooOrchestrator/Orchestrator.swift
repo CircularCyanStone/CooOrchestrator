@@ -3,14 +3,14 @@
 // 类型功能描述：Orchestrator 作为单例管理器，维护服务注册表、常驻服务持有集合、调度入口 fire(_:) 与注册入口 register(_:)。
 /**
  多线程方案选定策略：
- - 为了保证fire方法在传递事件时能保留原方法的执行环境，所以选择了了传统的使用锁来保护多线程的访问安全。
+ - 为了保证fire方法在传递事件时能保留原方法的执行环境，所以选择了传统的使用锁来保护多线程的访问安全。
  而使用Concurrency必然面临隔离域切换，一旦切换了就无法感知之前的执行环境了。
  */
 import Foundation
 
 /// 服务编排调度器 (Orchestrator)
 /// - 职责：统一按“时机 + 优先级”顺序执行服务逻辑；支持责任链分发与流程控制。
-/// - 并发模型：非隔离（Non-isolated），内部使用串行队列保护状态。fire 方法在调用者线程执行，支持同步返回值。
+/// - 并发模型：非隔离（Non-isolated），内部使用锁保护状态。fire 方法在调用者线程执行，支持同步返回值。
 public final class Orchestrator: @unchecked Sendable {
     
     // 已经解析的服务条目
@@ -29,12 +29,11 @@ public final class Orchestrator: @unchecked Sendable {
     private static let shared = Orchestrator()
     
     /// 内部互斥锁，用于保护 descriptors, residentServices, cacheByPhase 等状态
-    /// - Note: 使用 os_unfair_lock 替代 NSLock 以获得更高性能
     private let lock = UnfairLock()
     
     // MARK: - Internal Performance Helpers
     
-    // 恢复使用 String Key 以支持协议解耦和 OhService.id 查询
+    // 使用 String Key 以支持OhService.id 查询
     private typealias ServiceKey = String
     
     private init() {}
@@ -45,7 +44,7 @@ public final class Orchestrator: @unchecked Sendable {
     private var registeredServiceIDs: Set<ObjectIdentifier> = []
     /// 常驻服务实例表 (Key改为 String)
     private var residentServices: [ServiceKey: any OhService] = [:]
-    /// 是否已完成一次清单引导
+    /// 记录是否完成服务的加载
     private var hasBootstrapped = false
     /// 全局配置源（用于懒加载一致性）
     private var resolveSources: [OhServiceSource] = [OhManifestScanner(), OhModuleScanner()]
@@ -71,31 +70,28 @@ public final class Orchestrator: @unchecked Sendable {
     }
     
     private func resolve(sources: [OhServiceSource]) {
-        // 更新全局源配置，确保懒加载一致性
-        // 注意：这里没有加锁，假设 resolve 是在应用启动早期调用的
-        // 如果需要线程安全，可以加锁，但通常不需要
-        self.resolveSources = sources
-        
+        guard !hasBootstrapped else {
+            /// 如果已经启动了，说明已经有某个线程启动成功了，可以直接返回。
+            return
+        }
         let start = CFAbsoluteTimeGetCurrent()
         var eagerDefs: [OhServiceDefinition] = []
         
+        lock.lock()
         if !hasBootstrapped {
-            lock.lock()
-            if !hasBootstrapped {
-                // 加载所有源 (使用 self.resolveSources)
-                var allDefinitions: [OhServiceDefinition] = []
-                for source in self.resolveSources {
-                    allDefinitions.append(contentsOf: source.load())
-                }
-                
-                eagerDefs = self.mergeDefinitions(allDefinitions)
-                self.hasBootstrapped = true
-                
-                let end = CFAbsoluteTimeGetCurrent()
-                OhLogger.logPerf("Resolve: Bootstrap completed. Total Cost: \(String(format: "%.4fs", end - start))")
+            // 加载所有源 (使用 self.resolveSources)
+            var allDefinitions: [OhServiceDefinition] = []
+            for source in resolveSources {
+                allDefinitions.append(contentsOf: source.load())
             }
-            lock.unlock()
+            
+            eagerDefs = mergeDefinitions(allDefinitions)
+            hasBootstrapped = true
+            
+            let end = CFAbsoluteTimeGetCurrent()
+            OhLogger.logPerf("Resolve: Bootstrap completed. Total Cost: \(String(format: "%.4fs", end - start))")
         }
+        lock.unlock()
         
         if !eagerDefs.isEmpty {
             self.instantiateEagerServices(eagerDefs)
@@ -105,7 +101,7 @@ public final class Orchestrator: @unchecked Sendable {
     private func getService(of id: String) -> (any OhService)? {
         lock.lock()
         defer { lock.unlock() }
-        return self.residentServices[id]
+        return residentServices[id]
     }
     
     @discardableResult
@@ -122,14 +118,14 @@ public final class Orchestrator: @unchecked Sendable {
         
         lock.lock()
         // 1.1 Bootstrap Check
-        if !self.hasBootstrapped {
-            // 加载所有源 (使用 self.resolveSources 而不是硬编码 ManifestScanner)
+        if !hasBootstrapped {
+            // 加载所有源
             var allDefinitions: [OhServiceDefinition] = []
-            for source in self.resolveSources {
+            for source in resolveSources {
                 allDefinitions.append(contentsOf: source.load())
             }
-            _ = self.mergeDefinitions(allDefinitions)
-            self.hasBootstrapped = true
+            _ = mergeDefinitions(allDefinitions)
+            hasBootstrapped = true
         }
         
         // 1.2 Read Entries
@@ -170,7 +166,7 @@ public final class Orchestrator: @unchecked Sendable {
             
             if service == nil {
                 // 快照未命中需要实例化
-                service = self.resolveServiceInstance(for: item, context: context)
+                service = resolveServiceInstance(for: item, context: context)
             }
             
             guard let validService = service else { continue }
@@ -228,7 +224,7 @@ public final class Orchestrator: @unchecked Sendable {
         // 1. 尝试从缓存获取 (Fast Path)
         if item.effResidency == .hold {
             lock.lock()
-            if let existing = self.residentServices[key] {
+            if let existing = residentServices[key] {
                 lock.unlock()
                 return existing
             }
@@ -236,7 +232,7 @@ public final class Orchestrator: @unchecked Sendable {
         }
         
         // 2.因为强制在主线程实例化，所以这里不能在锁内，防止重入。
-        guard let created = self.instantiateService(from: item.desc, context: context) else {
+        guard let created = instantiateService(from: item.desc, context: context) else {
             return nil
         }
         
@@ -244,11 +240,11 @@ public final class Orchestrator: @unchecked Sendable {
         if case .hold = item.effResidency {
             lock.lock()
             // Double Check: 可能在实例化期间已有其他线程写入
-            if let existing = self.residentServices[key] {
+            if let existing = residentServices[key] {
                 lock.unlock()
                 return existing
             } else {
-                self.residentServices[key] = created
+                residentServices[key] = created
                 lock.unlock()
                 return created
             }
@@ -269,7 +265,7 @@ public final class Orchestrator: @unchecked Sendable {
             let context = OhContext(event: OhEvent(rawValue: "Orchestrator.EagerLoad"), args: def.args)
             
             // instantiateService 内部已处理主线程调度
-            if let service = self.instantiateService(from: def, context: context) {
+            if let service = instantiateService(from: def, context: context) {
                 if let serviceType = def.serviceClass as? any OhService.Type {
                     createdServices[serviceType.id] = service
                 }
@@ -282,8 +278,8 @@ public final class Orchestrator: @unchecked Sendable {
             // 安全性：因为 instantiateEagerServices 必须在锁外调用，所以此处 lock 是安全的
             lock.lock()
             for (key, service) in createdServices {
-                if self.residentServices[key] == nil {
-                    self.residentServices[key] = service
+                if residentServices[key] == nil {
+                    residentServices[key] = service
                 }
             }
             lock.unlock()
@@ -301,7 +297,7 @@ public final class Orchestrator: @unchecked Sendable {
         // 强制主线程执行，确保 init 和 serviceDidResolve 在主线程
         if !Thread.isMainThread {
             return DispatchQueue.main.sync {
-                self.instantiateService(from: desc, context: context)
+                instantiateService(from: desc, context: context)
             }
         }
         
@@ -369,7 +365,7 @@ public final class Orchestrator: @unchecked Sendable {
             // 2. 收集服务里注册的事件和事件的Handlers
             // 这里会触发 invokeRegister -> T.register，这可能比较耗时且是纯计算/配置
             // 应该在锁外进行
-            let handlers = self.collectHandlers(for: type)
+            let handlers = collectHandlers(for: type)
             if handlers.isEmpty { 
                 OhLogger.log("MergeDefinitions: \(NSStringFromClass(type)) has no handlers registered", level: .debug)
                 continue
@@ -502,7 +498,7 @@ extension Orchestrator {
 
 /// 高性能互斥锁封装 (os_unfair_lock)
 /// - Note: 必须是引用类型 (Class) 以保证锁地址稳定
-private final class UnfairLock: @unchecked Sendable {
+final class UnfairLock: @unchecked Sendable {
     private var _lock = os_unfair_lock()
     
     init() {}

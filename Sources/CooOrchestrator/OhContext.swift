@@ -17,7 +17,7 @@ public final class OhContext: @unchecked Sendable {
     // MARK: - Shared State (Thread Safe)
     /// 内部共享状态容器（引用类型，确保在不同 Context 实例间共享）
     public final class UserInfo: @unchecked Sendable {
-        private let lock = NSLock()
+        private let lock = UnfairLock()
         private var storage: [OhContextKey: Any] = [:]
         
         public init() {}
