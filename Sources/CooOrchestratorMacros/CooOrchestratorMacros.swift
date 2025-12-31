@@ -86,43 +86,6 @@ enum MacroHelper {
 
 // MARK: - Macros
 
-/// 注册模块宏 (Member Macro)
-public struct OhRegisterModuleMacro: MemberMacro {
-    public static func expansion(
-        of node: AttributeSyntax,
-        providingMembersOf declaration: some DeclGroupSyntax,
-        conformingTo protocols: [TypeSyntax],
-        in context: some MacroExpansionContext
-    ) throws -> [DeclSyntax] {
-        
-        var typeName = ""
-        
-        if let structDecl = declaration.as(StructDeclSyntax.self) {
-            typeName = structDecl.name.text
-        } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
-            typeName = classDecl.name.text
-        } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
-            typeName = enumDecl.name.text
-        } else {
-            return []
-        }
-        let moduleName = MacroHelper.extractModuleName(from: node, in: context)
-        
-        // 如果没有模块名，仅使用类名（运行时可能需要 @objc 配合）
-        let finalName = moduleName.isEmpty ? typeName : "\(moduleName).\(typeName)"
-        
-        return [
-            """
-            @_used
-            @_section("__DATA,__coo_sw_mod")
-            static let _coo_mod_entry: (StaticString) = (
-                "\(raw: finalName)"
-            )
-            """
-        ]
-    }
-}
-
 /// 注册服务宏 (Member Macro)
 public struct OhRegisterServiceMacro: MemberMacro {
     public static func expansion(
@@ -165,7 +128,6 @@ public struct OhRegisterServiceMacro: MemberMacro {
 @main
 struct CooOrchestratorPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        OhRegisterModuleMacro.self,
-        OhRegisterServiceMacro.self,
+        OhRegisterServiceMacro.self
     ]
 }

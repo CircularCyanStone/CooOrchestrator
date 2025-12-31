@@ -26,13 +26,6 @@
 // section 格式：segment,section
 #define OH_DATA_SECTION(sectname) __attribute__((used, section("__DATA," sectname)))
 
-// 注册模块 (OhServiceLoader)
-// 参数：modulename (Swift模块命名空间|target名称|framework名称), classname (模块类型名称)
-// 原理：生成变量名 __coo_mod_Module_Class，存储字符串 "Module.Class"
-#define OH_REGISTER_MODULE(modulename, classname) \
-    OH_DATA_SECTION("__coo_mod") \
-    static const char *__coo_mod_##modulename##_##classname = #modulename "." #classname;
-
 // 注册服务 (OhService)
 // 参数：modulename (Swift模块命名空间|target名称|framework名称), classname (模块类型名称)
 #define OH_REGISTER_SERVICE(modulename, classname) \

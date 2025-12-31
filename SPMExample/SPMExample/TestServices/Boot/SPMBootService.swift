@@ -14,7 +14,6 @@ final class SPMBootService: OhService, OhSceneObserver {
         addScene(.sceneWillConnect, in: registry)
     }
     
-    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions, context: OhContext) -> OhResult {
         guard let windowScene = scene as? UIWindowScene else {
             return .stop(result: .void, success: false, message: "scene as? UIWindowScene失败")

@@ -17,9 +17,6 @@ public struct OhObjcSectionLoader: OhServiceLoader {
     
     // MARK: - Constants
     
-    /// 模块注册段名
-    private static let sectionModule = "__coo_mod"
-    
     /// 服务注册段名
     private static let sectionService = "__coo_svc"
     
@@ -33,20 +30,7 @@ public struct OhObjcSectionLoader: OhServiceLoader {
         var results: [OhServiceDefinition] = []
         let start = CFAbsoluteTimeGetCurrent()
         
-        // 1. 扫描模块注册段
-        let moduleClasses = scanMachO(sectionName: Self.sectionModule)
-        for className in moduleClasses {
-            if let type = NSClassFromString(className) as? OhModuleServicesProvider.Type {
-                let instance = type.init()
-                let moduleServices = instance.provideServices()
-                results.append(contentsOf: moduleServices)
-                OhLogger.log("OhObjcSectionLoader: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
-            } else {
-                OhLogger.log("OhObjcSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhModuleServicesProvider.", level: .warning)
-            }
-        }
-        
-        // 2. 扫描服务注册段
+        // 扫描服务注册段
         let serviceClasses = scanMachO(sectionName: Self.sectionService)
         for className in serviceClasses {
             if let type = NSClassFromString(className) as? (any OhService.Type) {
@@ -59,7 +43,7 @@ public struct OhObjcSectionLoader: OhServiceLoader {
         
         let cost = CFAbsoluteTimeGetCurrent() - start
         if !results.isEmpty {
-            OhLogger.logPerf("OhObjcSectionLoader: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
+            OhLogger.logPerf("OhObjcSectionLoader: Scanned \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
         }
         
         return results

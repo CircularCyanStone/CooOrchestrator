@@ -15,7 +15,7 @@ class AppDelegate: OhAppDelegate {
     
     override var serviceLoaders: [any OhServiceLoader] {
         [
-            OhObjcSectionLoader()
+            OhManifestLoader()
         ]
     }
 

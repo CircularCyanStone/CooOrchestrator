@@ -47,22 +47,6 @@ final class TestServiceB: OhService {
     
 }
 
-// MARK: - 测试模块 (使用 @OrchModule 注册)
-
-// 这个模块负责加载 ServiceA 和 ServiceB
-@OrchModule()
-final class TestModuleSource: OhModuleServicesProvider {
-    
-    required init() {}
-    
-    func provideServices() -> [OhServiceDefinition] {
-        return [
-            .service(TestServiceA.self),
-            .service(TestServiceB.self)
-        ]
-    }
-}
-
 // MARK: - 独立服务 (使用 @OrchService 直接注册)
 
 // 服务 C
@@ -99,17 +83,3 @@ final class TestServiceD: OhService {
     }
 }
 
-
-@OrchModule()
-final class TestServiceF {
-    required init() {}
-}
-
-extension TestServiceF: OhModuleServicesProvider {
-    func provideServices() -> [CooOrchestrator.OhServiceDefinition] {
-        return [
-            .service(TestServiceA.self),
-            .service(TestServiceB.self)
-        ]
-    }
-}
