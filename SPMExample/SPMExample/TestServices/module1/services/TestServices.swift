@@ -77,8 +77,8 @@ final class TestServiceF {
     required init() {}
 }
 
-extension TestServiceF: OhServiceScanner {
-    func load() -> [CooOrchestrator.OhServiceDefinition] {
+extension TestServiceF: OhModuleServicesProvider {
+    func provideServices() -> [CooOrchestrator.OhServiceDefinition] {
         return [
             .service(TestServiceA.self),
             .service(TestServiceB.self)

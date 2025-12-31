@@ -45,7 +45,7 @@ public final class OhRegistry<T: OhService>: @unchecked Sendable {
     }
 }
 
-/// 应用服务协议（原 AppLifecycleTask）
+/// 应用服务协议
 /// - 模块/服务需遵守此协议以接收生命周期事件
 public protocol OhService: AnyObject,Sendable {
     /// 服务唯一标识（默认为类名）

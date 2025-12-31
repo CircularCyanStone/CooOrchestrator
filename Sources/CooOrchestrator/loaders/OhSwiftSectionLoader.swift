@@ -36,13 +36,13 @@ public struct OhSwiftSectionLoader: OhServiceLoader {
         // 1. 扫描模块注册段
         let moduleClasses = scanMachO(sectionName: Self.sectionModule)
         for className in moduleClasses {
-            if let type = NSClassFromString(className) as? OhServiceLoader.Type {
+            if let type = NSClassFromString(className) as? OhModuleServicesProvider.Type {
                 let instance = type.init()
-                let moduleServices = instance.load()
+                let moduleServices = instance.provideServices()
                 results.append(contentsOf: moduleServices)
                 OhLogger.log("OhSwiftSectionLoader: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
             } else {
-                OhLogger.log("OhSwiftSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceLoader.", level: .warning)
+                OhLogger.log("OhSwiftSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceProvider.", level: .warning)
             }
         }
         

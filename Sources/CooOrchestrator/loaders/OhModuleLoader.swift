@@ -24,14 +24,14 @@ public struct OhModuleLoader: OhServiceLoader {
         OhLogger.log("OhModuleLoader: Found \(moduleNames.count) modules in config.", level: .info)
         
         for className in moduleNames {
-            // 实例化模块入口 (必须遵循 OhServiceLoader)
-            if let moduleClass = NSClassFromString(className) as? OhServiceLoader.Type {
+            // 实例化模块入口 (必须遵循 OhServiceProvider)
+            if let moduleClass = NSClassFromString(className) as? OhModuleServicesProvider.Type {
                 let module = moduleClass.init()
-                let descriptors = module.load()
+                let descriptors = module.provideServices()
                 result.append(contentsOf: descriptors)
                 OhLogger.log("OhModuleLoader: Loaded \(descriptors.count) services from \(className)", level: .info)
             } else {
-                OhLogger.log("OhModuleLoader: Class '\(className)' not found or invalid.", level: .warning)
+                OhLogger.log("OhModuleLoader: Class '\(className)' not found or invalid (Must implement OhServiceProvider).", level: .warning)
             }
         }
         

@@ -3,9 +3,21 @@
 
 import Foundation
 
-/// 服务配置源协议
-/// - 职责：提供一组待注册的服务描述符
-/// - 扩展：任何模块入口都可以遵循此协议，通过纯代码方式返回该模块的服务列表
+/// 基于模块的服务提供者协议
+/// - 职责：分模块提供一组服务描述符，用于主工程在OhModules.plist里或者通过MachO进行注册。
+/// OhModules.plist里面注册的都是实现该协议的类型。MachO里面也可以基于模块进行注册。
+/// - 适用：只服务于通过OhModuleLoader方式去注册服务。
+public protocol OhModuleServicesProvider {
+    /// 必须提供无参初始化，以便框架通过反射自动加载
+    init()
+    /// 提供服务列表
+    func provideServices() -> [OhServiceDefinition]
+}
+
+/// 服务配置源协议 (Infrastructure Loader)
+/// - 职责：执行发现逻辑，加载服务提供者。用于发现项目中注册的服务，并提供给组件内部使用。
+///     如果需要自定义服务的发现逻辑需要实现该协议；组件内已内置4种方案。
+/// - 适用：OhManifestLoader, OhModuleLoader 等
 public protocol OhServiceLoader {
     /// 必须提供无参初始化，以便框架通过反射自动加载
     init()
