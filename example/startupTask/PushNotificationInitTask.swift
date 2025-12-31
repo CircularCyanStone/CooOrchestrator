@@ -34,11 +34,11 @@ public final class PushNotificationInitTask: NSObject, OhService, OhApplicationO
     
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> OhResult {
         print("PushNotificationInitTask: Initializing SDK...")
-        return .continue()
+        return .continue
     }
     
     public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) -> OhResult {
         print("PushNotificationInitTask: Registered token: \(deviceToken)")
-        return .continue()
+        return .continue
     }
 }

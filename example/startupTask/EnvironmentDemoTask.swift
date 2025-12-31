@@ -39,7 +39,7 @@ public final class EnvironmentDemoTask: NSObject, OhService {
 
             // 依然可以调用 Logging，但实际上 Manager 也会记录一次
             print("EnvironmentDemoTask: bundle=\(identifier) v\(version)(\(build)) msg=\(msg)")
-            return .continue()
+            return .continue
         }
     }
 }

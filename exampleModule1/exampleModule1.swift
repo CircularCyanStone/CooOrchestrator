@@ -20,12 +20,12 @@ public final class ExampleModule1: NSObject, OhService, OhApplicationObserver, O
     
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> OhResult {
         print("ExampleModule1 didFinishLaunchingWithOptions")
-        return .continue()
+        return .continue
     }
     
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> OhResult {
         print("ExampleModule1 willConnectTo")
-        return .continue()
+        return .continue
     }
     
 }

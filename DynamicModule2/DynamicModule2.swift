@@ -20,12 +20,12 @@ public final class DModule2: NSObject, OhService, OhApplicationObserver, OhScene
     
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> OhResult {
         print("DynamicModule2 didFinishLaunchingWithOptions")
-        return .continue()
+        return .continue
     }
     
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) -> OhResult {
         print("DynamicModule2 willConnectTo")
-        return .continue()
+        return .continue
     }
     
 }

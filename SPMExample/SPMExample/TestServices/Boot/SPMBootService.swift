@@ -11,12 +11,14 @@ import CooOrchestrator
 @OrchService()
 final class SPMBootService: OhService, OhSceneObserver {
     static func register(in registry: CooOrchestrator.OhRegistry<SPMBootService>) {
+        addApplication(.didFinishLaunching, in: registry)
+        addScene(.appReady, in: registry)
         addScene(.sceneWillConnect, in: registry)
     }
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions, context: OhContext) -> OhResult {
         guard let windowScene = scene as? UIWindowScene else {
-            return .stop(result: .void, success: false, message: "scene as? UIWindowScene失败")
+            return .stop(result: .void)
         }
         let sceneDelegate = context.source as? OhSceneDelegate
         sceneDelegate?.window = UIWindow(windowScene: windowScene)
@@ -25,4 +27,9 @@ final class SPMBootService: OhService, OhSceneObserver {
         return .stop()
     }
 
+}
+extension SPMBootService: OhApplicationObserver {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?, context: OhContext) -> OhResult {
+        .continue
+    }
 }

@@ -40,7 +40,7 @@ public final class OhRegistry<T: OhService>: @unchecked Sendable {
     public func add(_ event: OhEvent, handler: @escaping (T, OhContext) throws -> Void) {
         add(event) { service, context in
             try handler(service, context)
-            return .continue()
+            return .continue
         }
     }
 }

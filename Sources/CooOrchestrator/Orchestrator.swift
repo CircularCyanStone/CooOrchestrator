@@ -182,12 +182,9 @@ public final class Orchestrator: @unchecked Sendable {
                 if let handler = item.handler {
                     let result = try handler(validService, context)
                     switch result {
-                    case .continue(let s, let m):
-                        isSuccess = s
-                        message = m
-                    case .stop(let r, let s, let m):
-                        isSuccess = s
-                        message = m
+                    case .continue:
+                        break
+                    case .stop(let r):
                         finalReturnValue = r
                         shouldStop = true
                         OhLogger.logIntercept(NSStringFromClass(item.desc.serviceClass), event: event)
