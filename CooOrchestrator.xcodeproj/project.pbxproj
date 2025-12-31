@@ -98,7 +98,7 @@
 			);
 			publicHeaders = (
 				CooOrchestrator/CooOrchestrator.h,
-				CooOrchestrator/scanners/ocMacros/OhRegistrationMacros.h,
+				CooOrchestrator/loaders/ocMacros/OhRegistrationMacros.h,
 			);
 			target = FBD17C8A2EF3D61900C9CDB2 /* CooOrchestrator */;
 		};

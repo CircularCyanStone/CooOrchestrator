@@ -6,7 +6,7 @@ import Foundation
 /// 服务配置源协议
 /// - 职责：提供一组待注册的服务描述符
 /// - 扩展：任何模块入口都可以遵循此协议，通过纯代码方式返回该模块的服务列表
-public protocol OhServiceSource {
+public protocol OhServiceLoader {
     /// 必须提供无参初始化，以便框架通过反射自动加载
     init()
     /// 加载服务描述符
@@ -14,7 +14,7 @@ public protocol OhServiceSource {
 }
 
 /// 服务描述符（对应 Manifest 中的一条配置）
-public struct OhServiceDefinition: @unchecked Sendable {
+public struct OhServiceDefinition: @unchecked Sendable, CustomDebugStringConvertible {
     
     /// 服务类
     let serviceClass: AnyClass
@@ -28,6 +28,15 @@ public struct OhServiceDefinition: @unchecked Sendable {
     let retentionPolicy: OhRetentionPolicy?
     /// 静态参数
     let args: [String: Sendable]
+    public var debugDescription: String {
+        """
+            serviceClass: \(NSStringFromClass(serviceClass))
+            factoryClass: \(factoryClass != nil ? NSStringFromClass(factoryClass!) : "")
+            priority: \(String(describing: priority?.rawValue))
+            retentionPolicy: \(retentionPolicy == .hold ? "hold" : "destory")
+            args: \(args)
+        """
+    }
     
     public init(serviceClass: AnyClass,
                 priority: OhPriority? = nil,

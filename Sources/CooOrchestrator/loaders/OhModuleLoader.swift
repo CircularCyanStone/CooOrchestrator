@@ -7,7 +7,7 @@ import Foundation
 /// 模块配置发现器
 /// - 职责：从 `OhModules.plist` 读取模块入口类名，实例化并加载其服务。
 /// - 优势：显式、确定、高性能，完全解耦主工程与模块实现。
-public struct OhModuleScanner: OhServiceSource {
+public struct OhModuleLoader: OhServiceLoader {
     
     public init() {}
     
@@ -17,21 +17,21 @@ public struct OhModuleScanner: OhServiceSource {
         // 读取主 Bundle 下的 OhModules.plist
         guard let modulesURL = Bundle.main.url(forResource: "OhModules", withExtension: "plist"),
               let moduleNames = NSArray(contentsOf: modulesURL) as? [String] else {
-            OhLogger.log("OhModuleScanner: OhModules.plist not found or invalid.", level: .warning)
+            OhLogger.log("OhModuleLoader: OhModules.plist not found or invalid.", level: .warning)
             return []
         }
         
-        OhLogger.log("OhModuleScanner: Found \(moduleNames.count) modules in config.", level: .info)
+        OhLogger.log("OhModuleLoader: Found \(moduleNames.count) modules in config.", level: .info)
         
         for className in moduleNames {
-            // 实例化模块入口 (必须遵循 OhServiceSource)
-            if let moduleClass = NSClassFromString(className) as? OhServiceSource.Type {
+            // 实例化模块入口 (必须遵循 OhServiceLoader)
+            if let moduleClass = NSClassFromString(className) as? OhServiceLoader.Type {
                 let module = moduleClass.init()
                 let descriptors = module.load()
                 result.append(contentsOf: descriptors)
-                OhLogger.log("OhModuleScanner: Loaded \(descriptors.count) services from \(className)", level: .info)
+                OhLogger.log("OhModuleLoader: Loaded \(descriptors.count) services from \(className)", level: .info)
             } else {
-                OhLogger.log("OhModuleScanner: Class '\(className)' not found or invalid.", level: .warning)
+                OhLogger.log("OhModuleLoader: Class '\(className)' not found or invalid.", level: .warning)
             }
         }
         

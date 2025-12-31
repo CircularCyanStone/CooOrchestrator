@@ -66,7 +66,7 @@ final class CooOrchestratorTests: XCTestCase {
             final class TestModuleA {
                 init() {}
             }
-            extension TestModuleA: OhServiceSource {
+            extension TestModuleA: OhServiceLoader {
                 func load() -> [COServiceDefinition] {[]}
             }
             """,
@@ -92,7 +92,7 @@ final class CooOrchestratorTests: XCTestCase {
 final class TModule {
     
 }
-extension TModule: OhServiceSource {
+extension TModule: OhServiceLoader {
     func load() -> [CooOrchestrator.OhServiceDefinition] {
         []
     }

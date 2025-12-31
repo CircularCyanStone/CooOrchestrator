@@ -2,8 +2,8 @@ import Foundation
 import CooOrchestrator
 
 /// 示例：主模块的服务注册入口
-/// 遵循 OhServiceSource 协议，通过纯代码返回服务列表
-class MainModuleEntry: OhServiceSource {
+/// 遵循 OhServiceLoader 协议，通过纯代码返回服务列表
+class MainModuleEntry: OhServiceLoader {
     
     required init() {}
     

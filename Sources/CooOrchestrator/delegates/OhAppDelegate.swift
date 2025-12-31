@@ -14,14 +14,31 @@ import UIKit
 @main
 open class OhAppDelegate: UIResponder, UIApplicationDelegate {
         
-    // MARK: - App Life Cycle
+    
+    /// 定义服务加载器
+    /// - Description:
+    ///   子类可以通过重写此属性来自定义服务加载策略，而无需重写 application(_:didFinishLaunchingWithOptions:)。
+    ///   默认包含 OhModuleLoader (模块加载) 和 OhObjcSectionLoader (OC段加载)。
+    open var serviceLoaders: [OhServiceLoader] {
+        return [OhModuleLoader(), OhObjcSectionLoader()]
+    }
+
+    /// 程序生命周期入口
+    /// - Description:
+    ///   标准启动入口，负责初始化编排器并分发 .didFinishLaunching 事件。
+    ///   如果需要自定义服务源，请重写 `serviceLoaders` 属性。
     open func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // 1. 使用配置的源进行服务解析
+        Orchestrator.resolve(loaders: self.serviceLoaders)
+        
+        // 2. 准备参数并分发事件
         let params: [OhParameterKey: Any] = [
             .application: application,
             .launchOptions: launchOptions ?? [:]
         ]
         return Orchestrator.fire(.didFinishLaunching, source: self, parameters: params) ?? true
     }
+    
     
     open func applicationDidBecomeActive(_ application: UIApplication) {
         Orchestrator.fire(.didBecomeActive, parameters: [.application: application])
@@ -149,9 +166,10 @@ open class OhAppDelegate: UIResponder, UIApplicationDelegate {
             return config
         }
         
-        // 如果没有服务拦截，返回 connectingSceneSession.configuration
-        // 这样系统会自动使用 Info.plist 中的配置（Application Scene Manifest）
-        return connectingSceneSession.configuration
+        // 默认使用OhSceneDelegate进行场景代理。
+        let config = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        config.delegateClass = OhSceneDelegate.self
+        return config
     }
     
     open func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {

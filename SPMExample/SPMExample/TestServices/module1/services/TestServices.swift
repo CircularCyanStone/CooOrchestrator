@@ -38,7 +38,7 @@ final class TestServiceB: OhService {
 
 // 这个模块负责加载 ServiceA 和 ServiceB
 @OrchModule()
-final class TestModuleSource: OhServiceSource {
+final class TestModuleSource: OhServiceLoader {
     required init() {}
     
     func load() -> [OhServiceDefinition] {
@@ -77,7 +77,7 @@ final class TestServiceF {
     required init() {}
 }
 
-extension TestServiceF: OhServiceSource {
+extension TestServiceF: OhServiceScanner {
     func load() -> [CooOrchestrator.OhServiceDefinition] {
         return [
             .service(TestServiceA.self),

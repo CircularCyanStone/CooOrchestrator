@@ -13,7 +13,7 @@ import MachO
 ///
 /// - 职责：扫描 `__DATA` 段下的 `__coo_mod` 和 `__coo_svc` Section。
 /// - 数据格式：`UnsafePointer<CChar>` (即 `char *`)
-public struct OhObjcSectionScanner: OhServiceSource {
+public struct OhObjcSectionLoader: OhServiceLoader {
     
     // MARK: - Constants
     
@@ -27,7 +27,7 @@ public struct OhObjcSectionScanner: OhServiceSource {
     
     public init() {}
     
-    // MARK: - OhServiceSource
+    // MARK: - OhServiceLoader
     
     public func load() -> [OhServiceDefinition] {
         var results: [OhServiceDefinition] = []
@@ -36,13 +36,13 @@ public struct OhObjcSectionScanner: OhServiceSource {
         // 1. 扫描模块注册段
         let moduleClasses = scanMachO(sectionName: Self.sectionModule)
         for className in moduleClasses {
-            if let type = NSClassFromString(className) as? OhServiceSource.Type {
+            if let type = NSClassFromString(className) as? OhServiceLoader.Type {
                 let instance = type.init()
                 let moduleServices = instance.load()
                 results.append(contentsOf: moduleServices)
-                OhLogger.log("OhObjcSectionScanner: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
+                OhLogger.log("OhObjcSectionLoader: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
             } else {
-                OhLogger.log("OhObjcSectionScanner: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceSource.", level: .warning)
+                OhLogger.log("OhObjcSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceLoader.", level: .warning)
             }
         }
         
@@ -53,13 +53,13 @@ public struct OhObjcSectionScanner: OhServiceSource {
                 let def = OhServiceDefinition.service(type)
                 results.append(def)
             } else {
-                OhLogger.log("OhObjcSectionScanner: Class '\(className)' in \(Self.sectionService) is not a valid OhService.", level: .warning)
+                OhLogger.log("OhObjcSectionLoader: Class '\(className)' in \(Self.sectionService) is not a valid OhService.", level: .warning)
             }
         }
         
         let cost = CFAbsoluteTimeGetCurrent() - start
         if !results.isEmpty {
-            OhLogger.logPerf("OhObjcSectionScanner: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
+            OhLogger.logPerf("OhObjcSectionLoader: Scanned \(moduleClasses.count) modules, \(serviceClasses.count) services. Cost: \(String(format: "%.4fs", cost))")
         }
         
         return results

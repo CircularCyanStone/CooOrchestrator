@@ -47,7 +47,7 @@ public final class Orchestrator: @unchecked Sendable {
     /// 记录是否完成服务的加载
     private var hasBootstrapped = false
     /// 全局配置源（用于懒加载一致性）
-    private var resolveSources: [OhServiceSource] = [OhManifestScanner(), OhModuleScanner()]
+    private var loaders: [OhServiceLoader] = [OhManifestLoader(), OhModuleLoader()]
     /// 分组缓存
     private var cacheByEvent: [OhEvent: [ResolvedServiceEntry]] = [:]
     
@@ -69,7 +69,7 @@ public final class Orchestrator: @unchecked Sendable {
         }
     }
     
-    private func resolve(sources: [OhServiceSource]) {
+    private func resolve(loaders: [OhServiceLoader]) {
         guard !hasBootstrapped else {
             /// 如果已经启动了，说明已经有某个线程启动成功了，可以直接返回。
             return
@@ -78,11 +78,12 @@ public final class Orchestrator: @unchecked Sendable {
         var eagerDefs: [OhServiceDefinition] = []
         
         lock.lock()
+        self.loaders = loaders
         if !hasBootstrapped {
-            // 加载所有源 (使用 self.resolveSources)
+            // 加载所有源 (使用 self.loaders)
             var allDefinitions: [OhServiceDefinition] = []
-            for source in resolveSources {
-                allDefinitions.append(contentsOf: source.load())
+            for loader in self.loaders {
+                allDefinitions.append(contentsOf: loader.load())
             }
             
             eagerDefs = mergeDefinitions(allDefinitions)
@@ -121,8 +122,8 @@ public final class Orchestrator: @unchecked Sendable {
         if !hasBootstrapped {
             // 加载所有源
             var allDefinitions: [OhServiceDefinition] = []
-            for source in resolveSources {
-                allDefinitions.append(contentsOf: source.load())
+            for loader in loaders {
+                allDefinitions.append(contentsOf: loader.load())
             }
             _ = mergeDefinitions(allDefinitions)
             hasBootstrapped = true
@@ -447,9 +448,9 @@ extension Orchestrator {
     
     /// 启动引导：扫描并加载所有清单中的服务
     /// - Note: 建议在 didFinishLaunching 早期调用，防止被动懒加载导致的时序问题
-    /// - Parameter sources: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
-    public static func resolve(sources: [OhServiceSource] = [OhManifestScanner(), OhModuleScanner()]) {
-        shared.resolve(sources: sources)
+    /// - Parameter loaders: 服务配置源列表（默认包含 Manifest 扫描和 Module 配置加载）
+    public static func resolve(loaders: [OhServiceLoader] = [OhManifestLoader(), OhModuleLoader()]) {
+        shared.resolve(loaders: loaders)
     }
     
     /// 触发指定时机的服务执行

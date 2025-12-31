@@ -25,7 +25,7 @@ enum ManifestKeys {
 
 /// Manifest 解析器
 /// - 职责：从各模块私有清单读取服务配置并转换为统一的 `OhServiceDefinition` 集合。
-public struct OhManifestScanner: OhServiceSource {
+public struct OhManifestLoader: OhServiceLoader {
     
     public init() {}
     
@@ -110,7 +110,7 @@ public struct OhManifestScanner: OhServiceSource {
         let end = CFAbsoluteTimeGetCurrent()
         
         let totalCost = end - start
-        var logMsg = "OhManifestScanner: Scanned \(targetBundles.count) bundles, found \(result.count) services. Cost: \(String(format: "%.4fs", totalCost))\n"
+        var logMsg = "OhManifestLoader: Scanned \(targetBundles.count) bundles, found \(result.count) services. Cost: \(String(format: "%.4fs", totalCost))\n"
         logMsg += " - Find Bundles   : \(String(format: "%.4fs", findBundleCost))\n"
         logMsg += " - Scan Bundles   : \(String(format: "%.4fs", scanCost))"
         
