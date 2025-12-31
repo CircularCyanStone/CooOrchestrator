@@ -12,7 +12,7 @@ import CooOrchestrator
 class AppDelegate: OhAppDelegate {
 
     override var serviceLoaders: [OhServiceLoader] {
-        [OhObjcSectionLoader(), OhSwiftSectionLoader()]
+        [OhSwiftSectionLoader()]
     }
     
 }

@@ -42,7 +42,7 @@ public struct OhObjcSectionLoader: OhServiceLoader {
                 results.append(contentsOf: moduleServices)
                 OhLogger.log("OhObjcSectionLoader: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
             } else {
-                OhLogger.log("OhObjcSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceProvider.", level: .warning)
+                OhLogger.log("OhObjcSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhModuleServicesProvider.", level: .warning)
             }
         }
         

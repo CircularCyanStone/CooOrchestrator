@@ -42,7 +42,7 @@ public struct OhSwiftSectionLoader: OhServiceLoader {
                 results.append(contentsOf: moduleServices)
                 OhLogger.log("OhSwiftSectionLoader: Loaded module '\(className)' with \(moduleServices.count) services.", level: .info)
             } else {
-                OhLogger.log("OhSwiftSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhServiceProvider.", level: .warning)
+                OhLogger.log("OhSwiftSectionLoader: Class '\(className)' in \(Self.sectionModule) is not a valid OhModuleServicesProvider.", level: .warning)
             }
         }
         
